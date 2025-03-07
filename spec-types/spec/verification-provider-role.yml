@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: verification-provider
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the verification provider role of links.  Links of this role
+      shall reference ${verification:/spec-name} or
+      ${verification-group:/spec-name} items.
+    mandatory-attributes: all
+spec-name: Verification Provider Link Role
+spec-type: verification-provider-role
+type: spec

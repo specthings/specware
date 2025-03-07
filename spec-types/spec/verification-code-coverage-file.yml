@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      branches:
+        description: |
+          It shall be the list of applicable branches.
+        spec-type: verification-code-coverage-branches-list
+      functions:
+        description: |
+          It shall be the list of applicable function names.
+        spec-type: list-str
+      lines:
+        description: |
+          It shall be the list of applicable line numbers.
+        spec-type: verification-code-coverage-line-list
+    description: |
+      For a code coverage gap verification, this set of attributes specifies
+      the applicable branches, function names, and lines of a file.
+    mandatory-attributes: all
+spec-name: Code Coverage File
+spec-type: verification-code-coverage-file
+type: spec

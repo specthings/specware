@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: build
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      build-type:
+        description: |
+          It shall be the build item type.
+        spec-type: name
+      extra-files:
+        description: |
+          If the attribute is present, it shall be the list of extra files
+          associated with the item.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a build item.
+    mandatory-attributes:
+    - build-type
+spec-name: Build Item Type
+spec-type: build
+type: spec

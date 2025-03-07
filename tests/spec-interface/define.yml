@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: null
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+definition:
+  default: |
+    \
+      ((${float_t:/name}) 123)
+  variants:
+  - definition: ((${float_t:/name}) 456)
+    enabled-by:
+    - defined(${define-a:/name})
+    - (${define-b:/name} > ${define-c:/name})
+  - definition: ((${float_t:/name}) 789)
+    enabled-by:
+      and:
+      - defined(C)
+      - defined(D)
+description: null
+enabled-by: true
+index-entries: []
+interface-type: define
+links:
+- role: interface-placement
+  uid: h
+- role: interface-ingroup
+  uid: ga
+name: DEFINE
+notes: null
+type: interface

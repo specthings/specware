@@ -1,0 +1,25 @@
+arch: foo
+bsp: bar
+build-type: bsp
+enabled-by: true
+install:
+- source:
+  - abc
+links:
+- enabled-by:
+    not: false
+  role: build-dependency-conditional
+  uid: o
+- enabled-by:
+    not: A
+  role: build-dependency-conditional
+  uid: x
+- role: build-dependency
+  uid: op
+- role: build-dependency
+  uid: d
+- role: build-dependency
+  uid: extension
+source:
+- def
+type: build

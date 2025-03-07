@@ -1,0 +1,70 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2021 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: register-block
+  uid: interface
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      brief:
+        description: null
+        spec-type: interface-brief
+      definition:
+        description: null
+        spec-type: interface-register-block-member-directive-list
+      description:
+        description: null
+        spec-type: interface-description
+      identifier:
+        description: null
+        spec-type: interface-group-identifier
+      name:
+        description: |
+          It shall be the name of the register block.
+        spec-type: str
+      notes:
+        description: null
+        spec-type: interface-notes
+      registers:
+        description: null
+        spec-type: interface-register-list
+      register-block-group:
+        description: |
+          It shall be the name of the interface group defined for the register
+          block.  For the group identifier see the ``identifier`` attribute.
+        spec-type: str
+      register-block-size:
+        description: |
+          If the value is present, then it shall be the size of the register
+          block in units of the address space granule.
+        spec-type: optional-int
+      register-prefix:
+        description: |
+          If the value is present, then it will be used to prefix register bit
+          field names, otherwise the value of the ``name`` attribute will be
+          used.
+        spec-type: optional-str
+    description: |
+      This set of attributes specifies a register block.  A register block may
+      be used to specify the interface of devices.  Register blocks consist of
+      register block members specified by the ``definition`` attribute.
+      Register block members are either instances of registers specified by the
+      ``registers`` attribute or instances of other register blocks specified
+      by links with the ${interface-register-block-include-role:/spec-name}.
+      Registers consists of bit fields (see
+      ${interface-register-bits:/spec-name}.  The register block members are
+      placed into the address space of the device relative to the base address
+      of the register block.  Register member offsets and the register block
+      size are specified in units of the address space granule.
+    mandatory-attributes: all
+spec-name: Register Block Item Type
+spec-type: interface-register-block
+type: spec

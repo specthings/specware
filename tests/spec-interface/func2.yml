@@ -1,0 +1,57 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: Very long function brief description.
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+definition:
+  default:
+    attributes: __attribute__((__const__))
+    body: |
+      (void) ${.:/params[1]/name};
+      (void) ${.:/params[2]/name};
+      (void) ${.:/params[3]/name};
+      return ${.:/params[0]/name} + 1;
+    params:
+    - int ${.:/params[0]/name}
+    - const ${forward-decl:/name} *${.:/params[1]/name}
+    - ${u:/name} *( *${.:/params[2]/name} )( void )
+    - ${s:/name} *${.:/params[3]/name}
+    return: int
+  variants: []
+description: |
+  VeryLongFunction description.
+enabled-by: true
+index-entries: []
+interface-type: function
+links:
+- role: interface-placement
+  uid: h
+- role: interface-ingroup
+  uid: gb
+name: VeryLongFunction
+notes: |
+  VeryLongFunction notes.
+params:
+- description: |
+    is very long parameter 0 with some super important and extra very long
+    description which makes a lot of sense.
+  dir: null
+  name: VeryLongParam0
+- description: is very long parameter 1.
+  dir: in
+  name: VeryLongParam1
+- description: is very long parameter 2.
+  dir: out
+  name: VeryLongParam2
+- description: is very long parameter 3.
+  dir: inout
+  name: VeryLongParam3
+return:
+  return: Sometimes some value.  See ${func:/name}.
+  return-values:
+  - description: is returned, in case A.
+    value: 1
+  - description: is returned, in case B.
+    value: 2
+  - description: is returned, in case C.
+    value: ${enum:/name}
+type: interface

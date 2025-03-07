@@ -1,0 +1,48 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2021 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: validation
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      method:
+        description: |
+          It shall specify the requirement validation method (except validation
+          by test).  Validation by test is done through ${test-case:/spec-name}
+          items.
+        spec-type: name
+      references:
+        description: null
+        spec-type: external-reference-list
+      text:
+        description: |
+          It shall provide the validation evidence depending on the validation
+          method:
+
+          * *By analysis*: A statement shall be provided how the requirement is
+            met, by analysing static properties of the
+            ${/glossary/softwareproduct:/term}.
+
+          * *By inspection*: A statement shall be provided how the requirement
+            is met, by inspection of the ${/glossary/sourcecode:/term}.
+
+          * *By review of design*: A rationale shall be provided to demonstrate
+            how the requirement is satisfied implicitly by the software design.
+        spec-type: str
+    description: |
+      This set of attributes provides a requirement validation evidence.  The
+      item shall have exactly one link to the validated requirement with the
+      ${requirement-validation-role:/spec-name}.
+    mandatory-attributes: all
+spec-name: Requirement Validation Item Type
+spec-type: requirement-validation
+type: spec

@@ -1,0 +1,65 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2021 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-define
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-enum
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-enumerator
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-function
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-group
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-macro
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-object
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-struct
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-typedef
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: unspecified-union
+  uid: interface
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      name:
+        description: |
+          It shall be the name of the unspecified interface.
+        spec-type: str
+      references:
+        description: null
+        spec-type: external-reference-list
+    description: |
+      This set of attributes specifies an unspecified interface.
+    mandatory-attributes: all
+spec-name: Interface Unspecified Item Type
+spec-type: interface-unspecified
+type: spec

@@ -1,0 +1,10 @@
+build-type: group
+enabled-by: true
+extra-files:
+- a
+- b
+install:
+- source:
+  - ghi
+links: []
+type: build

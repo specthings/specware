@@ -1,0 +1,37 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes defines for each post-condition the state after
+      the action for a transition in an action requirement.
+    generic-attributes:
+      description: |
+        There shall be exactly one generic attribute key for each
+        post-condition.  The key name shall be the post-condition name.  The
+        value of each generic attribute shall be the state of the
+        post-condition or ``N/A`` if the post-condition is not applicable.
+      key-spec-type: requirement-action-name
+      value-spec-type: requirement-action-transition-post-state
+    mandatory-attributes: all
+  str:
+    assert:
+      and:
+      - re: ^[A-Z][a-zA-Z0-9]*$
+      - not:
+          eq: NA
+    description: |
+      It shall be the name of a skip reason.  If a skip reason is given instead
+      of a listing of post-condition states, then this transition is skipped
+      and no test code runs for this transition.
+spec-name: Action Requirement Transition Post-Conditions
+spec-type: requirement-action-transition-post
+type: spec

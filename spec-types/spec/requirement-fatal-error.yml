@@ -1,0 +1,53 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: functional-type
+  spec-value: fatal-error
+  uid: requirement-functional
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      test-brief:
+        description: |
+          It shall be the test suite brief description.
+        spec-type: str
+      test-case-code:
+        description: |
+          It shall be the test case code.  The test case code is placed in a
+          function which has two parameters.  The ``source`` parameter contains
+          the fatal source.  The ``code`` parameter contains the fatal code.
+        spec-type: str
+      test-description:
+        description: |
+          It shall be the test suite description.
+        spec-type: optional-str
+      test-includes:
+        description: |
+          It shall be a list of header files included via ``#include <...>``.
+        spec-type: list-str
+      test-local-includes:
+        description: |
+          It shall be a list of header files included via ``#include "..."``.
+        spec-type: list-str
+      test-support:
+        description: |
+          If the value is present, then it shall be the test case support code.
+          The support code is placed at file scope before the test case code.
+        spec-type: optional-str
+      test-target:
+        description: |
+          It shall be the path to the generated target test suite source file.
+        spec-type: str
+    description: |
+      This set of attributes specifies a fatal error.
+    mandatory-attributes: all
+spec-name: Fatal Error Requirement Item Type
+spec-type: requirement-fatal-error
+type: spec

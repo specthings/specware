@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: false
+links: []
+test-actions: []
+test-brief: Disabled.
+test-context: []
+test-context-support: null
+test-description: Disabled.
+test-header: null
+test-includes: []
+test-local-includes: []
+test-setup: null
+test-stop: null
+test-support: null
+test-target: tc-disabled.c
+test-teardown: null
+type: test-case

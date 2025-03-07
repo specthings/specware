@@ -1,0 +1,1154 @@
+# SPDX-License-Identifier: BSD-2-Clause
+""" Tests for the interface module. """
+
+# Copyright (C) 2020 embedded brains GmbH & Co. KG
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+import os
+import pytest
+
+from specitems import EmptyItemCache
+
+from specware import generate_header_file, generate_interfaces
+
+from .util import create_item_cache
+
+
+def test_interface(tmpdir):
+    base_directory = os.path.join(tmpdir, "base")
+
+    interface_config = {
+        "item-level-interfaces": [],
+        "domains": {
+            "/domain-abc": base_directory
+        },
+        "enabled": []
+    }
+    generate_interfaces(interface_config, EmptyItemCache())
+
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    interface_config["item-level-interfaces"] = ["/command-line"]
+    generate_interfaces(interface_config, item_cache)
+
+    with open(os.path.join(base_directory, "include", "h.h"), "r") as src:
+        content = """/* SPDX-License-Identifier: BSD-2-Clause */
+
+/**
+ * @file
+ *
+ * @ingroup GroupA
+ * @ingroup GroupB
+ * @ingroup GroupC
+ *
+ * @brief This header file defines X.
+ */
+
+/*
+ * Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*
+ * This file was automatically generated.  Do not edit it.
+ */
+
+/* Generated from spec:/h */
+
+#ifndef _H_H
+#define _H_H
+
+#include <h2.h>
+#include <h3.h>
+#include <math.h>
+#include <stdint.h>
+
+#if !defined(ASM) || defined(RTEMS_SMP)
+  #include <h9.h>
+#endif
+
+#if 0
+  #include <h5.h>
+  #include <h6.h>
+  #include <h7.h>
+#endif
+
+#if defined(ASM)
+  #include <h4.h>
+#endif
+
+#if defined(ASM) && defined(RTEMS_MULTIPROCESSING)
+  #include <h8.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Generated from spec:/ga */
+
+/**
+ * @defgroup GroupA Group A
+ *
+ * @brief Group A brief description.
+ *
+ * Group A description.
+ */
+
+/* Generated from spec:/gb */
+
+/**
+ * @defgroup GroupB Group B
+ *
+ * @ingroup GroupA
+ */
+
+/* Generated from spec:/define */
+
+/**
+ * @ingroup GroupA
+ */
+#if defined(A) || (B > C)
+  #define DEFINE ((float_t) 456)
+#elif defined(C) && defined(D)
+  #define DEFINE ((float_t) 789)
+#else
+  #define DEFINE \\
+    ((float_t) 123)
+#endif
+
+/* Generated from spec:/enum */
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Enum brief description.
+ *
+ * Enum description.
+ */
+typedef enum {
+  /**
+   * @brief Enumerator 0 brief description.
+   */
+  ENUMERATOR_0,
+
+  /**
+   * @brief Enumerator 1 brief description.
+   */
+  ENUMERATOR_1,
+
+  /**
+   * @brief Enumerator 2 brief description.
+   */
+  ENUMERATOR_2
+} Enum;
+
+/* Generated from spec:/enum3 */
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Enum B brief description.
+ */
+typedef enum EnumB {
+  /**
+   * @brief Enumerator B brief description.
+   */
+  ENUMERATOR_B = ENUMERATOR_A
+} EnumB;
+
+/* Generated from spec:/forward-decl */
+
+/* Forward declaration */
+struct Struct;
+
+/* Generated from spec:/func */
+
+/**
+ * @ingroup GroupA
+ *
+ * @brief Function brief description.
+ *
+ * @param Param0 is parameter 0.
+ *
+ * @param[in] Param1 is parameter 1.
+ *
+ * @param[out] Param2 is parameter 2.
+ *
+ * @param[in,out] Param3 is parameter 3.
+ *
+ * Function description.  References to xs, VeryLongFunction(), ::Integer,
+ * #Enum, #DEFINE, VERY_LONG_MACRO(), #Variable, ::ENUMERATOR_0, Struct, @ref
+ * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is ``Param1``.
+ * Mention struct US.
+ *
+ * @code
+ * these two lines
+ * are not wrapped
+ * @endcode
+ *
+ * @par Constraints
+ * @parblock
+ * The following constraints apply to this directive:
+ *
+ * - Constraint A for Function().
+ * @endparblock
+ */
+void Function(
+  int        Param0,
+  const int *Param1,
+  int       *Param2,
+  int       *Param3,
+  int       *Param4
+);
+
+/* Generated from spec:/func6 */
+void Function6( int Param0 );
+
+/* Generated from spec:/irqamp-timestamp */
+
+/**
+ * @defgroup IrqampTimestamp IRQ(A)MP Timestamp
+ *
+ * @brief This group contains the IRQ(A)MP Timestamp interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup IrqampTimestampITCNT \\
+ *   Interrupt timestamp counter n register (ITCNT)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_ITCNT_TCNT_SHIFT 0
+#define IRQAMP_ITCNT_TCNT_MASK 0xffffffffU
+#define IRQAMP_ITCNT_TCNT_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_ITCNT_TCNT_MASK ) >> \\
+    IRQAMP_ITCNT_TCNT_SHIFT )
+#define IRQAMP_ITCNT_TCNT_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ITCNT_TCNT_MASK ) | \\
+    ( ( ( _val ) << IRQAMP_ITCNT_TCNT_SHIFT ) & \\
+      IRQAMP_ITCNT_TCNT_MASK ) )
+#define IRQAMP_ITCNT_TCNT( _val ) \\
+  ( ( ( _val ) << IRQAMP_ITCNT_TCNT_SHIFT ) & \\
+    IRQAMP_ITCNT_TCNT_MASK )
+
+/** @} */
+
+/**
+ * @defgroup IrqampTimestampITSTMPC \\
+ *   Interrupt timestamp n control register (ITSTMPC)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_ITSTMPC_TSTAMP_SHIFT 27
+#define IRQAMP_ITSTMPC_TSTAMP_MASK 0xf8000000U
+#define IRQAMP_ITSTMPC_TSTAMP_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_ITSTMPC_TSTAMP_MASK ) >> \\
+    IRQAMP_ITSTMPC_TSTAMP_SHIFT )
+#define IRQAMP_ITSTMPC_TSTAMP_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ITSTMPC_TSTAMP_MASK ) | \\
+    ( ( ( _val ) << IRQAMP_ITSTMPC_TSTAMP_SHIFT ) & \\
+      IRQAMP_ITSTMPC_TSTAMP_MASK ) )
+#define IRQAMP_ITSTMPC_TSTAMP( _val ) \\
+  ( ( ( _val ) << IRQAMP_ITSTMPC_TSTAMP_SHIFT ) & \\
+    IRQAMP_ITSTMPC_TSTAMP_MASK )
+
+#define IRQAMP_ITSTMPC_S1 0x4000000U
+
+#define IRQAMP_ITSTMPC_S2 0x2000000U
+
+#define IRQAMP_ITSTMPC_KS 0x20U
+
+#define IRQAMP_ITSTMPC_TSISEL_SHIFT 0
+#define IRQAMP_ITSTMPC_TSISEL_MASK 0x1fU
+#define IRQAMP_ITSTMPC_TSISEL_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_ITSTMPC_TSISEL_MASK ) >> \\
+    IRQAMP_ITSTMPC_TSISEL_SHIFT )
+#define IRQAMP_ITSTMPC_TSISEL_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ITSTMPC_TSISEL_MASK ) | \\
+    ( ( ( _val ) << IRQAMP_ITSTMPC_TSISEL_SHIFT ) & \\
+      IRQAMP_ITSTMPC_TSISEL_MASK ) )
+#define IRQAMP_ITSTMPC_TSISEL( _val ) \\
+  ( ( ( _val ) << IRQAMP_ITSTMPC_TSISEL_SHIFT ) & \\
+    IRQAMP_ITSTMPC_TSISEL_MASK )
+
+/** @} */
+
+/**
+ * @defgroup IrqampTimestampITSTMPAS \\
+ *   Interrupt Assertion Timestamp n register (ITSTMPAS)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_ITSTMPAS_TASSERTION_SHIFT 0
+#define IRQAMP_ITSTMPAS_TASSERTION_MASK 0xffffffffU
+#define IRQAMP_ITSTMPAS_TASSERTION_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_ITSTMPAS_TASSERTION_MASK ) >> \\
+    IRQAMP_ITSTMPAS_TASSERTION_SHIFT )
+#define IRQAMP_ITSTMPAS_TASSERTION_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ITSTMPAS_TASSERTION_MASK ) | \\
+    ( ( ( _val ) << IRQAMP_ITSTMPAS_TASSERTION_SHIFT ) & \\
+      IRQAMP_ITSTMPAS_TASSERTION_MASK ) )
+#define IRQAMP_ITSTMPAS_TASSERTION( _val ) \\
+  ( ( ( _val ) << IRQAMP_ITSTMPAS_TASSERTION_SHIFT ) & \\
+    IRQAMP_ITSTMPAS_TASSERTION_MASK )
+
+/** @} */
+
+/**
+ * @defgroup IrqampTimestampITSTMPAC \\
+ *   Interrupt Acknowledge Timestamp n register (ITSTMPAC)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_ITSTMPAC_TACKNOWLEDGE_SHIFT 0
+#define IRQAMP_ITSTMPAC_TACKNOWLEDGE_MASK 0xffffffffU
+#define IRQAMP_ITSTMPAC_TACKNOWLEDGE_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_ITSTMPAC_TACKNOWLEDGE_MASK ) >> \\
+    IRQAMP_ITSTMPAC_TACKNOWLEDGE_SHIFT )
+#define IRQAMP_ITSTMPAC_TACKNOWLEDGE_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ITSTMPAC_TACKNOWLEDGE_MASK ) | \\
+    ( ( ( _val ) << IRQAMP_ITSTMPAC_TACKNOWLEDGE_SHIFT ) & \\
+      IRQAMP_ITSTMPAC_TACKNOWLEDGE_MASK ) )
+#define IRQAMP_ITSTMPAC_TACKNOWLEDGE( _val ) \\
+  ( ( ( _val ) << IRQAMP_ITSTMPAC_TACKNOWLEDGE_SHIFT ) & \\
+    IRQAMP_ITSTMPAC_TACKNOWLEDGE_MASK )
+
+/** @} */
+
+/**
+ * @brief This structure defines the IRQ(A)MP Timestamp register block memory
+ *   map.
+ */
+typedef struct irqamp_timestamp {
+  /**
+   * @brief See @ref IrqampTimestampITCNT.
+   */
+  uint32_t itcnt;
+
+  /**
+   * @brief See @ref IrqampTimestampITSTMPC.
+   */
+  uint32_t itstmpc;
+
+  /**
+   * @brief See @ref IrqampTimestampITSTMPAS.
+   */
+  uint32_t itstmpas;
+
+  /**
+   * @brief See @ref IrqampTimestampITSTMPAC.
+   */
+  uint32_t itstmpac;
+} irqamp_timestamp;
+
+/** @} */
+
+/* Generated from spec:/irqamp */
+
+/**
+ * @defgroup Irqamp IRQ(A)MP
+ *
+ * @brief This group contains the IRQ(A)MP interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup IrqampILEVEL Interrupt level register (ILEVEL)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_ILEVEL_IL_15_1_SHIFT 1
+#define IRQAMP_ILEVEL_IL_15_1_MASK 0xfffeU
+#define IRQAMP_ILEVEL_IL_15_1_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_ILEVEL_IL_15_1_MASK ) >> \\
+    IRQAMP_ILEVEL_IL_15_1_SHIFT )
+#define IRQAMP_ILEVEL_IL_15_1_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ILEVEL_IL_15_1_MASK ) | \\
+    ( ( ( _val ) << IRQAMP_ILEVEL_IL_15_1_SHIFT ) & \\
+      IRQAMP_ILEVEL_IL_15_1_MASK ) )
+#define IRQAMP_ILEVEL_IL_15_1( _val ) \\
+  ( ( ( _val ) << IRQAMP_ILEVEL_IL_15_1_SHIFT ) & \\
+    IRQAMP_ILEVEL_IL_15_1_MASK )
+
+/** @} */
+
+/**
+ * @defgroup IrqampIPEND8 Interrupt pending register (IPEND8)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/** @} */
+
+/**
+ * @brief This structure defines the IRQ(A)MP register block memory map.
+ */
+typedef struct irqamp {
+  /**
+   * @brief See @ref IrqampILEVEL.
+   */
+  uint32_t foobar_0;
+
+  #if defined(RTEMS_SMP)
+    /**
+     * @brief See @ref IrqampIPEND8.
+     */
+    uint8_t ipend8_0[ 4 ];
+  #else
+    /**
+     * @brief See @ref IrqampILEVEL.
+     */
+    uint32_t foobar_1;
+  #endif
+
+  uint8_t reserved_8_9;
+
+  /**
+   * @brief See @ref IrqampIPEND8.
+   */
+  uint8_t ipend8_1[ 4 ];
+
+  uint8_t reserved_d_100[ 243 ];
+
+  /**
+   * @brief See @ref IrqampTimestamp.
+   */
+  irqamp_timestamp itstmp[ 16 ];
+
+  uint32_t reserved_200_400[ 128 ];
+} irqamp;
+
+/** @} */
+
+/* Generated from spec:/macro */
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Very long macro brief description.
+ *
+ * @param VeryLongParam0 is very long parameter 0 with some super important and
+ *   extra very long description which makes a lot of sense.
+ *
+ * @param[in] VeryLongParam1 is very long parameter 1.
+ *
+ * @param[out] VeryLongParam2 is very long parameter 2.
+ *
+ * @param[in,out] VeryLongParam3 is very long parameter 3.
+ *
+ * @retval 1 is returned, in case A.
+ *
+ * @retval 2 is returned, in case B.
+ *
+ * @return Sometimes some value.
+ */
+#define VERY_LONG_MACRO( \\
+  VeryLongParam0, \\
+  VeryLongParam1, \\
+  VeryLongParam2, \\
+  VeryLongParam3 \\
+) \\
+  do { \\
+    (void) VeryLongParam1; \\
+    (void) VeryLongParam2; \\
+    (void) VeryLongParam3; \\
+  } while ( 0 ); \\
+  VeryLongParam0 + 1; \\
+  VERY_LONG_MACRO()
+
+/* Generated from spec:/macro2 */
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Short macro brief description.
+ *
+ * @param Param0 is parameter 0.
+ *
+ * @return Sometimes some value.
+ */
+#if 0
+  #define MACRO( Param0 )
+#else
+  #define MACRO( Param0 ) ( ( Param0 ) + 1 )
+#endif
+
+/* Generated from spec:/register-block-no-size */
+
+/**
+ * @defgroup RBNS RBNS
+ *
+ * @brief This group contains the RBNS interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup RBNSR Brief. (R)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/** @} */
+
+/**
+ * @name Registers
+ *
+ * @brief Brief.
+ *
+ * @{
+ */
+
+/**
+ * @brief See @ref RBNSR.
+ */
+#define RBNS_R 0x0
+
+/** @} */
+
+/** @} */
+
+/* Generated from spec:/s */
+
+/**
+ * @ingroup GroupC
+ */
+struct Struct {
+  /**
+   * @brief Brief union description.
+   *
+   * Union description.
+   */
+  union {
+    /**
+     * @brief Brief member description.
+     *
+     * Member description.
+     */
+    uint32_t some_member;
+
+    /**
+     * @brief Brief struct description.
+     *
+     * struct description.
+     */
+    struct {
+      /**
+       * @brief Brief member 2 description.
+       *
+       * Member 2 description.
+       */
+      uint32_t some_member_2;
+
+      /**
+       * @brief Brief member 3 description.
+       *
+       * Member 3 description.
+       */
+      Enum some_member_3;
+    } some_struct;
+  } some_union;
+
+  /**
+   * @brief Brief member 4 description.
+   *
+   * Member 4 description.
+   */
+  Enum some_member_4;
+};
+
+/* Generated from spec:/s2 */
+
+/**
+ * @ingroup GroupA
+ *
+ * References: Struct2
+ *
+ * @par Notes
+ * See also Struct and unspec_func().
+ *
+ * @par Constraints
+ * @parblock
+ * The following constraints apply to this structure:
+ *
+ * - Some constraint.
+ *
+ * - Members of the type shall not be accessed directly by the application.
+ * @endparblock
+ */
+typedef struct {
+  /**
+   * @brief Brief member description.
+   *
+   * Member description.
+   */
+  uint32_t member;
+} Struct2;
+
+/* Generated from spec:/td */
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Typedef Integer brief description.
+ *
+ * Typedef Integer description.
+ */
+typedef uint32_t Integer /* Some comment. */;
+
+/* Generated from spec:/td3 */
+
+/**
+ * @ingroup GroupB
+ */
+#if defined(RTEMS_SMP)
+  typedef uint32_t Integer3;
+#endif
+
+/* Generated from spec:/u */
+
+/**
+ * @ingroup GroupC
+ */
+typedef union Union {
+  /**
+   * @brief Brief member 0 description.
+   */
+  int m_0;
+
+  /**
+   * @brief Brief member 1 description.
+   */
+  long m_1;
+} Union;
+
+#if !defined(ASM)
+  /* Generated from spec:/var */
+
+  /**
+   * @ingroup GroupC
+   *
+   * @brief Variable brief description.
+   *
+   * Variable description.
+   */
+  extern struct Struct *Variable;
+#endif
+
+/* Generated from spec:/func2 */
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Very long function brief description.
+ *
+ * @param VeryLongParam0 is very long parameter 0 with some super important and
+ *   extra very long description which makes a lot of sense.
+ *
+ * @param[in] VeryLongParam1 is very long parameter 1.
+ *
+ * @param[out] VeryLongParam2 is very long parameter 2.
+ *
+ * @param[in,out] VeryLongParam3 is very long parameter 3.
+ *
+ * VeryLongFunction description.
+ *
+ * @retval 1 is returned, in case A.
+ *
+ * @retval 2 is returned, in case B.
+ *
+ * @retval #Enum is returned, in case C.
+ *
+ * @return Sometimes some value.  See Function().
+ *
+ * @par Notes
+ * VeryLongFunction notes.
+ */
+__attribute__((__const__)) static inline int VeryLongFunction(
+  int                  VeryLongParam0,
+  const struct Struct *VeryLongParam1,
+  Union            *( *VeryLongParam2 )( void ),
+  struct Struct       *VeryLongParam3
+)
+{
+  (void) VeryLongParam1;
+  (void) VeryLongParam2;
+  (void) VeryLongParam3;
+  return VeryLongParam0 + 1;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _H_H */
+"""
+        assert content == src.read()
+
+    header_file_config = {
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": "zephyr"
+    }
+    file_path = os.path.join(base_directory, "header.h")
+    generate_header_file(header_file_config, item_cache["/h"], file_path)
+
+    with open(file_path, "r") as src:
+        content = """/*
+ * Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef _H_H
+#define _H_H
+
+#include <h2.h>
+#include <h3.h>
+#include <math.h>
+#include <stdint.h>
+#include <zephyr/sys/util.h>
+
+#if !defined(ASM) || defined(RTEMS_SMP)
+  #include <h9.h>
+#endif
+
+#if 0
+  #include <h5.h>
+  #include <h6.h>
+  #include <h7.h>
+#endif
+
+#if defined(ASM)
+  #include <h4.h>
+#endif
+
+#if defined(ASM) && defined(RTEMS_MULTIPROCESSING)
+  #include <h8.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @defgroup GroupA Group A
+ *
+ * @brief Group A brief description.
+ *
+ * Group A description.
+ */
+
+/**
+ * @defgroup GroupB Group B
+ *
+ * @ingroup GroupA
+ */
+
+/**
+ * @ingroup GroupA
+ */
+#if defined(A) || (B > C)
+  #define DEFINE ((float_t) 456)
+#elif defined(C) && defined(D)
+  #define DEFINE ((float_t) 789)
+#else
+  #define DEFINE \\
+    ((float_t) 123)
+#endif
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Enum brief description.
+ *
+ * Enum description.
+ */
+typedef enum {
+  /**
+   * @brief Enumerator 0 brief description.
+   */
+  ENUMERATOR_0,
+
+  /**
+   * @brief Enumerator 1 brief description.
+   */
+  ENUMERATOR_1,
+
+  /**
+   * @brief Enumerator 2 brief description.
+   */
+  ENUMERATOR_2
+} Enum;
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Enum B brief description.
+ */
+typedef enum EnumB {
+  /**
+   * @brief Enumerator B brief description.
+   */
+  ENUMERATOR_B = ENUMERATOR_A
+} EnumB;
+
+/* Forward declaration */
+struct Struct;
+
+/**
+ * @ingroup GroupA
+ *
+ * @brief Function brief description.
+ *
+ * @param Param0 is parameter 0.
+ *
+ * @param[in] Param1 is parameter 1.
+ *
+ * @param[out] Param2 is parameter 2.
+ *
+ * @param[in,out] Param3 is parameter 3.
+ *
+ * Function description.  References to xs, VeryLongFunction(), ::Integer,
+ * #Enum, #DEFINE, VERY_LONG_MACRO(), #Variable, ::ENUMERATOR_0, Struct, @ref
+ * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is ``Param1``.
+ * Mention struct US.
+ *
+ * @code
+ * these two lines
+ * are not wrapped
+ * @endcode
+ *
+ * @par Constraints
+ * @parblock
+ * The following constraints apply to this directive:
+ *
+ * - Constraint A for Function().
+ * @endparblock
+ */
+void Function(
+  int        Param0,
+  const int *Param1,
+  int       *Param2,
+  int       *Param3,
+  int       *Param4
+);
+
+void Function6( int Param0 );
+
+/* ITCNT bits */
+#define IRQAMP_ITCNT_TCNT GENMASK(31, 0)
+
+/* ITSTMPC bits */
+#define IRQAMP_ITSTMPC_TSISEL GENMASK(4, 0)
+#define IRQAMP_ITSTMPC_KS BIT(5)
+#define IRQAMP_ITSTMPC_S2 BIT(25)
+#define IRQAMP_ITSTMPC_S1 BIT(26)
+#define IRQAMP_ITSTMPC_TSTAMP GENMASK(31, 27)
+
+/* ITSTMPAS bits */
+#define IRQAMP_ITSTMPAS_TASSERTION GENMASK(31, 0)
+
+/* ITSTMPAC bits */
+#define IRQAMP_ITSTMPAC_TACKNOWLEDGE GENMASK(31, 0)
+
+/* IRQ(A)MP Timestamp address offsets */
+#define IRQAMP_TIMESTAMP_ITCNT 0x0U
+#define IRQAMP_TIMESTAMP_ITSTMPC 0x4U
+#define IRQAMP_TIMESTAMP_ITSTMPAS 0x8U
+#define IRQAMP_TIMESTAMP_ITSTMPAC 0xcU
+
+/* ILEVEL bits */
+#define IRQAMP_ILEVEL_IL_15_1 GENMASK(15, 1)
+
+/* IPEND8 bits */
+
+/* IRQ(A)MP address offsets */
+#define IRQAMP_FOOBAR 0x0U
+#if defined(RTEMS_SMP)
+  #define IRQAMP_IPEND8(i) (0x4U + 1U * (i))
+#else
+  #define IRQAMP_FOOBAR 0x4U
+#endif
+#define IRQAMP_IPEND8(i) (0x9U + 1U * (i))
+#define IRQAMP_ITSTMP(i) (0x100U + 16U * (i))
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Very long macro brief description.
+ *
+ * @param VeryLongParam0 is very long parameter 0 with some super important and
+ *   extra very long description which makes a lot of sense.
+ *
+ * @param[in] VeryLongParam1 is very long parameter 1.
+ *
+ * @param[out] VeryLongParam2 is very long parameter 2.
+ *
+ * @param[in,out] VeryLongParam3 is very long parameter 3.
+ *
+ * @retval 1 is returned, in case A.
+ *
+ * @retval 2 is returned, in case B.
+ *
+ * @return Sometimes some value.
+ */
+#define VERY_LONG_MACRO( \\
+  VeryLongParam0, \\
+  VeryLongParam1, \\
+  VeryLongParam2, \\
+  VeryLongParam3 \\
+) \\
+  do { \\
+    (void) VeryLongParam1; \\
+    (void) VeryLongParam2; \\
+    (void) VeryLongParam3; \\
+  } while ( 0 ); \\
+  VeryLongParam0 + 1; \\
+  VERY_LONG_MACRO()
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Short macro brief description.
+ *
+ * @param Param0 is parameter 0.
+ *
+ * @return Sometimes some value.
+ */
+#if 0
+  #define MACRO( Param0 )
+#else
+  #define MACRO( Param0 ) ( ( Param0 ) + 1 )
+#endif
+
+/* R bits */
+
+/* RBNS address offsets */
+#define RBNS_R 0x0U
+
+/**
+ * @ingroup GroupC
+ */
+struct Struct {
+  /**
+   * @brief Brief union description.
+   *
+   * Union description.
+   */
+  union {
+    /**
+     * @brief Brief member description.
+     *
+     * Member description.
+     */
+    uint32_t some_member;
+
+    /**
+     * @brief Brief struct description.
+     *
+     * struct description.
+     */
+    struct {
+      /**
+       * @brief Brief member 2 description.
+       *
+       * Member 2 description.
+       */
+      uint32_t some_member_2;
+
+      /**
+       * @brief Brief member 3 description.
+       *
+       * Member 3 description.
+       */
+      Enum some_member_3;
+    } some_struct;
+  } some_union;
+
+  /**
+   * @brief Brief member 4 description.
+   *
+   * Member 4 description.
+   */
+  Enum some_member_4;
+};
+
+/**
+ * @ingroup GroupA
+ *
+ * References: Struct2
+ *
+ * @par Notes
+ * See also Struct and unspec_func().
+ *
+ * @par Constraints
+ * @parblock
+ * The following constraints apply to this structure:
+ *
+ * - Some constraint.
+ *
+ * - Members of the type shall not be accessed directly by the application.
+ * @endparblock
+ */
+typedef struct {
+  /**
+   * @brief Brief member description.
+   *
+   * Member description.
+   */
+  uint32_t member;
+} Struct2;
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Typedef Integer brief description.
+ *
+ * Typedef Integer description.
+ */
+typedef uint32_t Integer /* Some comment. */;
+
+/**
+ * @ingroup GroupB
+ */
+#if defined(RTEMS_SMP)
+  typedef uint32_t Integer3;
+#endif
+
+/**
+ * @ingroup GroupC
+ */
+typedef union Union {
+  /**
+   * @brief Brief member 0 description.
+   */
+  int m_0;
+
+  /**
+   * @brief Brief member 1 description.
+   */
+  long m_1;
+} Union;
+
+#if !defined(ASM)
+  /**
+   * @ingroup GroupC
+   *
+   * @brief Variable brief description.
+   *
+   * Variable description.
+   */
+  extern struct Struct *Variable;
+#endif
+
+/**
+ * @ingroup GroupB
+ *
+ * @brief Very long function brief description.
+ *
+ * @param VeryLongParam0 is very long parameter 0 with some super important and
+ *   extra very long description which makes a lot of sense.
+ *
+ * @param[in] VeryLongParam1 is very long parameter 1.
+ *
+ * @param[out] VeryLongParam2 is very long parameter 2.
+ *
+ * @param[in,out] VeryLongParam3 is very long parameter 3.
+ *
+ * VeryLongFunction description.
+ *
+ * @retval 1 is returned, in case A.
+ *
+ * @retval 2 is returned, in case B.
+ *
+ * @retval #Enum is returned, in case C.
+ *
+ * @return Sometimes some value.  See Function().
+ *
+ * @par Notes
+ * VeryLongFunction notes.
+ */
+__attribute__((__const__)) static inline int VeryLongFunction(
+  int                  VeryLongParam0,
+  const struct Struct *VeryLongParam1,
+  Union            *( *VeryLongParam2 )( void ),
+  struct Struct       *VeryLongParam3
+)
+{
+  (void) VeryLongParam1;
+  (void) VeryLongParam2;
+  (void) VeryLongParam3;
+  return VeryLongParam0 + 1;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _H_H */
+"""
+        assert content == src.read()

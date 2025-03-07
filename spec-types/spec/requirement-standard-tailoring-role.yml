@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: standard-tailoring
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the standard tailoring role of links.  The link target shall
+      be a ${requirement-standard:/spec-name} item.
+    mandatory-attributes: all
+spec-name: Standard Tailoring Link Role
+spec-type: requirement-standard-tailoring-role
+type: spec

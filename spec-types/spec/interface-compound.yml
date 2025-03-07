@@ -1,0 +1,45 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: struct
+  uid: interface
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: union
+  uid: interface
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      brief:
+        description: null
+        spec-type: interface-brief
+      definition:
+        description: null
+        spec-type: interface-member-definition-directive-list
+      definition-kind:
+        description: null
+        spec-type: interface-compound-definition-kind
+      description:
+        description: null
+        spec-type: interface-description
+      name:
+        description: |
+          It shall be the name of the compound (struct or union).
+        spec-type: str
+      notes:
+        description: null
+        spec-type: interface-notes
+    description: |
+      This set of attributes specifies a compound (struct or union).
+    mandatory-attributes: all
+spec-name: Interface Compound Item Type
+spec-type: interface-compound
+type: spec

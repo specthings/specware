@@ -1,0 +1,74 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
+# Copyright (C) 2026 embedded brains GmbH & Co. KG
+
+[project]
+name = "specware"
+version = "1.1.0.dev1"
+description = "Provides utilities to specify software."
+authors = [
+    {name = "The specware Authors", email = "specthings@embedded-brains.de"}
+]
+license = "BSD-2-Clause"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "specitems >=1.1.1",
+]
+keywords = [
+  "certification",
+  "documentation",
+  "markdown",
+  "qualification",
+  "requirements-management",
+  "traceability",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing :: Acceptance",
+    "Topic :: Text Processing :: Markup",
+    "Typing :: Typed",
+]
+
+[project.urls]
+"Source Code" = "https://github.com/specthings/specware"
+"Bug Tracker" = "https://github.com/specthings/specware/issues"
+
+[project.scripts]
+specwareexport = "specware.cliexport:cliexport"
+specwareexportheader = "specware.cliexportheader:cliexportheader"
+specwareverify = "specware.cliverify:cliverify"
+specwareview = "specware.cliview:cliview"
+
+[build-system]
+requires = ["uv_build>=0.10.0,<0.11.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "coverage>=7.13.3",
+    "flake8>=7.3.0",
+    "mypy>=1.19.1",
+    "pylint>=4.0.4",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "sphinx>=9.0.4",
+    "sphinx-autodoc-napoleon-typehints>=2.1.6",
+    "sphinx-autodoc-typehints>=3.6.1",
+    "sphinx-rtd-theme>=3.1.0",
+    "types-pyyaml>=6.0.12.20250915",
+    "yapf>=0.43.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "--cov=specware --cov-fail-under=100 --cov-branch --cov-report=term-missing --cov-config=.coveragerc"

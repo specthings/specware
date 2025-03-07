@@ -1,0 +1,45 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+default: default a
+description: description a
+index-entries:
+- index a
+name: a
+notes: |
+  notes a
+
+  references:
+
+  * ${b:/name}
+
+  * ${unspec-group:/name}
+
+  * ${unspec-group-2:/name}
+
+  * ${unspec-group-3:/name}
+
+  * ${unspec-func:/name}
+
+  * ${unspec-func-no-ref:/name}
+
+  * ${func:/name}
+
+  * ${td:/name}
+
+  * ${define:/name}
+
+  * ${unspec-define:/name}
+
+  * ${unspec-define-2:/name}
+
+  * ${unspec-type:/name}
+
+  * ${unspec-type-2:/name}
+appl-config-option-type: feature
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+interface-type: appl-config-option
+links:
+- role: interface-ingroup
+  uid: g
+type: interface

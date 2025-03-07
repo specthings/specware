@@ -1,0 +1,62 @@
+spec:
+  cache-directory: cache
+  paths:
+  - spec-build
+  - spec-rtems
+  resolve-proxies: true
+appl-config:
+  doxygen-target: appl-config.h
+  enabled-source: []
+  enabled-documentation: []
+  groups:
+  - uid: /if/group-general
+    target: acfg.rst
+build:
+  arch: foo
+  bsp: bar
+  enabled-set:
+  - A
+  build-uids:
+  - /g
+  base-directory-map:
+  - source: spec-build
+    target: .
+glossary:
+  project-groups:
+  - /glossary-general
+  project-header: Glossary
+  project-target: project-glossary.rst
+  documents:
+  - header: Glossary
+    rest-source-paths: []
+    target: glossary.rst
+interface:
+  enabled: []
+  item-level-interfaces: []
+  domains: {}
+interface-documentation:
+  enabled: []
+  groups:
+  - directives-target: directives.rst
+    group: /if/group
+    introduction-target: introduction.rst
+  types:
+    domains: []
+    groups: []
+    target: types.rst
+validation:
+  base-directory-map:
+  - source: spec-build
+    target: .
+spec-documentation:
+  target: items.rst
+  hierarchy-subsection-name: Specification Item Hierarchy
+  hierarchy-text: |
+    The specification item types have the following hierarchy:
+  ignore: '^$'
+  item-types-subsection-name: Specification Item Types
+  label-prefix: SpecType
+  root-type: /spec/root
+  section-label-prefix: ReqEng
+  section-name: Specification Items
+  value-types-subsection-name: Specification Attribute Sets and Value Types

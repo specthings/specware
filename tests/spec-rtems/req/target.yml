@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Target brief.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: |
+  Target description.
+enabled-by: true
+key: target-key
+links:
+- role: requirement-refinement
+  uid: root
+- role: performance-runtime-limits-provider
+  uid: perf-limits
+- role: test-timeouts
+  uid: test-timeouts
+- role: verification-provider
+  uid: ../verification/code-coverage-gap/gap
+- role: verification-provider
+  uid: ../verification/test-failures/default
+name: Target Name
+non-functional-type: design-target
+rationale: null
+references: []
+requirement-type: non-functional
+text: |
+  The ${.:/name} shall be a target.
+type: requirement

@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      For a code coverage gap verification, this set of attributes specifies
+      for each code coverage scope the applicable file areas.
+    generic-attributes:
+      description: null
+      key-spec-type: str
+      value-spec-type: verification-code-coverage-file
+    mandatory-attributes: all
+spec-name: Code Coverage File by Scope
+spec-type: verification-code-coverage-file-by-scope
+type: spec

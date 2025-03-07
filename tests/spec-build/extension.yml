@@ -1,0 +1,7 @@
+build-extension-points:
+- d
+- o2
+build-type: extension
+enabled-by: true
+links: []
+type: build

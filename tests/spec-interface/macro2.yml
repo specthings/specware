@@ -1,0 +1,40 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: Short macro brief description.
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+definition:
+  default:
+    attributes: null
+    body: |
+      ( ( ${.:/params[0]/name} ) + 1 )
+    params:
+    - ${.:/params[0]/name}
+    return: null
+  variants:
+  - definition:
+      attributes: null
+      body: ''
+      params:
+      - ${.:/params[0]/name}
+      return: null
+    enabled-by: '0'
+description: null
+enabled-by: true
+index-entries: []
+interface-type: macro
+links:
+- role: interface-placement
+  uid: h
+- role: interface-ingroup
+  uid: gb
+name: MACRO
+notes: null
+params:
+- description: |
+    is parameter 0.
+  dir: null
+  name: Param0
+return:
+  return: Sometimes some value.
+  return-values: []
+type: interface

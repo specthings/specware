@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      line:
+        description: |
+          It shall be the source code line number.  Line numbers start with the
+          number one.
+        spec-type: int
+      md5:
+        description: |
+          It shall be the MD5 digest of the source code line.
+        spec-type: md5-hex
+    description: |
+      For a code coverage gap verification, this set of attributes specifies an
+      applicable line of a file.
+    mandatory-attributes: all
+spec-name: Code Coverage Line
+spec-type: verification-code-coverage-line
+type: spec

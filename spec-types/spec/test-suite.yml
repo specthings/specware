@@ -1,0 +1,51 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: memory-benchmark
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: test-suite
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      test-brief:
+        description: |
+          It shall be the test suite brief description.
+        spec-type: str
+      test-code:
+        description: |
+          It shall be the test suite code.  The test suite code is placed at
+          file scope in the target source file.
+        spec-type: str
+      test-description:
+        description: |
+          It shall be the test suite description.
+        spec-type: optional-str
+      test-includes:
+        description: |
+          It shall be a list of header files included via ``#include <...>``.
+        spec-type: list-str
+      test-local-includes:
+        description: |
+          It shall be a list of header files included via ``#include "..."``.
+        spec-type: list-str
+      test-target:
+        description: |
+          It shall be the path to the generated target test suite source file.
+        spec-type: str
+    description: |
+      This set of attributes specifies a test suite.
+    mandatory-attributes: all
+spec-name: Test Suite Item Type
+spec-type: test-suite
+type: spec

@@ -1,0 +1,266 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+functional-type: action
+links:
+- role: interface-function
+  uid: ../if/clock-gettime
+post-conditions:
+- name: Status
+  states:
+  - name: Zero
+    test-code: |
+      T_eq_int( ctx->status, 0 );
+    text: |
+      The return value of ${../if/clock-gettime:/name} shall be equal to zero.
+  - name: MinusOne
+    test-code: |
+      T_eq_int( ctx->status, -1 );
+    text: |
+      The return value of ${../if/clock-gettime:/name} shall be equal to minus one.
+  test-epilogue: null
+  test-prologue: null
+- name: Errno
+  states:
+  - name: Unchanged
+    test-code: |
+      T_eq_int( errno, -1 );
+    text: |
+      The errno shall not be changed by the directive call.
+  - name: EINVAL
+    test-code: |
+      T_eq_int( errno, EINVAL );
+    text: |
+      The errno shall be equal to EINVAL.
+  test-epilogue: null
+  test-prologue: null
+- name: Tp
+  states:
+  - name: Monotonic
+    test-code: |
+      T_eq_i64( ctx->tp_obj.tv_sec, ctx->now_monotonic.tv_sec );
+      T_eq_long( ctx->tp_obj.tv_nsec, ctx->now_monotonic.tv_nsec );
+    text: |
+      The object referenced by the ``tp`` parameter shall be set to the time
+      elapsed since some fixed time point in the past measured using the
+      CLOCK_MONOTONIC at some time point during the
+      directive call.
+  - name: Realtime
+    test-code: |
+      T_eq_i64( ctx->tp_obj.tv_sec, ctx->now_realtime.tv_sec );
+      T_eq_long( ctx->tp_obj.tv_nsec, ctx->now_realtime.tv_nsec );
+    text: |
+      The object referenced by the ``tp`` parameter shall be set to the time
+      elapsed since the UNIX Epoch measured using the
+      CLOCK_REALTIME at some time point during the directive
+      call.
+  - name: ProcessCPUTimeId
+    test-code: |
+      T_eq_i64( ctx->tp_obj.tv_sec, 0 );
+      T_gt_long( ( ctx->tp_obj.tv_nsec + 500 ) / 1000, 2 );
+    text: |
+      The object referenced by the ``tp`` parameter shall be set to the time
+      elapsed since the last CPU usage statistics reset at some time point
+      during the directive call.
+  - name: ThreadCPUTimeId
+    test-code: |
+      T_eq_i64( ctx->tp_obj.tv_sec, 0 );
+      T_eq_long( ( ctx->tp_obj.tv_nsec + 500 ) / 1000, 2 );
+    text: |
+      The object referenced by the ``tp`` parameter shall be set to the
+      execution time of the executing thread since the last CPU usage
+      statistics reset at some time point during the directive call.
+  - name: Unchanged
+    test-code: |
+      T_eq_i64( ctx->tp_obj.tv_sec, -1 );
+      T_eq_long( ctx->tp_obj.tv_nsec, -1 );
+    text: |
+      The object referenced by the ``tp`` parameter shall not be changed by the
+      directive call.
+  test-epilogue: null
+  test-prologue: null
+pre-conditions:
+- name: ClockId
+  states:
+  - name: Monotonic
+    test-code: |
+      ctx->clock_id = CLOCK_MONOTONIC;
+    text: |
+      While the ``clock_id`` parameter is equal to CLOCK_MONOTONIC.
+  - name: Realtime
+    test-code: |
+      ctx->clock_id = CLOCK_REALTIME;
+    text: |
+      While the ``clock_id`` parameter is equal to CLOCK_REALTIME.
+  - name: ProcessCPUTimeId
+    test-code: |
+      ctx->clock_id = CLOCK_PROCESS_CPUTIME_ID;
+    text: |
+      While the ``clock_id`` parameter is equal to
+      CLOCK_PROCESS_CPUTIME_ID.
+  - name: ThreadCPUTimeId
+    test-code: |
+      ctx->clock_id = CLOCK_THREAD_CPUTIME_ID;
+    text: |
+      While the ``clock_id`` parameter is equal to
+      CLOCK_THREAD_CPUTIME_ID.
+  - name: Invalid
+    test-code: |
+      ctx->clock_id = INT_MAX;
+    text: |
+      While the ``clock_id`` parameter is an invalid clock identifier.
+  test-epilogue: null
+  test-prologue: null
+- name: Tp
+  states:
+  - name: Valid
+    test-code: |
+      ctx->tp = &ctx->tp_obj;
+    text: |
+      While the ``tp`` parameter references an object of type
+      struc timespec.
+  - name: 'Null'
+    test-code: |
+      ctx->tp = NULL;
+    text: |
+      While the ``tp`` parameter is equal to NULL.
+  test-epilogue: null
+  test-prologue: null
+rationale: null
+references: []
+requirement-type: functional
+skip-reasons: {}
+test-action: |
+  ctx->status = clock_gettime( ctx->clock_id, ctx->tp );
+test-brief: null
+test-cleanup: null
+test-context:
+- brief: |
+    This member contains the worker task identifier.
+  description: null
+  member: |
+    rtems_id worker_id
+- brief: |
+    This member contains the CLOCK_REALTIME value before the
+    ${../if/clock-gettime:/name} call.
+  description: null
+  member: |
+    struct timespec now_realtime
+- brief: |
+    This member contains the CLOCK_MONOTONIC value before the
+    ${../if/clock-gettime:/name} call.
+  description: null
+  member: |
+    struct timespec now_monotonic
+- brief: |
+    This member provides the object referenced by the ``tp`` parameter.
+  description: null
+  member: |
+    struct timespec tp_obj
+- brief: |
+    This member contains the return value of the ${../if/clock-gettime:/name}
+    call.
+  description: null
+  member: |
+    int status
+- brief: |
+    This member specifies the ``clock_id`` parameter value.
+  description: null
+  member: |
+    clockid_t clock_id
+- brief: |
+    This member specifies the ``tp`` parameter value.
+  description: null
+  member: |
+    struct timespec *tp
+test-context-support: null
+test-description: null
+test-header: null
+test-includes:
+- errno.h
+- limits.h
+- rtems.h
+- rtems/cpuuse.h
+- time.h
+test-local-includes:
+- tx-support.h
+test-prepare: |
+  uint32_t counter;
+
+  rtems_cpu_usage_reset();
+  Yield();
+  counter = GetTimecountCounter();
+
+  rtems_clock_get_monotonic( &ctx->now_monotonic );
+  SetTimecountCounter( counter );
+
+  rtems_clock_get_realtime( &ctx->now_realtime );
+  SetTimecountCounter( counter );
+
+  errno = -1;
+  ctx->status = -1;
+  ctx->tp_obj.tv_sec = -1;
+  ctx->tp_obj.tv_nsec = -1;
+test-setup:
+  brief: null
+  code: |
+    ctx->worker_id = CreateTask( "WORK", GetSelfPriority() );
+    StartTask( ctx->worker_id, Worker, 0 );
+  description: null
+test-stop: null
+test-support:
+  static void Worker( rtems_task_argument arg )
+  {
+    (void) arg;
+
+    while ( true ) {
+      Yield();
+    }
+  }
+test-target: tc-clock-gettime.c
+test-teardown:
+  brief: null
+  code: |
+    DeleteTask( ctx->worker_id );
+  description: null
+text: ${.:text-template}
+transition-map:
+- enabled-by: true
+  post-conditions:
+    Status:
+    - if:
+      - pre-conditions:
+          ClockId:
+          - Invalid
+      - pre-conditions:
+          Tp:
+          - 'Null'
+      then: MinusOne
+    - else: Zero
+    Errno:
+    - if:
+      - pre-conditions:
+          ClockId:
+          - Invalid
+      - pre-conditions:
+          Tp:
+          - 'Null'
+      then: EINVAL
+    - else: Unchanged
+    Tp:
+    - if:
+        pre-conditions:
+          Tp:
+          - 'Null'
+      then: N/A
+    - if:
+        pre-conditions:
+          ClockId:
+          - Invalid
+      then: Unchanged
+    - specified-by: ClockId
+  pre-conditions:
+    ClockId: all
+    Tp: all
+type: requirement

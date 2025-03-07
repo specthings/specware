@@ -1,0 +1,38 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: enumerator
+  uid: interface
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      brief:
+        description: null
+        spec-type: interface-brief
+      definition:
+        description: null
+        spec-type: interface-definition-directive
+      description:
+        description: null
+        spec-type: interface-description
+      name:
+        description: |
+          It shall be the name of the enumerator.
+        spec-type: str
+      notes:
+        description: null
+        spec-type: interface-notes
+    description: |
+      This set of attributes specifies an enumerator.
+    mandatory-attributes: all
+spec-name: Interface Enumerator Item Type
+spec-type: interface-enumerator
+type: spec

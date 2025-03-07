@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: verification
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      verification-type:
+        description: |
+          It shall be the verification item type.
+        spec-type: name
+      text:
+        description: |
+          It shall state the verification.
+        spec-type: str
+    description: |
+      This set of attributes specifies a verification.  The item shall have at
+      least one link to the verified item with the
+      ${verification-role:/spec-name}.
+    mandatory-attributes: all
+spec-name: Verification Item Type
+spec-type: verification
+type: spec

@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: forward-declaration
+  uid: interface
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      Items of this type specify a forward declaration.  The item shall have
+      exactly one link with the ${interface-target:/spec-name} to an
+      ${interface-compound:/spec-name} item.  This link defines the type
+      declared by the forward declaration.
+    mandatory-attributes: all
+spec-name: Interface Forward Declaration Item Type
+spec-type: interface-forward-declaration
+type: spec

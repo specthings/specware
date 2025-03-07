@@ -1,0 +1,33 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      brief:
+        description: |
+          It shall be the test support method brief description.
+        spec-type: optional-str
+      code:
+        description: |
+          It shall be the test support method code.  The code may use a local
+          variable ``ctx`` which points to the test context, see
+          ${test-context:/spec-name}.
+        spec-type: str
+      description:
+        description: |
+          It shall be the test support method description.
+        spec-type: optional-str
+    description: |
+      This set of attributes defines an action requirement test support method.
+    mandatory-attributes: all
+  none: null
+spec-name: Test Support Method
+spec-type: test-support-method
+type: spec

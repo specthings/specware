@@ -1,0 +1,54 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+test-actions:
+- action-brief: |
+    Test case action 0 description.
+  action-code: |
+    /* Test case action 0 code */
+  checks:
+  - brief: |
+      Test case action 0 check 0 description.
+    code: |
+      /* Test case action 0 check 0 code: ${.:/step:123} */
+    links: []
+  - brief: |
+      Test case action 0 check 1 description.
+    code: |
+      /* Test case action 0 check 1 code; step ${.:/step} */
+    links: []
+  links: []
+- action-brief: |
+    Test case action 1 description.
+  action-code: |
+    /* Test case action 1 code */
+  checks:
+  - brief: |
+      Test case action 1 check 0 description.
+    code: |
+      /* Test case action 1 check 0 code; step ${.:/step} */
+    links: []
+  - brief: |
+      Test case action 1 check 1 description.
+    code: |
+      /* Test case action 1 check 1 code */
+    links: []
+  links: []
+test-brief: Test case brief description.
+test-context: []
+test-context-support: null
+test-description: Test case description. Is contained in ${ts:/spec}.
+test-header: null
+test-includes:
+- a.h
+test-local-includes:
+- x.h
+test-setup: null
+test-stop: null
+test-support: |
+  /* Test case support code */
+test-target: tc12.c
+test-teardown: null
+type: test-case

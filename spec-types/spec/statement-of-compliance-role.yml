@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: statement-of-compliance
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      customer-status:
+        description: |
+          It shall be the status of compliance requested by the customer.
+        spec-type: statement-of-compliance-status
+      supplier-status:
+        description: |
+          It shall be the status of compliance offered by the supplier.
+        spec-type: statement-of-compliance-status
+    description: |
+      It defines the statement of compliance role of links.  The link target
+      shall be an ${requirement-ecss:/spec-name} item.
+    mandatory-attributes: all
+spec-name: Statement of Compliance Link Role
+spec-type: statement-of-compliance-role
+type: spec

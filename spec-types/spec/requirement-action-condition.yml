@@ -1,0 +1,40 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      name:
+        description: null
+        spec-type: requirement-action-name
+      states:
+        description: null
+        spec-type: requirement-action-state-list
+      test-epilogue:
+        description: |
+          If the value is present, then it shall be the test epilogue code.
+          The epilogue code is placed in the test condition preparation or
+          check before the state-specific code.  The code may use a local
+          variable ``ctx`` which points to the test context, see
+          ${test-context:/spec-name}.
+        spec-type: optional-str
+      test-prologue:
+        description: |
+          If the value is present, then it shall be the test prologue code.
+          The prologue code is placed in the test condition preparation or
+          check after the state-specific code.  The code may use a local
+          variable ``ctx`` which points to the test context, see
+          ${test-context:/spec-name}.
+        spec-type: optional-str
+    description: |
+      This set of attributes defines an action pre-condition or post-condition.
+    mandatory-attributes: all
+spec-name: Action Requirement Condition
+spec-type: requirement-action-condition
+type: spec

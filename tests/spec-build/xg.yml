@@ -1,0 +1,13 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+identifier: Ident
+links: []
+non-functional-type: design-group
+rationale: null
+references: []
+requirement-type: non-functional
+text: |
+  Text.
+type: requirement

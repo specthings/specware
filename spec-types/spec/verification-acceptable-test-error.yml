@@ -1,0 +1,41 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024, 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - no-begin-of-test-message
+      - no-end-of-test-message
+      - no-runtime-limits
+      - no-test-results
+      - unexpected-bsp
+      - unexpected-build
+      - unexpected-build-label
+      - unexpected-compiler
+      - unexpected-duration
+      - unexpected-failed-steps-count
+      - unexpected-report-hash
+      - unexpected-rtems-debug
+      - unexpected-rtems-multiprocessing
+      - unexpected-rtems-posix-api
+      - unexpected-rtems-profiling
+      - unexpected-rtems-smp
+      - unexpected-runtime-maximum
+      - unexpected-runtime-median
+      - unexpected-runtime-minimum
+      - unexpected-step-count
+      - unexpected-target-hash
+      - unexpected-tools
+      - unexpected-version
+    description: |
+      It specifies acceptable test errors.
+spec-name: Acceptable Test Errors
+spec-type: verification-acceptable-test-error
+type: spec

@@ -1,0 +1,310 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+functional-type: action
+links: []
+post-conditions:
+- name: A
+  states:
+  - name: A0
+    test-code: |
+      /* Post A 0 */
+    text: |
+      Post A 0.
+  - name: A1
+    test-code: |
+      /* Post A 1 */
+    text: |
+      Post A 1.
+  - name: A2
+    test-code: |
+      /* Post A 2 */
+    text: |
+      Post A 2.
+  - name: A3
+    test-code: |
+      /* Post A 3 */
+    text: |
+      Post A 3.
+  test-epilogue: |
+    /* Post A epilogue. */
+  test-prologue: |
+    /* Post A prologue. */
+- name: B
+  states:
+  - name: B0
+    test-code: |
+      /* Post B 0 */
+    text: |
+      Post B 0.
+  - name: B1
+    test-code: |
+      /* Post B 1 */
+    text: |
+      Post B 1.
+  - name: B2
+    test-code: |
+      /* Post B 2 */
+    text: |
+      Post B 2.
+  test-epilogue: |
+    /* Post B epilogue. */
+  test-prologue: |
+    /* Post B prologue. */
+pre-conditions:
+- name: A
+  states:
+  - name: A0
+    test-code: |
+      /* Pre A 0 */
+    text: |
+      Pre A 0.
+  - name: A1
+    test-code: |
+      /* Pre A 1 */
+      ${.:skip}
+    text: |
+      Pre A 1.
+  test-epilogue: |
+    /* Pre A epilogue. */
+  test-prologue: |
+    /* Pre A prologue. */
+- name: B
+  states:
+  - name: B0
+    test-code: |
+      /* Pre B 0 */
+    text: |
+      Pre B 0.
+  - name: B1
+    test-code: |
+      /* Pre B 1 */
+    text: |
+      Pre B 1.
+  - name: B2
+    test-code: |
+      /* Pre B 1 */
+    text: |
+      Pre B 1.
+  test-epilogue: |
+    /* Pre B epilogue. */
+  test-prologue: |
+    /* Pre B prologue. */
+- name: C
+  states:
+  - name: C0
+    test-code: |
+      /* Pre C 0 */
+    text: |
+      Pre C 0.
+  - name: C1
+    test-code: |
+      /* Pre B 1 */
+    text: |
+      Pre C 1.
+  - name: C2
+    test-code: |
+      /* Pre C 2 */
+    text: |
+      Pre C 2.
+  test-epilogue: |
+    /* Pre C epilogue. */
+  test-prologue: |
+    /* Pre C prologue. */
+rationale: null
+references: []
+requirement-type: functional
+skip-reasons:
+  Overwritten: |
+    Overwritten.
+  SkipReason: |
+    Skip it due to some reason.
+test-action: |
+  /* Action with ctx */
+test-brief: |
+  Test brief.
+test-cleanup: |
+  /* Cleanup */
+test-context:
+- brief: |
+    Context member brief.
+  description: |
+    Context member description.
+  member: |
+    int member
+test-context-support: |
+  /* Context support code */
+test-description: |
+  Test description.
+test-header:
+  code: |
+    /* Header code for ${.:/test-name} with ${.:/test-run}() */
+  includes:
+  - d.h
+  local-includes:
+  - e.h
+  run-params:
+  - description: |
+      Parameter A description.
+    dir: in
+    name: a
+    specifier: |
+      int *${.:name}
+  - description: |
+      Parameter B description.
+    dir: null
+    name: b
+    specifier: int ${.:name}
+  - description: |
+      Parameter C description.
+    dir: out
+    name: c
+    specifier: int *${.:name}
+  target: action2.h
+test-includes:
+- a.h
+test-local-includes:
+- b.h
+test-name: Action 2
+test-prepare: |
+  /* Prepare */
+test-setup:
+  brief: |
+    Setup brief.
+  code: |
+    /* Setup code */
+  description: |
+    Setup description.
+test-stop: null
+test-support: |
+  /* Support code */
+
+  ${.:/test-context-type} *instance = &${.:/test-context-instance};
+
+  static const char ident[] = "${.:/test-ident}";
+test-target: action2.c
+test-teardown:
+  brief: |
+    Teardown brief.
+  code: |
+    /* Teardown code */
+  description: |
+    Teardown description.
+text: |
+  Text.
+transition-map:
+- enabled-by: true
+  post-conditions:
+    A:
+    - if:
+        not:
+          pre-conditions:
+            B: B0
+      then: A0
+    - if:
+        and:
+        - pre-conditions:
+            A: A0
+        - pre-conditions:
+            B: B0
+      then: A1
+    - if:
+        or:
+        - pre-conditions:
+            C: C0
+        - pre-conditions:
+            A: A1
+            C: C1
+      then: A2
+    - else: A3
+    B:
+    - if:
+        pre-conditions:
+          A: A0
+      then-specified-by: B
+    - specified-by: B
+  pre-conditions:
+    A: all
+    B:
+    - B0
+    C: all
+- enabled-by: true
+  post-conditions:
+    A: A1
+    B:
+    - if:
+        post-conditions:
+          A: A2
+      then: B0
+    - if:
+        post-conditions:
+          A:
+          - A0
+          - A1
+      then: N/A
+  pre-conditions:
+    A: N/A
+    B:
+    - B1
+    C:
+      applicable: true
+- enabled-by: true
+  post-conditions: Overwritten
+  pre-conditions:
+    A:
+    - A1
+    B:
+    - B2
+    C:
+      skip:
+        condition:
+          pre-conditions:
+            A: A1
+            B: B2
+        reason: Overwritten
+- enabled-by: true
+  post-conditions: SkipReason
+  pre-conditions:
+    A:
+    - A1
+    B:
+    - B2
+    C: all
+- enabled-by: true
+  post-conditions:
+    A:
+    - if:
+      - pre-conditions:
+          A:
+          - A0
+          - A1
+      then: A2
+    - else: A0
+    B: B0
+  pre-conditions: default
+- enabled-by: FOOBAR
+  post-conditions:
+    A: A1
+    B: B0
+  pre-conditions:
+    A:
+    - A0
+    B:
+    - B0
+    C:
+    - C0
+- enabled-by: BOOM
+  post-conditions:
+    A: N/A
+    B: B0
+  pre-conditions:
+    A:
+      not-applicable:
+        pre-conditions:
+          B: B0
+    B:
+    - B0
+    C:
+    - C0
+type: requirement

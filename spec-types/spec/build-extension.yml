@@ -1,0 +1,34 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: build-type
+  spec-value: extension
+  uid: build
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      build-extension-points:
+        description: |
+          It shall be the list of UIDs associated with build extension points.
+        spec-type: list-str
+      build-spec-directories:
+        description: |
+          It shall be the list of directory paths containing the build
+          specification items of the extension.  The directory paths shall be
+          relative to the directory of the build extension item file.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a build extension.  The build items
+      provided by the extension are only loaded and accessed if the build
+      extension item is enabled.
+    mandatory-attributes: all
+spec-name: Build Extension Item Type
+spec-type: build-extension
+type: spec

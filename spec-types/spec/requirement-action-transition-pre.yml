@@ -1,0 +1,34 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes defines for each pre-condition the set of states
+      before the action for a transition in an action requirement.
+    generic-attributes:
+      description: |
+        There shall be exactly one generic attribute key for each
+        pre-condition.  The key name shall be the pre-condition name.  The
+        value of each generic attribute shall be a set of states of the
+        pre-condition.
+      key-spec-type: requirement-action-name
+      value-spec-type: requirement-action-transition-pre-states
+    mandatory-attributes: all
+  str:
+    assert:
+      eq: default
+    description: |
+      If this name is specified instead of explicit pre-condition states,
+      then the post-condition states of this entry are used to define all
+      remaining transitions of the map.
+spec-name: Action Requirement Transition Pre-Conditions
+spec-type: requirement-action-transition-pre
+type: spec

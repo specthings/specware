@@ -1,0 +1,12 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+acceptable-test-errors: []
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: verification-member
+  uid: default
+text: |
+  The test failure verification text.
+type: verification
+verification-type: test-failure

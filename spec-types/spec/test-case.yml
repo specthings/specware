@@ -1,0 +1,71 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: test-case
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      test-actions:
+        description: null
+        spec-type: test-case-action-list
+      test-brief:
+        description: |
+          It shall be the test case brief description.
+        spec-type: str
+      test-context:
+        description: null
+        spec-type: test-context-list
+      test-context-support:
+        description: |
+          If the value is present, then it shall be the test context support
+          code.  The context support code is placed at file scope before the
+          test context definition.
+        spec-type: optional-str
+      test-description:
+        description: |
+          It shall be the test case description.
+        spec-type: optional-str
+      test-header:
+        description: null
+        spec-type: test-header
+      test-includes:
+        description: |
+          It shall be a list of header files included via ``#include <...>``.
+        spec-type: list-str
+      test-local-includes:
+        description: |
+          It shall be a list of header files included via ``#include "..."``.
+        spec-type: list-str
+      test-setup:
+        description: null
+        spec-type: test-support-method
+      test-stop:
+        description: null
+        spec-type: test-support-method
+      test-support:
+        description: |
+          If the value is present, then it shall be the test case support code.
+          The support code is placed at file scope before the test case code.
+        spec-type: optional-str
+      test-target:
+        description: |
+          It shall be the path to the generated target test case source file.
+        spec-type: str
+      test-teardown:
+        description: null
+        spec-type: test-support-method
+    description: |
+      This set of attributes specifies a test case.
+    mandatory-attributes: all
+spec-name: Test Case Item Type
+spec-type: test-case
+type: spec

@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+areas:
+  scope:
+    file.txt:
+      branches:
+      - branches:
+        - 1
+        line: 2
+        md5: 0123456789abcdef0123456789abcdef
+      lines:
+      - line: 3
+        md5: 0123456789abcdef0123456789abcdef
+      functions:
+      - name
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+text: |
+  The code coverage gap verification text.
+type: verification
+verification-type: code-coverage-gap

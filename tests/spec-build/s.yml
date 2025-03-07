@@ -1,0 +1,7 @@
+build-type: start-file
+enabled-by:
+- A
+links: []
+source:
+- stu
+type: build

@@ -1,0 +1,55 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      code:
+        description: |
+          If the value is present, then it shall be the test header code.  The
+          header code is placed at file scope after the general test
+          declarations and before the test run function declaration.
+        spec-type: optional-str
+      freestanding:
+        description: |
+          The value shall be ``true``, if the test case is freestanding,
+          otherwise ``false``.  Freestanding test cases are not statically
+          registered.  Instead the generated test runner uses
+          :c:func:`T_case_begin` and :c:func:`T_case_end`.
+        spec-type: bool
+      includes:
+        description: |
+          It shall be a list of header files included by the header file via
+          ``#include <...>``.
+        spec-type: list-str
+      local-includes:
+        description: |
+          It shall be a list of header files included by the header file via
+          ``#include "..."``.
+        spec-type: list-str
+      run-params:
+        description: null
+        spec-type: test-run-param-list
+      target:
+        description: |
+          It shall be the path to the generated test header file.
+        spec-type: str
+    description: |
+      This set of attributes specifies a test header.  In case a test header is
+      specified, then instead of a test case a test run function will be
+      generated.  The test run function will be declared in the test header
+      target file and defined in the test source target file.  The test run
+      function can be used to compose test cases.  The test header file is not
+      automatically included in the test source file.  It should be added to
+      the includes or local includes of the test.
+    mandatory-attributes: all
+  none: null
+spec-name: Test Header
+spec-type: test-header
+type: spec

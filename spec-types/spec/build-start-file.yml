@@ -1,0 +1,55 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: build-type
+  spec-value: start-file
+  uid: build
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  asflags: []
+  build-type: start-file
+  copyrights:
+  - Copyright (C) 2020 embedded brains GmbH & Co. KG
+  cppflags: []
+  enabled-by: true
+  includes: []
+  install-path: ${BSP_LIBDIR}
+  links: []
+  source:
+  - bsps/sparc/shared/start/start.S
+  target: start.o
+  type: build
+spec-info:
+  dict:
+    attributes:
+      asflags:
+        description: null
+        spec-type: build-asflags
+      cppflags:
+        description: null
+        spec-type: build-cppflags
+      includes:
+        description: null
+        spec-type: build-includes
+      install-path:
+        description: null
+        spec-type: build-install-path
+      source:
+        description: null
+        spec-type: build-source-list
+      target:
+        description: null
+        spec-type: build-target
+    description: |
+      This set of attributes specifies a start file to build.  A start file is
+      used to link an executable.
+    mandatory-attributes: all
+spec-name: Build Start File Item Type
+spec-type: build-start-file
+type: spec

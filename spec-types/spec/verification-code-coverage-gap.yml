@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: verification-type
+  spec-value: code-coverage-gap
+  uid: verification
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      areas:
+        description: |
+          It shall be the description of applicable code areas.
+        spec-type: verification-code-coverage-scope-by-name
+    description: null
+    mandatory-attributes: all
+spec-name: Code Coverage Gap Verification
+spec-type: verification-code-coverage-gap
+type: spec

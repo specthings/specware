@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: Function brief description with very long return type.
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+definition:
+  default:
+    attributes: null
+    body: null
+    params: []
+    return: VeryLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongType
+  variants:
+  - definition:
+      attributes: null
+      body: null
+      params: []
+      return: NotSoVeryLongType
+    enabled-by: true
+description: |
+  I am defined in ${h4:/path}.
+enabled-by: true
+index-entries: []
+interface-type: function
+links:
+- role: interface-placement
+  uid: h4
+- role: interface-ingroup
+  uid: gb
+name: VeryLongTypeFunction
+notes: |
+  See also ${func5:/name}.
+params: []
+return:
+  return: This function returns an object with a very long type.
+  return-values: []
+type: interface

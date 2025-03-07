@@ -1,0 +1,33 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  none: null
+  dict:
+    attributes:
+      brief:
+        description: null
+        spec-type: interface-brief
+      description:
+        description: null
+        spec-type: interface-description
+      kind:
+        description: |
+          It shall be the interface compound member kind.
+        spec-type: str
+      name:
+        description: |
+          It shall be the interface compound member name.
+        spec-type: str
+    description: |
+      This set of attributes specifies an interface compound member definition.
+    mandatory-attributes: all
+spec-name: Interface Compound Member Definition
+spec-type: interface-member-definition
+type: spec

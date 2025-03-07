@@ -1,0 +1,12 @@
+build-type: test-program
+enabled-by: true
+links:
+- role: build-dependency
+  uid: obj
+source:
+- tc34.c
+- ts.c
+- action2.c
+- action3.c
+- other.c
+type: build

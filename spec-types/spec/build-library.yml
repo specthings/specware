@@ -1,0 +1,71 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: build-type
+  spec-value: library
+  uid: build
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  build-type: library
+  cflags:
+  - -Wno-pointer-sign
+  copyrights:
+  - Copyright (C) 2020 embedded brains GmbH & Co. KG
+  cppflags: []
+  cxxflags: []
+  enabled-by: true
+  includes:
+  - cpukit/libfs/src/jffs2/include
+  install:
+  - destination: ${BSP_INCLUDEDIR}/rtems
+    source:
+    - cpukit/include/rtems/jffs2.h
+  install-path: ${BSP_LIBDIR}
+  links: []
+  source:
+  - cpukit/libfs/src/jffs2/src/build.c
+  target: jffs2
+  type: build
+spec-info:
+  dict:
+    attributes:
+      cflags:
+        description: null
+        spec-type: build-cflags
+      cppflags:
+        description: null
+        spec-type: build-cppflags
+      cxxflags:
+        description: null
+        spec-type: build-cxxflags
+      includes:
+        description: null
+        spec-type: build-includes
+      install:
+        description: null
+        spec-type: build-install-list
+      install-path:
+        description: null
+        spec-type: build-install-path
+      source:
+        description: null
+        spec-type: build-source-list
+      target:
+        description: |
+          It shall be the name of the static library, e.g. ``z`` for
+          ``libz.a``.
+        spec-type: build-target
+    description: |
+      This set of attributes specifies a static library.  Library items may use
+      additional objects provided by ${build-objects:/spec-name} items through
+      the build dependency links of the item.
+    mandatory-attributes: all
+spec-name: Build Library Item Type
+spec-type: build-library
+type: spec

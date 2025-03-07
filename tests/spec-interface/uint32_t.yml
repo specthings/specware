@@ -1,0 +1,15 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: typedef
+links:
+- role: other
+  uid: other3
+- role: interface-placement
+  uid: stdint
+name: uint32_t
+params: []
+return: null
+type: interface

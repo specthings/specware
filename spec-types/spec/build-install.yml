@@ -1,0 +1,41 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      destination:
+        description: |
+          It shall be the install destination directory.
+        spec-type: str
+      source:
+        description: |
+          If the ``glob`` attribute is present, then it shall be the source
+          base directory used to glob the source files for installation in the
+          destination directory, otherwise it shall be the list of source files
+          to be installed in the destination directory.  The path to the base
+          source directory or a source file shall be relative to the directory
+          of the :file:`wscript`.
+        spec-type: build-install-source
+      glob:
+        description: |
+          If the attribute is present, it shall be the Python glob pattern
+          defining the source files installed in the destination directory.
+          The pattern shall be relative to the base source directory specified
+          by the ``source`` attribute.  The relative path is preserved in the
+          installation destination.
+        spec-type: str
+    description: |
+      This set of attributes specifies files installed by a build item.
+    mandatory-attributes:
+    - destination
+    - source
+spec-name: Build Install Directive
+spec-type: build-install
+type: spec

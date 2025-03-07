@@ -1,0 +1,9 @@
+build-type: objects
+enabled-by: true
+install:
+- source:
+  - o2i
+links: []
+source:
+- o2s
+type: build

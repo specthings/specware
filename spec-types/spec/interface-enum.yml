@@ -1,0 +1,38 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: enum
+  uid: interface
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      brief:
+        description: null
+        spec-type: interface-brief
+      definition-kind:
+        description: null
+        spec-type: interface-enum-definition-kind
+      description:
+        description: null
+        spec-type: interface-description
+      name:
+        description: |
+          It shall be the name of the enum.
+        spec-type: str
+      notes:
+        description: null
+        spec-type: interface-description
+    description: |
+      This set of attributes specifies an enum.
+    mandatory-attributes: all
+spec-name: Interface Enum Item Type
+spec-type: interface-enum
+type: spec

@@ -1,0 +1,6 @@
+build-type: test-program
+enabled-by: true
+links: []
+source:
+- fet.c
+type: build

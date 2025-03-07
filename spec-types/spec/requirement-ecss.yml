@@ -1,0 +1,46 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: non-functional-type
+  spec-value: ecss
+  uid: requirement-non-functional
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      aim:
+        description: |
+          If the value is present, it shall be the aim.
+        spec-type: optional-str
+      bullet:
+        description: |
+          It shall be the requirement clause bullet.
+        spec-type: str
+      expected-output:
+        description: |
+          If the value is present, it shall be the expected output.
+        spec-type: optional-str
+      name:
+        description: |
+          It shall be the requirement subject.
+        spec-type: str
+      notes:
+        description: |
+          It shall be the list of notes.
+        spec-type: list-str
+      section:
+        description: |
+          It shall be the requirement section number.
+        spec-type: str
+    description: |
+      This set of attributes specifies an ${/glossary/ecss:/term} requirement.
+    mandatory-attributes: all
+spec-name: ECSS Requirement Item Type
+spec-type: requirement-ecss
+type: spec

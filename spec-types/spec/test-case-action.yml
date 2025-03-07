@@ -1,0 +1,35 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      action-brief:
+        description: |
+          It shall be the test case action brief description.
+        spec-type: optional-str
+      action-code:
+        description: |
+          It shall be the test case action code.
+        spec-type: str
+      checks:
+        description: null
+        spec-type: test-case-check-list
+      links:
+        description: |
+          The links should use the ${requirement-validation-role:/spec-name}
+          for validation tests and the ${test-unit-role:/spec-name} for unit
+          tests.
+        spec-type: links
+    description: |
+      This set of attributes specifies a test case action.
+    mandatory-attributes: all
+spec-name: Test Case Action
+spec-type: test-case-action
+type: spec

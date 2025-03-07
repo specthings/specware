@@ -1,0 +1,16 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2021 embedded brains GmbH & Co. KG
+enabled-by: true
+identifier: RTEMSImplClassicSignal3
+links:
+- role: requirement-refinement
+  uid: group-2
+non-functional-type: design-group
+rationale: null
+references: []
+requirement-type: non-functional
+text: |
+  The software architecture shall have a component containing the Signal
+  Manager implementation.
+type: requirement

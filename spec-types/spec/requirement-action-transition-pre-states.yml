@@ -1,0 +1,52 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      applicable:
+        description: |
+          If the state is not already defined as not applicable by the
+          ``not-applicable`` attribute, then the expression defines if a
+          pre-condition state is applicable for a transition.  If the
+          expression evaluates to true, then the state is applicable.
+        spec-type: requirement-action-pre-states-exp
+      not-applicable:
+        description: |
+          This expression defines if a pre-condition state is not applicable
+          for a transition.  If the expression evaluates to true, then the
+          state is not applicable.
+        spec-type: requirement-action-pre-states-exp
+      skip:
+        description: |
+          This attribute defines if a transition shall be skipped.
+        spec-type: requirement-action-pre-states-skip
+    description: |
+      This set of attributes represents all states of the pre-condition in the
+      transition descriptor through pre-condition state expressions.  If none
+      of the expressions evaluate to true, then the state is defined as not
+      applicable in the transition.
+    mandatory-attributes: none
+  list:
+    description: |
+      The list defines the set of states of the pre-condition in the
+      transition.
+    spec-type: requirement-action-name
+  str:
+    assert:
+      in:
+      - all
+      - N/A
+    description: |
+      The value ``all`` represents all states of the pre-condition in the
+      transition descriptor.  The value ``N/A`` marks the pre-condition as not
+      applicable in the transition descriptor.
+spec-name: Action Requirement Transition Pre-Condition State Set
+spec-type: requirement-action-transition-pre-states
+type: spec

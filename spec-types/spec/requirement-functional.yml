@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: requirement-type
+  spec-value: functional
+  uid: requirement
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      functional-type:
+        description: |
+          It shall be the functional type of the requirement.
+        spec-type: name
+    description: |
+      This set of attributes specifies a functional requirement.
+    mandatory-attributes: all
+spec-name: Functional Requirement Item Type
+spec-type: requirement-functional
+type: spec

@@ -1,0 +1,97 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: build-type
+  spec-value: ada-test-program
+  uid: build
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  ada-main: testsuites/ada/samples/hello/hello.adb
+  ada-object-directory: testsuites/ada/samples/hello
+  adaflags: []
+  adaincludes:
+  - cpukit/include/adainclude
+  - testsuites/ada/support
+  build-type: ada-test-program
+  cflags: []
+  copyrights:
+  - Copyright (C) 2020 embedded brains GmbH & Co. KG
+  cppflags: []
+  cxxflags: []
+  enabled-by: true
+  includes: []
+  ldflags: []
+  links: []
+  source:
+  - testsuites/ada/samples/hello/init.c
+  stlib: []
+  target: testsuites/ada/ada_hello.exe
+  type: build
+  use-after: []
+  use-before: []
+spec-info:
+  dict:
+    attributes:
+      ada-main:
+        description: |
+          It shall be the path to the Ada main body file.
+        spec-type: str
+      ada-object-directory:
+        description: |
+          It shall be the path to the Ada object directory (``-D`` option value for ``gnatmake``).
+        spec-type: str
+      adaflags:
+        description: |
+          It shall be a list of options for the Ada compiler.
+        spec-type: list-str
+      adaincludes:
+        description: |
+          It shall be a list of Ada include paths.
+        spec-type: list-str
+      cflags:
+        description: null
+        spec-type: build-cflags
+      cppflags:
+        description: null
+        spec-type: build-cppflags
+      cxxflags:
+        description: null
+        spec-type: build-cxxflags
+      includes:
+        description: null
+        spec-type: build-includes
+      ldflags:
+        description: null
+        spec-type: build-ldflags
+      source:
+        description: null
+        spec-type: build-source-list
+      stlib:
+        description: null
+        spec-type: build-stlib-list
+      target:
+        description: null
+        spec-type: build-target
+      use-after:
+        description: null
+        spec-type: build-use-after-list
+      use-before:
+        description: null
+        spec-type: build-use-before-list
+    description: |
+      This set of attributes specifies an Ada test program executable to build.
+      Test programs may use additional objects provided by
+      ${build-objects:/spec-name} items.  Test programs have an implicit
+      ``enabled-by`` attribute value which is controlled by the option action
+      :ref:`set-test-state <SpecTypeBuildOptionItemType>`.  If the test state
+      is set to ``exclude``, then the test program is not built.
+    mandatory-attributes: all
+spec-name: Build Ada Test Program Item Type
+spec-type: build-ada-test-program
+type: spec

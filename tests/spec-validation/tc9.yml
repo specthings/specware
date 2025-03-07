@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+test-actions:
+- action-brief: |
+    Test case 9 action 0 description.
+  action-code: |
+    /* Test case 9 action 0 code */
+  checks: []
+  links: []
+test-brief: Test case 9 brief description.
+test-context:
+- brief: |
+    Context 9 member brief.
+  description: |
+    Context 9 member description.
+  member: |
+    int member
+test-context-support: null
+test-description: Test case 9 description.
+test-header: null
+test-includes: []
+test-local-includes: []
+test-setup: null
+test-stop: null
+test-support: null
+test-target: tc34.c
+test-teardown: null
+type: test-case

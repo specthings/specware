@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: verification-type
+  spec-value: test-failure
+  uid: verification
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      acceptable-test-errors:
+        description: |
+          It shall be the list of acceptable test errors.
+        spec-type: verification-acceptable-test-error-list
+    description: null
+    mandatory-attributes: all
+spec-name: Test Failure Verification
+spec-type: verification-test-failure
+type: spec

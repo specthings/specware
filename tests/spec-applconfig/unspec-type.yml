@@ -1,0 +1,11 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+interface-type: unspecified-typedef
+links: []
+name: unspec_type
+references:
+- identifier: boom
+  type: function
+type: interface

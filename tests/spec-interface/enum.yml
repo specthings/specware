@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: Enum brief description.
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+definition-kind: typedef-only
+description: Enum description.
+enabled-by: true
+index-entries: []
+interface-type: enum
+links:
+- role: interface-placement
+  uid: h
+- role: interface-ingroup
+  uid: gb
+- role: interface-enumerator
+  uid: enumerator-0
+- role: interface-enumerator
+  uid: enumerator-1
+- role: interface-enumerator
+  uid: enumerator-2
+name: Enum
+notes: null
+type: interface

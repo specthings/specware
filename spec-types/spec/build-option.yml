@@ -1,0 +1,77 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: build-type
+  spec-value: option
+  uid: build
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  actions:
+  - get-integer: null
+  - define: null
+  build-type: option
+  copyrights:
+  - Copyright (C) 2020, 2022 embedded brains GmbH & Co. KG
+  default:
+  - enabled-by:
+    - bsps/powerpc/motorola_powerpc
+    - m68k/m5484FireEngine
+    - powerpc/hsc_cm01
+    value: 9600
+  - enabled-by: m68k/COBRA5475
+    value: 19200
+  - enabled-by: true
+    value: 115200
+  description: |
+    Default baud for console and other serial devices.
+  enabled-by: true
+  format: '{}'
+  links: []
+  name: BSP_CONSOLE_BAUD
+  type: build
+spec-info:
+  dict:
+    attributes:
+      actions:
+        description: |
+          Each action operates on the *action value* handed over by a previous
+          action and action-specific attribute values.  The actions pass the
+          processed action value to the next action in the list.  The first
+          action starts with an action value of ``None``.  The actions are
+          carried out during the configure command execution.
+        spec-type: build-action-list
+      default:
+        description: |
+          It shall be the list of default values of the option.  When a default
+          value is needed, the first value on the list which is enabled
+          according to the enabled set is choosen.  If no value is enabled,
+          then the default value is ``null``.
+        spec-type: build-default-value-list
+      description:
+        description: |
+          It shall be the description of the option.
+        spec-type: optional-str
+      format:
+        description: |
+          It shall be a `Python format string
+          <https://docs.python.org/3/library/string.html#formatstrings>`_, for
+          example ``'{}'`` or ``'{:#010x}'``.
+        spec-type: optional-str
+      name:
+        description: null
+        spec-type: build-option-name
+    description: |
+      This set of attributes specifies a build option.
+    mandatory-attributes:
+    - actions
+    - default
+    - description
+spec-name: Build Option Item Type
+spec-type: build-option
+type: spec

@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+functional-type: fatal-error
+links:
+- role: requirement-refinement
+  uid: group
+requirement-type: functional
+test-brief: The FET brief description.
+test-case-code: |
+  /* FET - ${.:/test-suite-name} */
+test-description: The FET description.
+test-includes:
+- fet.h
+test-local-includes:
+- fet-local.h
+test-support:
+  /* FET support */
+test-target: fet.c
+type: requirement

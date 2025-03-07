@@ -1,0 +1,66 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links: []
+test-actions:
+- action-brief: |
+    Test case 2 action 0 description.
+  action-code: |
+    /* Test case 2 action 0 code */
+  checks:
+  - brief: |
+      Test case 2 action 0 check 0 description.
+    code: |
+      /* Test case 2 action 0 check 0 code */
+    links: []
+  - brief: |
+      Test case 2 action 0 check 1 description.
+    code: |
+      /* Test case 2 action 0 check 1 code */
+    links: []
+  links: []
+- action-brief: |
+    Test case 2 action 1 description.
+  action-code: |
+    /* Test case 2 action 1 code with ctx */
+  checks: []
+  links: []
+- action-brief: |
+    Test case 2 action 2 description.
+  action-code: |
+    /* Test case 2 action 2 code */
+  checks:
+  - brief: |
+      Test case 2 action 2 check 0 description.
+    code: |
+      /* Test case 2 action 2 check 0 code with ctx */
+    links: []
+  links: []
+test-brief: Test case 2 brief description.
+test-context:
+- brief: |
+    Context member brief.
+  description: |
+    Context member description.
+  member: |
+    int member
+test-context-support: null
+test-description: Test case 2 description.
+test-header: null
+test-includes:
+- b.h
+test-local-includes:
+- y.h
+test-setup:
+  brief: |
+    Setup brief.
+  code: |
+    /* Setup code */
+  description: |
+    Setup description.
+test-stop: null
+test-support: null
+test-target: tc12.c
+test-teardown: null
+type: test-case

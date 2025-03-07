@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: build-type
+  spec-value: mkimage
+  uid: build
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      content:
+        description: |
+          It shall be the content of the configuration file. A $${VARIABLE}
+          substitution is performed during the configure command execution
+          using the variables of the configuration set.  Use $$$$ for a plain
+          $$ character. To have all variables from sibling items available for
+          substitution it is recommended to link them in the proper order.
+        spec-type: str
+    description: |
+      This set of attributes specifies a make image script placed in the build
+      tree.  The script is generated during the configure command execution and
+      is placed in the build tree.  It is installed to a default location.
+    mandatory-attributes: all
+spec-name: Build Make Image Item Type
+spec-type: build-mkimage
+type: spec

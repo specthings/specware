@@ -1,0 +1,36 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: interface-type
+  spec-value: appl-config-group
+  uid: interface
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      description:
+        description: |
+          It shall be the description of the application configuration group.
+        spec-type: str
+      name:
+        description: |
+          It shall be human readable name of the application configuration
+          group.
+        spec-type: str
+      text:
+        description: |
+          It shall state the requirement for the application configuration
+          group.
+        spec-type: requirement-text
+    description: |
+      This set of attributes specifies an application configuration group.
+    mandatory-attributes: all
+spec-name: Application Configuration Group Item Type
+spec-type: appl-config-group
+type: spec

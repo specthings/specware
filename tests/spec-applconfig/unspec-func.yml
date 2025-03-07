@@ -1,0 +1,14 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2021 embedded brains GmbH & Co. KG
+enabled-by: true
+interface-type: unspecified-function
+links: []
+name: unspec_func
+references:
+- identifier: SphinxRefUnspecFunc
+  name: c-user
+  type: document
+- identifier: unspec-func.html
+  type: url
+type: interface

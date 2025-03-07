@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: statement-of-compliance
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      text:
+        description: |
+          It shall provide the statement of compliance with respect to a
+          requirement.
+        spec-type: str
+    description: |
+      This set of attributes provides a statement of compliance.
+    mandatory-attributes: all
+spec-name: Statement of Compliance
+spec-type: statement-of-compliance
+type: spec

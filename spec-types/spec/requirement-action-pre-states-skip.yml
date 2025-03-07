@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2025 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      condition:
+        description: |
+          This expression defines if a transition shall be skipped.
+        spec-type: requirement-action-pre-states-exp
+      reason:
+        description: |
+          It shall be the name of a skip reason.
+        spec-type: str
+    description: |
+      This set of attributes defines the condition and reason why a transition
+      shall be skipped.
+    mandatory-attributes: all
+spec-name: Action Requirement Pre-Condition States Skip Definition
+spec-type: requirement-action-pre-states-skip
+type: spec

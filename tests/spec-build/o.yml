@@ -1,0 +1,13 @@
+build-type: objects
+enabled-by: true
+install:
+- source:
+  - jkl
+- source: a/b
+  glob: c/**/*.h
+links:
+- role: build-dependency
+  uid: s
+source:
+- mno
+type: build

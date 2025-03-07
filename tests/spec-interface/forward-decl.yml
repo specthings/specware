@@ -1,0 +1,12 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: forward-declaration
+links:
+- role: interface-placement
+  uid: h
+- role: interface-target
+  uid: s
+type: interface

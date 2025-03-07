@@ -1,0 +1,70 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: This header file defines X.
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by:
+- and:
+  - RTEMS_SMP
+  - blub
+- foobar
+- not:
+    and:
+    - foo
+    - bar
+index-entries: []
+interface-type: header-file
+links:
+- enabled-by:
+  - and:
+    - RTEMS_SMP
+    - blub
+  - foobar
+  - not:
+      and:
+      - foo
+      - bar
+  role: interface-include
+  uid: h2
+- enabled-by: []
+  role: interface-include
+  uid: h4
+- enabled-by: RTEMS_SMP
+  role: interface-include
+  uid: h4
+- enabled-by: ASM
+  role: interface-include
+  uid: h4
+- enabled-by: []
+  role: interface-include
+  uid: h4
+- role: other
+  uid: h4
+- enabled-by: true
+  role: interface-include
+  uid: h5
+- enabled-by: false
+  role: interface-include
+  uid: h6
+- enabled-by: ASM
+  role: interface-include
+  uid: h7
+- enabled-by: ASM
+  role: interface-include
+  uid: h8
+- enabled-by:
+  - not: ASM
+  - RTEMS_SMP
+  - blub
+  role: interface-include
+  uid: h9
+- role: interface-placement
+  uid: domain-abc
+- role: interface-ingroup
+  uid: ga
+- role: interface-ingroup
+  uid: gc
+- role: interface-ingroup
+  uid: gb
+path: h.h
+prefix: include
+type: interface

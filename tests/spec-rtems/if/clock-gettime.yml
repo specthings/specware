@@ -1,0 +1,16 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2024 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: unspecified-function
+links:
+- role: interface-placement
+  uid: header-confdefs
+- role: interface-ingroup
+  uid: group
+name: clock_gettime
+references:
+- identifier: https://pubs.opengroup.org/onlinepubs/9799919799/functions/clock_gettime.html
+  type: url
+type: interface

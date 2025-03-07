@@ -1,0 +1,11 @@
+build-type: test-program
+enabled-by: true
+links: []
+source:
+- ts.c
+- tc.c
+- tc-b.c
+- tc-clock-gettime.c
+- tc-clock-nanosleep.c
+- tc-barrier-performance.c
+type: build

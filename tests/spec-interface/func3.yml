@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: null
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+definition:
+  default: null
+  variants:
+  - definition:
+      attributes: null
+      body: null
+      params: []
+      return: void
+    enabled-by: true
+description: null
+enabled-by: true
+index-entries: []
+interface-type: function
+links:
+- role: interface-placement
+  uid: h4
+- role: interface-ingroup
+  uid: gb
+name: VoidFunction
+notes: null
+params: []
+return: null
+type: interface

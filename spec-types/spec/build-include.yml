@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    description: |
+      It shall be a path to header files.  The path is used by the C
+      preprocessor to search for header files.  It succeeds the includes
+      presented to the item by the build item context.  For an
+      ${build-group:/spec-name} item the includes are visible to all items
+      referenced by the group item.  For ${build-bsp:/spec-name},
+      ${build-objects:/spec-name}, ${build-library:/spec-name},
+      ${build-start-file:/spec-name}, and ${build-test-program:/spec-name}
+      items the includes are only visible to the sources specified by the item
+      itself and they do not propagate to referenced items.
+spec-name: Build Include Path
+spec-type: build-include
+type: spec

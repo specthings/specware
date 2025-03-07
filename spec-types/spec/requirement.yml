@@ -1,0 +1,50 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: requirement
+  uid: root
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  copyrights:
+  - Copyright (C) 2020 embedded brains GmbH & Co. KG
+  enabled-by: true
+  functional-type: capability
+  links: []
+  rationale: |
+    It keeps you busy.
+  requirement-type: functional
+  text: |
+    The system shall do crazy things.
+  type: requirement
+spec-info:
+  dict:
+    attributes:
+      rationale:
+        description: |
+          If the value is present, then it shall state the rationale or
+          justification of the requirement.
+        spec-type: optional-str
+      references:
+        description: null
+        spec-type: external-reference-list
+      requirement-type:
+        description: |
+          It shall be the requirement item type.
+        spec-type: name
+      text:
+        description: |
+          It shall state the requirement.
+        spec-type: requirement-text
+    description: |
+      This set of attributes specifies a requirement.
+    mandatory-attributes: all
+spec-name: Requirement Item Type
+spec-type: requirement
+type: spec

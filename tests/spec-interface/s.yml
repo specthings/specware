@@ -1,0 +1,60 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: null
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+definition:
+- default:
+    brief: Brief union description.
+    definition:
+    - default:
+        brief: Brief member description.
+        definition: ${uint32_t:/name} ${.:name}
+        description: Member description.
+        kind: member
+        name: some_member
+      variants: []
+    - default:
+        brief: Brief struct description.
+        definition:
+        - default:
+            brief: Brief member 2 description.
+            definition: ${uint32_t:/name} ${.:name}
+            description: Member 2 description.
+            kind: member
+            name: some_member_2
+          variants: []
+        - default:
+            brief: Brief member 3 description.
+            definition: ${enum:/name} ${.:name}
+            description: Member 3 description.
+            kind: member
+            name: some_member_3
+          variants: []
+        description: struct description.
+        kind: struct
+        name: some_struct
+      variants: []
+    description: Union description.
+    kind: union
+    name: some_union
+  variants: []
+- default:
+    brief: Brief member 4 description.
+    definition: ${enum:/name} ${.:name}
+    description: Member 4 description.
+    kind: member
+    name: some_member_4
+  variants: []
+definition-kind: struct-only
+description: null
+enabled-by: true
+index-entries: []
+interface-type: struct
+links:
+- role: interface-placement
+  uid: h
+- role: interface-ingroup
+  uid: gc
+name: Struct
+notes: null
+type: interface

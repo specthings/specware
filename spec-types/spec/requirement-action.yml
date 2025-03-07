@@ -1,0 +1,242 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: functional-type
+  spec-value: action
+  uid: requirement-functional
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  copyrights:
+  - Copyright (C) 2020 embedded brains GmbH & Co. KG
+  enabled-by: true
+  functional-type: action
+  links: []
+  post-conditions:
+  - name: Status
+    states:
+    - name: Success
+      test-code: |
+        /* Check that the status is SUCCESS */
+      text: |
+        The status shall be SUCCESS.
+    - name: Error
+      test-code: |
+        /* Check that the status is ERROR */
+      text: |
+        The status shall be ERROR.
+    test-epilogue: null
+    test-prologue: null
+  - name: Data
+    states:
+    - name: Unchanged
+      test-code: |
+        /* Check that the data is unchanged */
+      text: |
+        The data shall be unchanged by the action.
+    - name: Red
+      test-code: |
+        /* Check that the data is red */
+      text: |
+        The data shall be red.
+    - name: Green
+      test-code: |
+        /* Check that the data is green */
+      text: |
+        The data shall be green.
+    test-epilogue: null
+    test-prologue: null
+  pre-conditions:
+  - name: Data
+    states:
+    - name: NullPtr
+      test-code: |
+        /* Set data pointer to NULL */
+      text: |
+        The data pointer shall be NULL.
+    - name: Valid
+      test-code: |
+        /* Set data pointer to reference a valid data buffer */
+      text: |
+        The data pointer shall reference a valid data buffer.
+    test-epilogue: null
+    test-prologue: null
+  - name: Option
+    states:
+    - name: Red
+      test-code: |
+        /* Set option to RED */
+      text: |
+        The option shall be RED.
+    - name: Green
+      test-code: |
+        /* Set option to GREEN */
+      text: |
+        The option shall be GREEN.
+    test-epilogue: null
+    test-prologue: null
+  requirement-type: functional
+  skip-reasons: {}
+  test-action: |
+    /* Call the function of the action */
+  test-brief: null
+  test-cleanup: null
+  test-context:
+  - brief: null
+    description: null
+    member: void *data
+  - brief: null
+    description: null
+    member: option_type option
+  test-context-support: null
+  test-description: null
+  test-header: null
+  test-includes: []
+  test-local-includes: []
+  test-prepare: null
+  test-setup: null
+  test-stop: null
+  test-support: null
+  test-target: tc-red-green-data.c
+  test-teardown: null
+  transition-map:
+  - enabled-by: true
+    post-conditions:
+      Status: Error
+      Data: Unchanged
+    pre-conditions:
+      Data: NullPtr
+      Option: all
+  - enabled-by: true
+    post-conditions:
+      Status: Success
+      Data: Red
+    pre-conditions:
+      Data: Valid
+      Option: Red
+  - enabled-by: true
+    post-conditions:
+      Status: Success
+      Data: Green
+    pre-conditions:
+      Data: Valid
+      Option: Green
+  rationale: null
+  references: []
+  text: |
+    ${.:/text-template}
+  type: requirement
+spec-info:
+  dict:
+    attributes:
+      post-conditions:
+        description: null
+        spec-type: requirement-action-condition-list
+      pre-conditions:
+        description: null
+        spec-type: requirement-action-condition-list
+      skip-reasons:
+        description: null
+        spec-type: requirement-action-skip-reasons
+      test-action:
+        description: |
+          It shall be the test action code.
+        spec-type: str
+      test-brief:
+        description: |
+          If the value is present, then it shall be the test case brief
+          description.
+        spec-type: optional-str
+      test-cleanup:
+        description: |
+          If the value is present, then it shall be the test cleanup code.  The
+          code is placed in the test action loop body after the test
+          post-condition checks.
+        spec-type: optional-str
+      test-context:
+        description: null
+        spec-type: test-context-list
+      test-context-support:
+        description: |
+          If the value is present, then it shall be the test context support
+          code.  The context support code is placed at file scope before the
+          test context definition.
+        spec-type: optional-str
+      test-description:
+        description: |
+          If the value is present, then it shall be the test case description.
+        spec-type: optional-str
+      test-header:
+        description: null
+        spec-type: test-header
+      test-includes:
+        description: |
+          It shall be a list of header files included via ``#include <...>``.
+        spec-type: list-str
+      test-local-includes:
+        description: |
+          It shall be a list of header files included via ``#include "..."``.
+        spec-type: list-str
+      test-prepare:
+        description: |
+          If the value is present, then it shall be the early test preparation
+          code.  The code is placed in the test action loop body before the
+          test pre-condition preparations.
+        spec-type: optional-str
+      test-setup:
+        description: null
+        spec-type: test-support-method
+      test-stop:
+        description: null
+        spec-type: test-support-method
+      test-support:
+        description: |
+          If the value is present, then it shall be the test case support code.
+          The support code is placed at file scope before the test case code.
+        spec-type: optional-str
+      test-target:
+        description: |
+          It shall be the path to the generated test case source file.
+        spec-type: str
+      test-teardown:
+        description: null
+        spec-type: test-support-method
+      transition-map:
+        description: null
+        spec-type: requirement-action-transition-list
+    description: |
+      This set of attributes specifies functional requirements and
+      corresponding validation test code.  The functional requirements of an
+      action are specified.  An action performs a step in a finite state
+      machine.  An action is implemented through a function or a macro.  The
+      action is performed through a call of the function or an execution of the
+      code of a macro expansion by an actor.  The actor is for example a task
+      or an interrupt service routine.
+
+      For action requirements which specify the function of an interface, there
+      shall be exactly one link with the ${interface-function-role:/spec-name}
+      to the interface of the action.
+
+      The action requirements are specified by
+
+      * a list of pre-conditions, each with a set of states,
+
+      * a list of post-conditions, each with a set of states,
+
+      * the transition of pre-condition states to post-condition states through
+        the action.
+
+      Along with the requirements, the test code to generate a validation test
+      is specified.  For an action requirement it is verified that all
+      variations of pre-condition states have a set of post-condition states
+      specified in the transition map.  All transitions are covered by the
+      generated test code.
+    mandatory-attributes: all
+spec-name: Action Requirement Item Type
+spec-type: requirement-action
+type: spec

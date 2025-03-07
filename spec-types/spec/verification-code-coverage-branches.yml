@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      branches:
+        description: |
+          It shall be the list of applicable branches.  Branch numbers start
+          with the number zero.  Since GCC 14, the JSON gcov output is used by
+          gcovr coverage aggregation and reporting tool.  In this case,
+          branches are identified by a ``source_block_id`` and
+          ``destination_block_id`` pair.  The ``source_block_id`` is the same
+          for all branches of a line.  In GCC 13 or earlier, a ``branchno`` is
+          used to identify branches.  This means that the branch identification
+          depends on the target GCC version.
+        spec-type: list-int
+      line:
+        description: |
+          It shall be the source code line number of the branches.  Line
+          numbers start with the number one.
+        spec-type: int
+      md5:
+        description: |
+          It shall be the MD5 digest of the source code line.
+        spec-type: md5-hex
+    description: |
+      For a code coverage gap verification, this set of attributes specifies
+      applicable branches of a file.
+    mandatory-attributes: all
+spec-name: Code Coverage Branches
+spec-type: verification-code-coverage-branches
+type: spec
