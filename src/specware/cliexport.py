@@ -4,7 +4,7 @@ Provides a command line interface to export the specification to source and
 documentation files.
 """
 
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,10 +32,10 @@ import contextlib
 import os
 import sys
 
-from specitems import (DocumentGlossaryConfig, GlossaryConfig, ItemCache,
-                       ItemCacheConfig, MarkdownContent, MarkdownMapper,
-                       SpecDocumentConfig, SphinxContent, SphinxMapper,
-                       augment_glossary_terms, create_config,
+from specitems import (Content, DocumentGlossaryConfig, GlossaryConfig,
+                       ItemCache, ItemCacheConfig, MarkdownContent,
+                       MarkdownMapper, SpecDocumentConfig, SphinxContent,
+                       SphinxMapper, augment_glossary_terms, create_config,
                        generate_glossary, generate_specification_documentation,
                        item_is_enabled)
 
@@ -101,6 +101,9 @@ def cliexport(argv: list[str] = sys.argv):
     """ Export the specification to source and documentation files. """
     args = _parse_args(argv)
     config, working_directory = load_specware_config(args.config_file)
+    Content.AUTOMATICALLY_GENERATED_WARNING = config.get(
+        "automatically-generated-warning",
+        Content.AUTOMATICALLY_GENERATED_WARNING)
     with contextlib.chdir(working_directory):
         item_cache = ItemCache(create_config(config["spec"], ItemCacheConfig),
                                type_provider=SpecWareTypeProvider({}),
