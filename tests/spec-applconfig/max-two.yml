@@ -4,6 +4,9 @@ copyrights:
 enabled-by: true
 links: []
 text: |
-  The value of the application configuration option shall be less than or
-  equal to two.
+  The value of the application configuration option shall be
+
+  - less than, or
+
+  - equal to two.
 type: constraint

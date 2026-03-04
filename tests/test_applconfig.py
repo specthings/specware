@@ -410,7 +410,11 @@ The following constraints apply to this configuration option:
 
 - The value of the configuration option shall be greater than or equal to zero.
 
-- The value of the configuration option shall be less than or equal to two.
+- The value of the configuration option shall be
+
+- - less than, or
+
+- - equal to two.
 
 .. Generated from spec:/m
 
@@ -889,7 +893,11 @@ The following constraints apply to this configuration option:
 
 - The value of the configuration option shall be greater than or equal to zero.
 
-- The value of the configuration option shall be less than or equal to two.
+- The value of the configuration option shall be
+
+- - less than, or
+
+- - equal to two.
 
 % Generated from spec:/m
 
@@ -1175,7 +1183,11 @@ description m
  * - The value of the configuration option shall be greater than or equal to
  *   zero.
  *
- * - The value of the configuration option shall be less than or equal to two.
+ * - The value of the configuration option shall be
+ *
+ * - - less than, or
+ *
+ * - - equal to two.
  * @endparblock
  */
 #define l
