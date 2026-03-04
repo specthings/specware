@@ -274,9 +274,9 @@ class CContent(Content):
     def close_comment_block(self) -> None:
         """ Close a comment block. """
         self.pop_indent()
-        if self.lines[-1].lstrip().startswith("/*"):
+        if self._lines[-1].lstrip().startswith("/*"):
             # Discard empty comment blocks
-            self.lines = self.lines[:-2]
+            self._lines = self._lines[:-2]
         else:
             self.append(" */")
             self.gap = True
@@ -550,11 +550,11 @@ class CContent(Content):
         if content:
             self.add(f"@par {name}")
             self.gap = False
-            last = len(self.lines)
+            last = len(self._lines)
             self.wrap(content)
-            if self._empty_line_indent in self.lines[last:]:
-                self.lines.insert(last, f"{self._indent}@parblock")
-                self.lines.append(f"{self._indent}@endparblock")
+            if self._empty_line_indent in self._lines[last:]:
+                self._lines.insert(last, f"{self._indent}@parblock")
+                self._lines.append(f"{self._indent}@endparblock")
 
 
 def get_value_doxygen_function(ctx: ItemGetValueContext) -> Any:

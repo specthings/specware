@@ -409,7 +409,7 @@ class _TestItem:
         default_members = CContent()
         with default_members.indent():
             self.add_default_context_members(default_members)
-        if not self["test-context"] and not default_members.lines:
+        if not self["test-context"] and not default_members:
             return "NULL"
         with content.doxygen_block():
             content.add_brief_description(
@@ -868,8 +868,7 @@ class _ActionRequirementTestItem(_TestItem):
                         pci = f"ctx->Map.{self._pci}[ {index} ]"
                         content.append(
                             [f"{pci} = {enum[-1]} - 1;", fall_through])
-                content.lines[-1] = content.lines[-1].replace(
-                    fall_through, "break;")
+                content.last = content.last.replace(fall_through, "break;")
             content.append("}")
 
     def _add_test_variant(self, content: CContent,

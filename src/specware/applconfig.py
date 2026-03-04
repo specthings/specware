@@ -125,9 +125,9 @@ class _ContentAdaptor:
         """ Add the option notes. """
         self._add_rubric("NOTES", notes)
 
-    def add_option_constraints(self, lines: list[str]) -> None:
+    def add_option_constraints(self, constraints: GenericContent) -> None:
         """ Add the option value constraints. """
-        self._add_rubric("CONSTRAINTS", lines, wrap=True)
+        self._add_rubric("CONSTRAINTS", constraints, wrap=True)
 
     def add_licence_and_copyrights(self) -> None:
         """ Add the license and copyrights. """
@@ -192,14 +192,14 @@ class _DoxygenContentAdaptor(_ContentAdaptor):
     def add_option_notes(self, notes: str) -> None:
         self._notes = notes
 
-    def add_option_constraints(self, lines: list[str]) -> None:
+    def add_option_constraints(self, constraints: GenericContent) -> None:
         self.content.add_brief_description(self._option_type)
         self.content.add(f"@anchor {self._name}")
         self.content.wrap(self._description)
         self.content.add_paragraph("Default Value", self._default_value)
         self.content.add_paragraph("Default Configuration",
                                    self._default_config)
-        self.content.add_paragraph("Constraints", lines)
+        self.content.add_paragraph("Constraints", constraints)
         self.content.add_paragraph("Notes", self._notes)
         self.content.close_comment_block()
         self.content.append(f"#define {self._name}")
@@ -230,14 +230,15 @@ def _get_constraints(content: _ContentAdaptor, item: Item,
 
 def _generate_constraints(content: _ContentAdaptor, item: Item,
                           enabled_set: EnabledSet) -> None:
-    constraints = _get_constraints(content, item, enabled_set)
-    if len(constraints) > 1:
-        constraint_list = Content("BSD-2-Clause")
+    constraint_list = _get_constraints(content, item, enabled_set)
+    if len(constraint_list) > 1:
+        constraints = Content("BSD-2-Clause")
         prologue = ("The following constraints apply "
                     "to this configuration option:")
-        constraint_list.add_list(constraints, prologue)
-        constraints = constraint_list.lines
-    content.add_option_constraints(constraints)
+        constraints.add_list(constraint_list, prologue)
+        content.add_option_constraints(constraints)
+    else:
+        content.add_option_constraints(constraint_list)
 
 
 def _generate_initializer_or_integer(content: _ContentAdaptor, item: Item,

@@ -31,11 +31,11 @@ from contextlib import contextmanager
 import functools
 import itertools
 import os
-from typing import Any, Callable, Iterator, NamedTuple, Optional, Union
+from typing import Any, Callable, Iterator, NamedTuple, Optional
 
 from specitems import (Item, ItemCache, ItemGetValueContext, ItemGetValueMap,
-                       ItemMapper, get_value_default, get_value_plural, Link,
-                       to_camel_case)
+                       ItemMapper, GenericContent, get_value_default,
+                       get_value_plural, Link, to_camel_case)
 
 from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
                        forward_declaration, get_value_compound,
@@ -46,8 +46,7 @@ from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
                        get_value_unspecified_type)
 
 _ItemMap = dict[str, Item]
-_Lines = Union[str, list[str]]
-_GetLines = Callable[["_Node", Item, str, Any], _Lines]
+_GetLines = Callable[["_Node", Item, str, Any], GenericContent]
 
 
 def _get_ingroups(item: Item) -> _ItemMap:
@@ -387,7 +386,7 @@ class _Node:
                                     _Node._get_enumerator_definition))
                 enumerators.append(enumerator)
             for enumerator in enumerators[0:-1]:
-                enumerator.lines[-1] += ","
+                enumerator.last += ","
                 enumerator.append("")
                 self.content.append(enumerator)
             try:
@@ -576,7 +575,7 @@ class _Node:
         return ""
 
     def _get_compound_definition(self, item: Item, prefix: str,
-                                 definition: Any) -> _Lines:
+                                 definition: Any) -> GenericContent:
         content = CContent()
         content.add_description_block(
             self.substitute_text(definition["brief"], prefix=prefix),
@@ -599,17 +598,17 @@ class _Node:
                             compound_member, _Node._get_compound_definition))
             name = definition["name"]
             content.append(f"}} {name};")
-        return content.lines
+        return content
 
     def _get_enumerator_definition(self, item: Item, prefix: str,
-                                   definition: Any) -> _Lines:
+                                   definition: Any) -> GenericContent:
         name = item["name"]
         if definition:
             return f"{name} = {self.substitute_code(definition, prefix)}"
         return f"{name}"
 
     def _get_define_definition(self, item: Item, prefix: str,
-                               definition: Any) -> _Lines:
+                               definition: Any) -> GenericContent:
         name = item["name"]
         value = self.substitute_code(definition, prefix)
         if value:
@@ -617,7 +616,7 @@ class _Node:
         return f"#define {name}"
 
     def _get_function_definition(self, item: Item, prefix: str,
-                                 definition: Any) -> _Lines:
+                                 definition: Any) -> GenericContent:
         content = CContent()
         name = item["name"]
         attrs = self.substitute_code(definition["attributes"], prefix)
@@ -633,10 +632,10 @@ class _Node:
                 content.add(self.substitute_code(body, prefix))
         else:
             content.declare_function(f"{attrs}{ret}", name, params)
-        return content.lines
+        return content
 
     def _get_macro_definition(self, item: Item, prefix: str,
-                              definition: Any) -> _Lines:
+                              definition: Any) -> GenericContent:
         name = item["name"]
         params = [param["name"] for param in item["params"]]
         if params:
@@ -660,7 +659,7 @@ class _Node:
 
     def _get_register_bits_definition(self, _item: Item, _prefix: str,
                                       definition: Any,
-                                      reg_name: str) -> _Lines:
+                                      reg_name: str) -> GenericContent:
         lines = []  # list[str]
         prefix = self.item["register-prefix"]
         if prefix is None:
@@ -697,7 +696,7 @@ class _Node:
     def _get_register_define_definition(self, item: Item, _prefix: str,
                                         definition: Any,
                                         ctx: _RegisterMemberContext,
-                                        offset: int) -> _Lines:
+                                        offset: int) -> GenericContent:
         name, alias = _get_register_name(definition)
         count = definition["count"]
         assert count == 1
@@ -706,11 +705,11 @@ class _Node:
             content.add(f"@brief See @ref {ctx.regs[name]['group']}.")
         content.append(
             f"#define {item['name'].upper()}_{alias.upper()} {offset:#x}")
-        return content.lines
+        return content
 
-    def _get_register_member_definition(self, _item: Item, _prefix: str,
-                                        definition: Any,
-                                        ctx: _RegisterMemberContext) -> _Lines:
+    def _get_register_member_definition(
+            self, _item: Item, _prefix: str, definition: Any,
+            ctx: _RegisterMemberContext) -> GenericContent:
         name, alias = _get_register_name(definition)
         count = definition["count"]
         array = f"[ {count} ]" if count > 1 else ""
@@ -725,14 +724,14 @@ class _Node:
             content.add(f"@brief See @ref {ctx.regs[name]['group']}.")
         content.append(
             f"{ctx.regs[name]['type']} {alias.lower()}{idx}{array};")
-        return content.lines
+        return content
 
     def _get_typedef_definition(self, _item: Item, prefix: str,
-                                definition: Any) -> _Lines:
+                                definition: Any) -> GenericContent:
         return f"typedef {self.substitute_code(definition, prefix)};"
 
     def _get_variable_definition(self, _item: Item, prefix: str,
-                                 definition: Any) -> _Lines:
+                                 definition: Any) -> GenericContent:
         return f"extern {self.substitute_code(definition, prefix)};"
 
     def _get_description(self, item: Item, ingroups: _ItemMap) -> CContent:
@@ -798,7 +797,7 @@ class _ZephyrNode(_Node):
 
     def _get_register_bits_definition(self, _item: Item, _prefix: str,
                                       definition: Any,
-                                      reg_name: str) -> _Lines:
+                                      reg_name: str) -> GenericContent:
         lines = []  # list[str]
         prefix = self.item["register-prefix"]
         if prefix is None:
@@ -839,7 +838,7 @@ class _ZephyrNode(_Node):
     def _get_register_define_definition(self, item: Item, _prefix: str,
                                         definition: Any,
                                         ctx: _RegisterMemberContext,
-                                        offset: int) -> _Lines:
+                                        offset: int) -> GenericContent:
         name, alias = _get_register_name(definition)
         define = f"#define {item['name'].upper()}_{alias.upper()}"
         count = definition["count"]
