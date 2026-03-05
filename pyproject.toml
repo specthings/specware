@@ -13,7 +13,7 @@ license = "BSD-2-Clause"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "specitems >=1.1.1",
+    "specitems >=1.1.2",
 ]
 keywords = [
   "certification",
