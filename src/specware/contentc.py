@@ -239,37 +239,38 @@ class CContent(Content):
         self._add_includes(includes_unconditional, local)
         self._add_includes_enabled_by(includes_enabled_by, local)
 
-    def _open_comment_block(self, begin) -> None:
-        self.add(begin)
-        self.push_indent(" * ", " *")
-
     def open_comment_block(self) -> None:
         """ Open a comment block. """
         if self.gap:
             self.ensure_blank_line()
-        self._open_comment_block("/*")
+        self.push_indent("/*", " * ", " *")
+        self.append("")
+
+    def _open_doxygen_block(self, begin: list[str]) -> None:
+        """ Open a Doxygen comment block. """
+        if self.gap:
+            self.ensure_blank_line()
+        self.push_indent("/**", " * ", " *")
+        self.append(begin)
 
     def open_doxygen_block(self) -> None:
         """ Open a Doxygen comment block. """
-        self._open_comment_block("/**")
+        self._open_doxygen_block([""])
 
     def open_file_block(self) -> None:
         """ Open a Doxygen @file comment block. """
-        self._open_comment_block(["/**", " * @file"])
-        self.gap = True
+        self._open_doxygen_block(["", "@file"])
 
     def open_defgroup_block(self, identifier: str, name: str) -> None:
         """ Open a Doxygen @defgroup comment block. """
-        defgroup = [f" * @defgroup {identifier} {name}"]
-        if len(self._indent) + len(defgroup[0]) > self.text_width:
-            defgroup = [f" * @defgroup {identifier} \\", f" *   {name}"]
-        self._open_comment_block(["/**"] + defgroup)
-        self.gap = True
+        defgroup = ["", f"@defgroup {identifier} {name}"]
+        if len(self._line_indent) + 3 + len(defgroup[1]) > self.text_width:
+            defgroup = ["", f"@defgroup {identifier} \\", f"  {name}"]
+        self._open_doxygen_block(defgroup)
 
     def open_function_block(self, function: str) -> None:
         """ Open a Doxygen @fn comment block. """
-        self._open_comment_block(["/**", f" * @fn {function}"])
-        self.gap = True
+        self._open_doxygen_block(["", f"@fn {function}"])
 
     def close_comment_block(self) -> None:
         """ Close a comment block. """
@@ -328,7 +329,7 @@ class CContent(Content):
     def open_for_loop(self, begin: str, end: str, step: str) -> None:
         """ Open a for loop. """
         for_loop = [f"for ( {begin}; {end}; {step} ) {{"]
-        if len(self._indent) + len(for_loop[0]) > self.text_width:
+        if len(self._line_indent) + len(for_loop[0]) > self.text_width:
             for_loop = [
                 "for (", f"{self.tab}{begin};", f"{self.tab}{end};",
                 f"{self.tab}{step}", ") {"
@@ -354,9 +355,9 @@ class CContent(Content):
         # pylint: disable=too-many-arguments
         # pylint: disable=too-many-positional-arguments
         line = f"{ret}{space}{name}("
-        if len(self._indent) + len(line) > self.text_width:
+        if len(self._line_indent) + len(line) > self.text_width:
             line = f"{name}{param_line}{semicolon}"
-            if len(self._indent) + len(line) > self.text_width:
+            if len(self._line_indent) + len(line) > self.text_width:
                 self.add([ret, f"{name}("])
             else:
                 self.add([ret, line])
@@ -384,7 +385,7 @@ class CContent(Content):
         else:
             param_line = "()"
         line = f"{ret}{space}{name}{param_line}{semicolon}"
-        if len(self._indent) + len(line) > self.text_width:
+        if len(self._line_indent) + len(line) > self.text_width:
             if params:
                 self._function(ret, name, params, param_line, space, semicolon)
             elif ret:
@@ -413,7 +414,7 @@ class CContent(Content):
         space = "" if not ret or ret.endswith("*") else " "
         semicolon = "" if define else ";"
         line = f"{ret}{space}{name}{param_line}{semicolon}"
-        if len(self._indent) + len(line) > self.text_width:
+        if len(self._line_indent) + len(line) > self.text_width:
             if align:
                 params = align_declarations(params)
             self._function(ret, name, params, param_line, space, semicolon)
@@ -553,8 +554,8 @@ class CContent(Content):
             last = len(self._lines)
             self.wrap(content)
             if self._empty_line_indent in self._lines[last:]:
-                self._lines.insert(last, f"{self._indent}@parblock")
-                self._lines.append(f"{self._indent}@endparblock")
+                self._lines.insert(last, f"{self._line_indent}@parblock")
+                self._lines.append(f"{self._line_indent}@endparblock")
 
 
 def get_value_doxygen_function(ctx: ItemGetValueContext) -> Any:

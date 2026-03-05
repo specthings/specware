@@ -175,18 +175,14 @@ def test_add_includes():
 def test_comment_block():
     content = CContent()
     with content.comment_block():
-        assert not content.gap
         content.add("")
-        assert not content.gap
         assert str(content) == """/*
 """
         content.add("a")
-        assert content.gap
         assert str(content) == """/*
  * a
 """
         content.add("b")
-        assert content.gap
         assert str(content) == """/*
  * a
  *
