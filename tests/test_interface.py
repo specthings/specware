@@ -662,6 +662,8 @@ typedef uint32_t Integer /* Some comment. */;
 
 /**
  * @ingroup GroupB
+ *
+ * @brief Interface3 brief.
  */
 #if defined(RTEMS_SMP)
   typedef uint32_t Integer3;
@@ -1074,6 +1076,8 @@ typedef uint32_t Integer /* Some comment. */;
 
 /**
  * @ingroup GroupB
+ *
+ * @brief Interface3 brief.
  */
 #if defined(RTEMS_SMP)
   typedef uint32_t Integer3;

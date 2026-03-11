@@ -597,6 +597,8 @@ Typedef Integer description.
 Integer3
 ========
 
+Interface3 brief.
+
 .. Generated from spec:/s
 
 .. index:: Struct
@@ -1209,6 +1211,8 @@ Typedef Integer description.
 (InterfaceInteger3)=
 
 ### Integer3
+
+Interface3 brief.
 
 % Generated from spec:/s
 
