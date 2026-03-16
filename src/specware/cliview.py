@@ -28,10 +28,11 @@ import argparse
 import contextlib
 import itertools
 import sys
-from typing import Any, Optional
+from typing import Any, Optional, Iterable
 
-from specitems import (Item, ItemCache, ItemCacheConfig, ItemGetValueContext,
-                       ItemMapper, SphinxContent, create_config)
+from specitems import (COL_SPAN, Item, ItemCache, ItemCacheConfig,
+                       ItemGetValueContext, ItemMapper, ROW_SPAN,
+                       SphinxContent, create_config)
 
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       gather_api_items, gather_build_files,
@@ -240,7 +241,7 @@ def _action_table(item: Item, show_skip: bool) -> None:
                             (condition["name"]
                              for condition in item["post-conditions"])))
     ]
-    transition_map = TransitionMap(item)
+    transition_map = TransitionMap(item, "N/A")
     for map_idx, variant in transition_map.get_variants(
             item.cache.enabled_set):
         if show_skip or not variant.skip:
@@ -250,8 +251,52 @@ def _action_table(item: Item, show_skip: bool) -> None:
     print(str(content))
 
 
+def _states(transition_map: TransitionMap, co_idx: int,
+            states: list[int]) -> str:
+    return ", ".join(
+        transition_map.pre_co_idx_st_idx_to_st_name(co_idx, st_idx)
+        for st_idx in set(states))
+
+
+def _action_compact_table(item: Item) -> None:
+    transition_map = TransitionMap(item, "N/A")
+    rows: list[Iterable[str | int]] = [
+        ("Pre-Conditions", ) + (ROW_SPAN, ) *
+        (transition_map.pre_co_count - 1) + ("Post-Conditions", ) +
+        (ROW_SPAN, ) * (transition_map.post_co_count - 1)
+    ]
+    rows.append(
+        tuple(
+            itertools.chain(
+                (condition["name"] for condition in item["pre-conditions"]),
+                (condition["name"] for condition in item["post-conditions"]))))
+    for post_co, pre_co_collection in transition_map.get_post_conditions(
+            item.cache.enabled_set):
+        if post_co[0]:
+            post_co_row = ((transition_map.skip_idx_to_name(post_co[0]), ) +
+                           (ROW_SPAN, ) * (transition_map.post_co_count - 1))
+            post_co_col_span: tuple[str | int,
+                                    ...] = ((COL_SPAN, ) +
+                                            (COL_SPAN | ROW_SPAN, ) *
+                                            (transition_map.post_co_count - 1))
+        else:
+            post_co_row = tuple(
+                transition_map.post_co_idx_st_idx_to_st_name(co_idx, st_idx)
+                for co_idx, st_idx in enumerate(post_co[1:]))
+            post_co_col_span = (COL_SPAN, ) * transition_map.post_co_count
+        for pre_co in pre_co_collection:
+            pre_co_row = tuple(
+                _states(transition_map, co_idx, co_states)
+                for co_idx, co_states in enumerate(pre_co))
+            rows.append(pre_co_row + post_co_row)
+            post_co_row = post_co_col_span
+    content = SphinxContent()
+    content.add_grid_table(rows, header_rows=2)
+    print(str(content))
+
+
 def _action_list(item: Item) -> None:
-    transition_map = TransitionMap(item)
+    transition_map = TransitionMap(item, "N/A")
     for post_cond, pre_conds in transition_map.get_post_conditions(
             item.cache.enabled_set):
         print("")
@@ -262,7 +307,7 @@ def _action_list(item: Item) -> None:
             for co_idx, st_idx in enumerate(post_cond[1:]):
                 st_name = transition_map.post_co_idx_st_idx_to_st_name(
                     co_idx, st_idx)
-                if st_name != "NA":
+                if st_name != "N/A":
                     co_name = transition_map.post_co_idx_to_co_name(co_idx)
                     names.append(f"{co_name} = {st_name}")
             print(", ".join(names))
@@ -275,13 +320,25 @@ def _action_list(item: Item) -> None:
                         co_idx, st_idx) for st_idx in set(co_states)
                 ]
                 if len(states) == 1:
-                    if states[0] != "NA":
+                    if states[0] != "N/A":
                         entries.append(f"{co_name} = {states[0]}")
                 else:
                     entries.append(f"{co_name} = {{ " + ", ".join(states) +
                                    " }")
             print("")
             print("    * " + ", ".join(entries))
+
+
+def _action_stats(item_cache: ItemCache) -> None:
+    stats: list[tuple[int, int, str]] = []
+    for item in sorted(item_cache.values()):
+        if item.type == "requirement/functional/action":
+            transition_map = TransitionMap(item, "N/A")
+            stats.append(
+                (transition_map.pre_co_count + transition_map.post_co_count,
+                 len(transition_map), item.uid))
+    for conditions, variants, uid in sorted(stats):
+        print(f"{conditions} {variants} {uid}")
 
 
 def _list_api(item_cache: ItemCache) -> None:
@@ -320,8 +377,9 @@ def cliview(argv: list[str] = sys.argv):
     parser.add_argument('--filter',
                         choices=[
                             "none", "api", "build", "orphan", "no-validation",
-                            "action-table", "action-table-show-skip",
-                            "action-list", "design", "types"
+                            "action-compact-table", "action-table",
+                            "action-table-show-skip", "action-list",
+                            "action-stats", "design", "types"
                         ],
                         type=str.lower,
                         default="none",
@@ -361,9 +419,14 @@ def cliview(argv: list[str] = sys.argv):
         elif args.filter == "action-table-show-skip":
             for uid in args.UIDs:
                 _action_table(item_cache[uid], True)
+        elif args.filter == "action-compact-table":
+            for uid in args.UIDs:
+                _action_compact_table(item_cache[uid])
         elif args.filter == "action-list":
             for uid in args.UIDs:
                 _action_list(item_cache[uid])
+        elif args.filter == "action-stats":
+            _action_stats(item_cache)
         elif args.filter == "orphan":
             validate(root, _validate)
             for item in item_cache.values():

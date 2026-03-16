@@ -56,6 +56,7 @@ def test_validation(tmpdir):
     augment_with_test_case_links(item_cache)
 
     transition_map = TransitionMap(item_cache["/directive"])
+    assert len(transition_map) == 36
     assert transition_map.pre_co_idx_to_co_name(0) == "Name"
     assert transition_map.post_co_idx_st_idx_to_st_name(0, 0) == "Ok"
     assert transition_map.post_co_idx_to_co_name(0) == "Status"

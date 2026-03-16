@@ -93,12 +93,12 @@ def _to_st_idx(conditions: list[Any]) -> tuple[dict[str, int], ...]:
             }]))) for condition in conditions)
 
 
-def _to_st_name(conditions: list[Any]) -> tuple[tuple[str, ...], ...]:
+def _to_st_name(conditions: list[Any],
+                not_applicable: str) -> tuple[tuple[str, ...], ...]:
     return tuple(
         tuple(
-            itertools.chain((state["name"]
-                             for state in condition["states"]), ["NA"]))
-        for condition in conditions)
+            itertools.chain((state["name"] for state in condition["states"]), (
+                not_applicable, ))) for condition in conditions)
 
 
 class _CondExpContext(NamedTuple):
@@ -263,15 +263,15 @@ class TransitionMap:
     """ Representation of an action requirement transition map. """
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, item: Item):
+    def __init__(self, item: Item, not_applicable: str = "NA"):
         self._item = item
-        self._pre_co_count = len(item["pre-conditions"])
-        self._post_co_count = len(item["post-conditions"])
-        self.pre_co_summary = tuple(0 for _ in range(self._pre_co_count + 1))
+        self.pre_co_count = len(item["pre-conditions"])
+        self.post_co_count = len(item["post-conditions"])
+        self.pre_co_summary = tuple(0 for _ in range(self.pre_co_count + 1))
         self._pre_co_idx_st_idx_to_st_name = _to_st_name(
-            item["pre-conditions"])
+            item["pre-conditions"], not_applicable)
         self._post_co_idx_st_idx_to_st_name = _to_st_name(
-            item["post-conditions"])
+            item["post-conditions"], not_applicable)
         self._pre_co_idx_st_name_to_st_idx = _to_st_idx(item["pre-conditions"])
         self._post_co_idx_st_name_to_st_idx = _to_st_idx(
             item["post-conditions"])
@@ -302,6 +302,9 @@ class TransitionMap:
 
     def __iter__(self):
         yield from self._map
+
+    def __len__(self):
+        return len(self._map)
 
     def entries(self) -> Iterator[list[Any]]:
         """ Yield the transition map entry variants sorted by frequency. """
@@ -566,7 +569,7 @@ class TransitionMap:
                          map_idx: int, pre_cond_na: tuple) -> None:
         # pylint: disable=too-many-arguments
         # pylint: disable=too-many-positional-arguments
-        if co_idx < self._pre_co_count:
+        if co_idx < self.pre_co_count:
             condition = self._pre_co_idx_to_cond[co_idx]
             state_count = len(condition["states"])
             map_idx *= state_count
@@ -616,7 +619,7 @@ class TransitionMap:
                 transition.add(
                     self._make_transition(map_idx, desc_idx, enabled_by,
                                           skip_post_cond,
-                                          (0, ) * self._pre_co_count))
+                                          (0, ) * self.pre_co_count))
 
     def _get_post_cond(self, desc: dict[str, Any], co_idx: int) -> Any:
         info = desc["post-conditions"][self._post_co_idx_to_co_name[co_idx]]
@@ -638,7 +641,7 @@ class TransitionMap:
                 try:
                     skip_post_cond = (0, ) + tuple(
                         self._get_post_cond(desc, co_idx)
-                        for co_idx in range(self._post_co_count))
+                        for co_idx in range(self.post_co_count))
                 except KeyError as err:
                     msg = (f"transition map descriptor {desc_idx} of "
                            f"{self._item.spec} refers to non-existent "
@@ -648,7 +651,7 @@ class TransitionMap:
                 skip_post_cond = (
                     self._skip_name_to_idx[desc["post-conditions"]], ) + tuple(
                         self._post_co_idx_st_name_to_st_idx[co_idx]["N/A"]
-                        for co_idx in range(self._post_co_count))
+                        for co_idx in range(self.post_co_count))
             if isinstance(desc["pre-conditions"], dict):
                 self._add_transitions(transition_map, desc, desc_idx,
                                       skip_post_cond, 0, 0, ())
@@ -672,7 +675,7 @@ class TransitionMap:
         return "\n".join(wrapper.wrap(text)) + " },"
 
     def _get_entry_bits(self) -> int:
-        bits = self._pre_co_count + 1
+        bits = self.pre_co_count + 1
         for st_idx_to_st_name in self._post_co_idx_st_idx_to_st_name:
             bits += math.ceil(math.log2(len(st_idx_to_st_name)))
         return 2**max(math.ceil(math.log2(bits)), 3)

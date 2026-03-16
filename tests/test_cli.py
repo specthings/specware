@@ -146,9 +146,14 @@ def test_cliview(tmpdir):
         "/req/clock-nanosleep"
     ])
     cliview([
+        "command", "--config-file", config_file,
+        "--filter=action-compact-table", "/req/clock-nanosleep"
+    ])
+    cliview([
         "command", "--config-file", config_file, "--filter=action-list",
         "/req/clock-nanosleep"
     ])
+    cliview(["command", "--config-file", config_file, "--filter=action-stats"])
     cliview([
         "command", "--config-file", config_file,
         "--filter=action-table-show-skip", "/req/clock-nanosleep"
