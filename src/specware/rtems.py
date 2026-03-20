@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides methods specific to the RTEMS specification. """
 
-# Copyright (C) 2021, 2024 embedded brains GmbH & Co. KG
+# Copyright (C) 2021, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -25,16 +25,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import itertools
-from typing import Any, Callable, Union
+from typing import Callable
 
-from specitems import EnabledSet, create_unique_link, Item, ItemCache, \
-    link_is_enabled
+from specitems import (EnabledSet, Item, ItemCache, create_unique_link,
+                       link_is_enabled)
 
-_NOT_PRE_QUALIFIED = set([
+_NOT_PRE_QUALIFIED = frozenset((
     "/acfg/constraint/option-not-pre-qualified",
     "/constraint/constant-not-pre-qualified",
     "/constraint/directive-not-pre-qualified",
-])
+))
 
 
 def is_pre_qualified(item: Item) -> bool:
@@ -44,10 +44,9 @@ def is_pre_qualified(item: Item) -> bool:
             _NOT_PRE_QUALIFIED))
 
 
-_ENABLEMENT_ROLES = [
-    "interface-function", "interface-ingroup", "interface-ingroup-hidden",
-    "requirement-refinement", "validation"
-]
+_ENABLEMENT_ROLES = ("interface-function", "interface-ingroup",
+                     "interface-ingroup-hidden", "requirement-refinement",
+                     "validation")
 
 
 def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
@@ -66,7 +65,7 @@ def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
     return result
 
 
-def _add_link(item_cache: ItemCache, child: Item, data: Any) -> None:
+def _add_link(item_cache: ItemCache, child: Item, data: dict) -> None:
     parent = item_cache[child.to_abs_uid(data["uid"])]
     create_unique_link(child, parent, data)
 
@@ -101,27 +100,23 @@ _VALIDATION_METHOD = {
     "validation/by-review-of-design": "validation by review of design",
 }
 
-_CONTAINER_TYPE = [
-    "interface/domain", "interface/header-file",
-    "interface/unspecified-header-file"
-]
+_CONTAINER_TYPE = ("interface/domain", "interface/header-file",
+                   "interface/unspecified-header-file")
 
 # In the first pass using _validate_tree() we consider interface domains and
 # header files as validated.  We have to do this since a traversal to interface
 # placements would lead to an infinite recursion in _validate_tree().  In the
 # second pass using _validate_containers() the interface domain and header file
 # validations are fixed.
-_VALIDATION_LEAF = list(_VALIDATION_METHOD.keys()) + _CONTAINER_TYPE
+_VALIDATION_LEAF = tuple(
+    itertools.chain(_VALIDATION_METHOD.keys(), _CONTAINER_TYPE))
 
-_CHILD_ROLES = [
-    "requirement-refinement", "interface-ingroup", "interface-ingroup-hidden",
-    "interface-function", "glossary-member", "test-case", "validation"
-]
+_CHILD_ROLES = ("requirement-refinement", "interface-ingroup",
+                "interface-ingroup-hidden", "interface-function",
+                "glossary-member", "test-case", "validation")
 
-_PARENT_ROLES = [
-    "function-implementation", "interface-enumerator",
-    "performance-runtime-limits"
-]
+_PARENT_ROLES = ("function-implementation", "interface-enumerator",
+                 "performance-runtime-limits")
 
 
 def is_validation_by_test(item: Item) -> bool:
@@ -234,7 +229,7 @@ def _validate_containers(item: Item) -> bool:
 
 
 def _fixup_pre_qualified(item: Item, types: list[str],
-                         roles: Union[str, list[str]]) -> None:
+                         roles: str | list[str]) -> None:
     for type_name in types:
         for item_2 in item.cache.items_by_type.get(type_name, []):
             # Count of not pre-qualified (index 0) and pre-qualified (index 1)
@@ -276,10 +271,10 @@ _API_INTERFACES = [
     "interface/unspecified-macro",
 ]
 
-_API_ROLES = [
+_API_ROLES = (
     "requirement-refinement",
     "interface-ingroup",
-]
+)
 
 
 def _gather_api_items(item: Item, items: dict[str, list[Item]]) -> None:
