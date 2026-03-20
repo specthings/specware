@@ -29,8 +29,8 @@ import pytest
 from specitems import EmptyItemCache, Item, ItemCache, ItemSelection
 
 from specware import (augment_with_test_links, gather_api_items,
-                      is_pre_qualified, is_validation_by_test,
-                      recursive_is_enabled, validate)
+                      gather_related_items, is_pre_qualified,
+                      is_validation_by_test, recursive_is_enabled, validate)
 
 from .util import create_item_cache
 
@@ -138,6 +138,48 @@ def test_validate(tmpdir):
     ] == [("Application Configuration",
            ["/if/clock-gettime", "/if/clock-nanosleep"]),
           ("General System Configuration", ["/if/disable-newlib-reentrancy"])]
+
+    assert [item.uid for item in sorted(gather_related_items(root))] == [
+        "/constraint/bad",
+        "/constraint/constant-not-pre-qualified",
+        "/constraint/terminate",
+        "/glossary-general",
+        "/glossary/api",
+        "/glossary/bad",
+        "/glossary/ecss",
+        "/glossary/softwareproduct",
+        "/glossary/sourcecode",
+        "/glossary/target",
+        "/if/clock-gettime",
+        "/if/clock-nanosleep",
+        "/if/disable-newlib-reentrancy",
+        "/if/domain",
+        "/if/errno",
+        "/if/errno-header",
+        "/if/group",
+        "/if/group-general",
+        "/if/header-confdefs",
+        "/if/header-empty",
+        "/if/not-pre-qualified",
+        "/if/not-pre-qualified-header",
+        "/req/api",
+        "/req/clock-gettime",
+        "/req/clock-nanosleep",
+        "/req/disable-newlib-reentrancy",
+        "/req/group",
+        "/req/group-2",
+        "/req/group-3",
+        "/req/mem-catch-snd",
+        "/req/perf-runtime",
+        "/req/root",
+        "/req/signal-count",
+        "/req/signal-number",
+        "/req/target",
+        "/req/usage-constraints",
+        "/val/disable-newlib-reentrancy",
+        "/val/perf",
+        "/val/tc",
+    ]
 
     item_cache.add_item(
         "/orphan", {

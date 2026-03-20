@@ -119,6 +119,22 @@ _PARENT_ROLES = ("function-implementation", "interface-enumerator",
                  "performance-runtime-limits")
 
 
+def _visit_tree(item: Item, related_items: set[Item]) -> None:
+    if item in related_items:
+        return
+    related_items.add(item)
+    for item_2 in itertools.chain(item.children(_CHILD_ROLES),
+                                  item.parents(_PARENT_ROLES)):
+        _visit_tree(item_2, related_items)
+
+
+def gather_related_items(root: Item) -> set[Item]:
+    """ Gather all items related to the root item.  """
+    related_items: set[Item] = set()
+    _visit_tree(root, related_items)
+    return related_items
+
+
 def is_validation_by_test(item: Item) -> bool:
     """ Return true, if the item is a validation by test, otherwise false. """
     return _VALIDATION_METHOD.get(item.type, "") == "validation by test"
