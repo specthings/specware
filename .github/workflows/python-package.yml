@@ -26,6 +26,6 @@ jobs:
       with:
         enable-cache: true
         python-version: ${{ matrix.python-version }}
-        version: 0.9.30
+        version: 0.10.12
     - name: Make
       run: make
