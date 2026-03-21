@@ -904,7 +904,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.1.11"
+version = "1.1.12"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mdformat" },
@@ -915,9 +915,9 @@ dependencies = [
     { name = "mdformat-tables" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2e/72/9084a562251b2d09a31486049227078b1a9f569ed67a1c0ed7b2ae6ebe60/specitems-1.1.11.tar.gz", hash = "sha256:2c8469d1e7b1121848ab3e35c12008a06e43bfd95417d1e4e3a1ffd4818fa112", size = 54406, upload-time = "2026-03-20T00:35:13.405Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/98/91/2d0e508e0a9abf6a630378f2f387a38f81979cba86fe0f27b3b26a28378c/specitems-1.1.12.tar.gz", hash = "sha256:3447b343f7643566ea078bef0f2da1392f5672ab106dccacd948c48aff0a95bd", size = 54522, upload-time = "2026-03-21T00:50:19.698Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/22/de/d16acd1f2e317e69d9ac5178b41fb22400238b215f247fcde464d0befcab/specitems-1.1.11-py3-none-any.whl", hash = "sha256:a59c51f4495f06caa8b17ec765aca30fbc289ef9c514405d1f4647e6ab54c4ff", size = 75806, upload-time = "2026-03-20T00:35:12.493Z" },
+    { url = "https://files.pythonhosted.org/packages/34/6d/8113a98e03618f5df28c0c837e3413a3ef1b1b5cab221686c7f6e43e089a/specitems-1.1.12-py3-none-any.whl", hash = "sha256:b3222a8f16d691b70423450628c45b740eb730fe44accf0cf83f83111c2651d0", size = 75926, upload-time = "2026-03-21T00:50:20.726Z" },
 ]
 
 [[package]]
@@ -940,14 +940,14 @@ dev = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-autodoc-napoleon-typehints" },
     { name = "sphinx-autodoc-typehints", version = "3.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
-    { name = "sphinx-autodoc-typehints", version = "3.9.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "sphinx-autodoc-typehints", version = "3.9.9", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sphinx-rtd-theme" },
     { name = "types-pyyaml" },
     { name = "yapf" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "specitems", specifier = ">=1.1.11" }]
+requires-dist = [{ name = "specitems", specifier = ">=1.1.12" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1059,7 +1059,7 @@ wheels = [
 
 [[package]]
 name = "sphinx-autodoc-typehints"
-version = "3.9.8"
+version = "3.9.9"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -1067,9 +1067,9 @@ resolution-markers = [
 dependencies = [
     { name = "sphinx", version = "9.1.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/4d/02216afa475c838c123b41f30e3a2875ad27c14fae3f5bbed4ba4e7fd894/sphinx_autodoc_typehints-3.9.8.tar.gz", hash = "sha256:1e36b31ee593b7e838988045918b7fa965f5062abbd6800af96d5e2c3f17130e", size = 68763, upload-time = "2026-03-09T15:40:01.02Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c1/26/3fb37400637a3fbb099bd454298b21c420decde96c4b5acedeefee14d714/sphinx_autodoc_typehints-3.9.9.tar.gz", hash = "sha256:c862859c7d679a1495de5bcac150f6b1a6ebc24a1547379ca2aac1831588aa0d", size = 69333, upload-time = "2026-03-20T15:14:15.555Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/6c/f275f59095b2fec6627c3ce2caba4e18f55a3925718cf0547cde04821a37/sphinx_autodoc_typehints-3.9.8-py3-none-any.whl", hash = "sha256:df123ec82479934fed27e31d4ccdcf382901c5d9481450fc224054496e574466", size = 36685, upload-time = "2026-03-09T15:39:59.567Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/64/2dc63a88a3010e9b2ea86788d5ef1ec37bc9b9c6b544cea4f764ff343ea4/sphinx_autodoc_typehints-3.9.9-py3-none-any.whl", hash = "sha256:53c849d74ab67b51fade73c398d08aa3003158c1af88fb84876440d7382143c5", size = 36846, upload-time = "2026-03-20T15:14:14.384Z" },
 ]
 
 [[package]]
