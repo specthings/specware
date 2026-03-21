@@ -25,10 +25,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import itertools
-from typing import Callable
+from typing import Callable, Iterable
 
 from specitems import (EnabledSet, Item, ItemCache, create_unique_link,
-                       link_is_enabled)
+                       link_is_enabled, to_iterable)
 
 _NOT_PRE_QUALIFIED = frozenset((
     "/acfg/constraint/option-not-pre-qualified",
@@ -128,11 +128,85 @@ def _visit_tree(item: Item, related_items: set[Item]) -> None:
         _visit_tree(item_2, related_items)
 
 
-def gather_related_items(root: Item) -> set[Item]:
-    """ Gather all items related to the root item.  """
+def gather_related_items(root: Item) -> list[Item]:
+    """ Gather a sorted list of all items related to the root item.  """
     related_items: set[Item] = set()
     _visit_tree(root, related_items)
-    return related_items
+    return sorted(related_items)
+
+
+def get_items_by_type_map(items: Iterable[Item]) -> dict[str, list[Item]]:
+    """ Get a dictionary with item sets by type. """
+    items_by_type: dict[str, list[Item]] = {}
+    for item in items:
+        items_by_type.setdefault(item.type, []).append(item)
+    return items_by_type
+
+
+def get_items_by_types(items_by_type: dict[str, list[Item]],
+                       types: str | Iterable[str]) -> list[Item]:
+    """ Get a sorted list of items by an iterable of types. """
+    items: list[Item] = []
+    for type_name in to_iterable(types):
+        items.extend(item for item in items_by_type.get(type_name, tuple()))
+    return sorted(items)
+
+
+def get_item_types_by_prefix(
+    items_by_type: dict[str, list[Item]],
+    prefix: str | tuple[str, ...],
+    exclude: tuple[str, ...] = tuple()
+) -> list[str]:
+    """
+    Get the types of items matching with one of the type prefixes.
+    """
+    return sorted(type_name for type_name in items_by_type
+                  if type_name.startswith(prefix) and type_name not in exclude)
+
+
+def get_constraint_items(items_by_type: dict[str, list[Item]]) -> list[Item]:
+    """ Get a sorted list of the constraint items. """
+    return get_items_by_types(
+        items_by_type, get_item_types_by_prefix(items_by_type, "constraint"))
+
+
+def get_interface_items(items_by_type: dict[str, list[Item]]) -> list[Item]:
+    """ Get a sorted list of the interface items. """
+    return get_items_by_types(
+        items_by_type,
+        get_item_types_by_prefix(
+            items_by_type,
+            ("interface/",
+             "requirement/non-functional/interface-requirement")))
+
+
+def get_requirement_items(items_by_type: dict[str, list[Item]]) -> list[Item]:
+    """ Get a sorted list of the requirement items. """
+    return get_items_by_types(
+        items_by_type,
+        get_item_types_by_prefix(
+            items_by_type, "requirement/",
+            ("requirement/non-functional/interface-requirement", )))
+
+
+def get_interface_and_requirement_items(
+        items_by_type: dict[str, list[Item]]) -> list[Item]:
+    """ Get a sorted list of the interface and requirement items. """
+    return get_items_by_types(
+        items_by_type,
+        get_item_types_by_prefix(items_by_type,
+                                 ("interface/", "requirement/")))
+
+
+def get_validation_items(items_by_type: dict[str, list[Item]]) -> list[Item]:
+    """ Get a sorted list of the validation items. """
+    return get_items_by_types(
+        items_by_type,
+        get_item_types_by_prefix(
+            items_by_type,
+            ("requirement/functional/action",
+             "requirement/non-functional/performance-runtime",
+             "runtime-measurement-test", "test-case", "validation")))
 
 
 def is_validation_by_test(item: Item) -> bool:

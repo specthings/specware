@@ -29,8 +29,12 @@ import pytest
 from specitems import EmptyItemCache, Item, ItemCache, ItemSelection
 
 from specware import (augment_with_test_links, gather_api_items,
-                      gather_related_items, is_pre_qualified,
-                      is_validation_by_test, recursive_is_enabled, validate)
+                      gather_related_items, get_items_by_type_map,
+                      get_constraint_items, get_interface_items,
+                      get_interface_and_requirement_items,
+                      get_requirement_items, get_validation_items,
+                      is_pre_qualified, is_validation_by_test,
+                      recursive_is_enabled, validate)
 
 from .util import create_item_cache
 
@@ -121,6 +125,10 @@ def _validate(item, validated):
     return validated
 
 
+def _uids(items):
+    return [item.uid for item in items]
+
+
 def test_validate(tmpdir):
     item_cache = create_item_cache(tmpdir, "spec-rtems")
     augment_with_test_links(item_cache)
@@ -139,7 +147,8 @@ def test_validate(tmpdir):
            ["/if/clock-gettime", "/if/clock-nanosleep"]),
           ("General System Configuration", ["/if/disable-newlib-reentrancy"])]
 
-    assert [item.uid for item in sorted(gather_related_items(root))] == [
+    related_items = gather_related_items(root)
+    assert _uids(related_items) == [
         "/constraint/bad",
         "/constraint/constant-not-pre-qualified",
         "/constraint/terminate",
@@ -176,6 +185,101 @@ def test_validate(tmpdir):
         "/req/signal-number",
         "/req/target",
         "/req/usage-constraints",
+        "/val/disable-newlib-reentrancy",
+        "/val/perf",
+        "/val/tc",
+    ]
+    items_by_type = get_items_by_type_map(related_items)
+    assert sorted(items_by_type) == [
+        "constraint",
+        "glossary/group",
+        "glossary/term",
+        "interface/appl-config-group",
+        "interface/appl-config-option/feature-enable",
+        "interface/domain",
+        "interface/group",
+        "interface/header-file",
+        "interface/unspecified-define",
+        "interface/unspecified-function",
+        "requirement/functional/action",
+        "requirement/functional/function",
+        "requirement/non-functional/design",
+        "requirement/non-functional/design-group",
+        "requirement/non-functional/design-target",
+        "requirement/non-functional/interface-requirement",
+        "requirement/non-functional/performance-runtime",
+        "requirement/non-functional/quality",
+        "runtime-measurement-test",
+        "test-case",
+        "validation/by-inspection",
+    ]
+    assert _uids(get_constraint_items(items_by_type)) == [
+        "/constraint/bad",
+        "/constraint/constant-not-pre-qualified",
+        "/constraint/terminate",
+    ]
+    assert _uids(get_interface_items(items_by_type)) == [
+        "/if/clock-gettime",
+        "/if/clock-nanosleep",
+        "/if/disable-newlib-reentrancy",
+        "/if/domain",
+        "/if/errno",
+        "/if/errno-header",
+        "/if/group",
+        "/if/group-general",
+        "/if/header-confdefs",
+        "/if/header-empty",
+        "/if/not-pre-qualified",
+        "/if/not-pre-qualified-header",
+        "/req/api",
+    ]
+    assert _uids(get_requirement_items(items_by_type)) == [
+        "/req/clock-gettime",
+        "/req/clock-nanosleep",
+        "/req/disable-newlib-reentrancy",
+        "/req/group",
+        "/req/group-2",
+        "/req/group-3",
+        "/req/mem-catch-snd",
+        "/req/perf-runtime",
+        "/req/root",
+        "/req/signal-count",
+        "/req/signal-number",
+        "/req/target",
+        "/req/usage-constraints",
+    ]
+    assert _uids(get_interface_and_requirement_items(items_by_type)) == [
+        "/if/clock-gettime",
+        "/if/clock-nanosleep",
+        "/if/disable-newlib-reentrancy",
+        "/if/domain",
+        "/if/errno",
+        "/if/errno-header",
+        "/if/group",
+        "/if/group-general",
+        "/if/header-confdefs",
+        "/if/header-empty",
+        "/if/not-pre-qualified",
+        "/if/not-pre-qualified-header",
+        "/req/api",
+        "/req/clock-gettime",
+        "/req/clock-nanosleep",
+        "/req/disable-newlib-reentrancy",
+        "/req/group",
+        "/req/group-2",
+        "/req/group-3",
+        "/req/mem-catch-snd",
+        "/req/perf-runtime",
+        "/req/root",
+        "/req/signal-count",
+        "/req/signal-number",
+        "/req/target",
+        "/req/usage-constraints",
+    ]
+    assert _uids(get_validation_items(items_by_type)) == [
+        "/req/clock-gettime",
+        "/req/clock-nanosleep",
+        "/req/perf-runtime",
         "/val/disable-newlib-reentrancy",
         "/val/perf",
         "/val/tc",
