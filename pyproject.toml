@@ -4,7 +4,7 @@
 
 [project]
 name = "specware"
-version = "1.1.5"
+version = "1.1.6.dev1"
 description = "Provides utilities to specify software."
 authors = [
     {name = "The specware Authors", email = "specthings@embedded-brains.de"}
