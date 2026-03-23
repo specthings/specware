@@ -118,13 +118,21 @@ _CHILD_ROLES = ("requirement-refinement", "interface-ingroup",
 _PARENT_ROLES = ("function-implementation", "interface-enumerator",
                  "performance-runtime-limits")
 
+# WARNING: This role set works only with _visit_tree() which stops the
+# recursion once it sees an item the second time.  It is there to support older
+# versions of the RTEMS specification where not every interface was assigned to
+# an interface group or other group membership roles were used.
+_BACKWARD_COMPATIBLE_CHILD_ROLES = _CHILD_ROLES + ("appl-config-group-member",
+                                                   "interface-placement")
+
 
 def _visit_tree(item: Item, related_items: set[Item]) -> None:
     if item in related_items:
         return
     related_items.add(item)
-    for item_2 in itertools.chain(item.children(_CHILD_ROLES),
-                                  item.parents(_PARENT_ROLES)):
+    for item_2 in itertools.chain(
+            item.children(_BACKWARD_COMPATIBLE_CHILD_ROLES),
+            item.parents(_PARENT_ROLES)):
         _visit_tree(item_2, related_items)
 
 
