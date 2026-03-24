@@ -69,7 +69,8 @@ def load_specware_config(config_file: str | None) -> tuple[dict, str]:
 def run_command(args: list[str],
                 cwd: Union[str, Path] = ".",
                 stdout: Optional[list[str]] = None,
-                env=None) -> int:
+                env=None,
+                status: Optional[int] = None) -> int:
     """
     Run the command in a subprocess in the working directory and environment.
 
@@ -84,13 +85,19 @@ def run_command(args: list[str],
                           cwd=cwd,
                           env=env) as task:
         assert task.stdout is not None
+        if stdout is None:
+            stdout = []
         while True:
             raw_line = task.stdout.readline()
             if raw_line:
                 line = raw_line.decode("utf-8", "ignore").rstrip("\r\n")
                 logging.debug("%s", line)
-                if stdout is not None:
-                    stdout.append(line)
+                stdout.append(line)
             elif task.poll() is not None:
                 break
-        return task.wait()
+        actual_status = task.wait()
+        if status is not None and actual_status != status:
+            raise RuntimeError(
+                f"in '{cwd}' command '{' '.join(args)}' returned "
+                f"unexpected status {actual_status} with output: {stdout}")
+        return actual_status

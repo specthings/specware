@@ -62,7 +62,7 @@ def test_load_specware_config(tmpdir):
 
 def test_run(caplog, monkeypatch):
     lines = [b"2\r", b"1\n"]
-    poll_data = [4, None, 3]
+    poll_data = [4, None, 3, 2]
 
     class _Stdout:
 
@@ -102,6 +102,13 @@ def test_run(caplog, monkeypatch):
     assert get_and_clear_log(caplog) == """INFO run in 'cwd': 'cmd' 'arg'
 DEBUG 1
 DEBUG 2"""
+
     lines.append(b"x")
     status = run_command(["cmd", "arg"], "cwd", None, {"env": 123})
     assert status == 42
+
+    lines.append(b"runtime error")
+    match = (r"^in 'cwd' command 'cmd arg' returned unexpected "
+             r"status 42 with output: \['runtime error'\]$")
+    with pytest.raises(RuntimeError, match=match):
+        run_command(["cmd", "arg"], "cwd", None, {"env": 123}, status=0)
