@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2024 embedded brains GmbH & Co. KG
+- Copyright (C) 2024, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -9,13 +9,20 @@ links:
   spec-key: role
   spec-value: verification
   uid: link
+- role: spec-refinement
+  spec-key: role
+  spec-value: verification-by
+  uid: link
 spec-description: null
 spec-example: null
 spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the verification role of links.
+      It defines the verification role of links.  The `verification` role is
+      intended for links from a ${verification:/spec-name} item to a verified
+      item.  The `verification-by` role is intended for links from a verified
+      item to a ${verification:/spec-name} item.
     mandatory-attributes: all
 spec-name: Verification Link Role
 spec-type: verification-role
