@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2024 embedded brains GmbH & Co. KG
+- Copyright (C) 2024, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -17,6 +17,10 @@ spec-info:
       timeouts:
         description: null
         spec-type: test-timeouts-by-build-config
+      time-of-last-update:
+        description: |
+          It shall be the time of the last update in ISO 8601 format.
+        spec-type: str
     description: |
       This set of attributes specifies a set of test timeouts.
     mandatory-attributes: all
