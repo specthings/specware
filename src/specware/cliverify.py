@@ -28,20 +28,25 @@ Provides a command line interface to verify the specification item format.
 
 import sys
 
-from specitems import (ItemCache, ItemCacheConfig, create_argument_parser,
-                       init_logging, verify_specification_format)
+from specitems import (ItemCache, ItemCacheConfig, get_arguments,
+                       verify_specification_format)
 
 from specware import SpecWareTypeProvider
 
 
 def cliverify(argv: list[str] = sys.argv):
     """ Verify the specification item format. """
-    parser = create_argument_parser()
-    parser.add_argument("spec_directories",
-                        nargs="+",
-                        metavar="SPEC_DIRECTORIES")
-    args = parser.parse_args(argv[1:])
-    init_logging(args)
+
+    def _add_arguments(parser):
+        parser.add_argument("spec_directories",
+                            nargs="+",
+                            metavar="SPEC_DIRECTORY",
+                            help="specification item directory")
+
+    args = get_arguments(argv[1:],
+                         default_log_level="WARNING",
+                         description=cliverify.__doc__,
+                         add_arguments=(_add_arguments, ))
     config = ItemCacheConfig(paths=args.spec_directories,
                              cache_directory="cache-specware")
     type_provider = SpecWareTypeProvider({})
