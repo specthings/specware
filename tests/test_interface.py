@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the interface module. """
 
-# Copyright (C) 2020 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -219,7 +219,7 @@ struct Struct;
  * Function description.  References to xs, VeryLongFunction(), ::Integer,
  * #Enum, #DEFINE, VERY_LONG_MACRO(), #Variable, ::ENUMERATOR_0, Struct, @ref
  * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is ``Param1``.
- * Mention struct US.
+ * Mention struct US.  Cite Misc.
  *
  * @code
  * these two lines
@@ -877,7 +877,7 @@ struct Struct;
  * Function description.  References to xs, VeryLongFunction(), ::Integer,
  * #Enum, #DEFINE, VERY_LONG_MACRO(), #Variable, ::ENUMERATOR_0, Struct, @ref
  * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is ``Param1``.
- * Mention struct US.
+ * Mention struct US.  Cite Misc.
  *
  * @code
  * these two lines
