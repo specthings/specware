@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides methods to generate the interface documentation. """
 
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,8 +24,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from specitems import (Item, ItemGetValue, ItemGetValueContext, MarkdownMapper,
-                       SphinxMapper, get_reference, make_label)
+from specitems import (BibTeXCitationProvider, Item, ItemGetValue,
+                       ItemGetValueContext, MarkdownMapper, SphinxMapper,
+                       get_reference, make_label)
 
 from .contentc import get_value_header_file
 
@@ -115,6 +116,7 @@ class SphinxInterfaceMapper(SphinxMapper):
     def __init__(self, item: Item, group_uids: list[str]):
         super().__init__(item)
         self._group_uids = set(group_uids)
+        BibTeXCitationProvider(self)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",
                            _get_value_sphinx_appl_config_option)
         self.add_get_value("interface/appl-config-option/feature:/name",
@@ -262,6 +264,7 @@ class MarkdownInterfaceMapper(MarkdownMapper):
     def __init__(self, item: Item, group_uids: list[str]):
         super().__init__(item)
         self._group_uids = set(group_uids)
+        BibTeXCitationProvider(self)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",
                            _get_value_markdown_appl_config_option)
         self.add_get_value("interface/appl-config-option/feature:/name",

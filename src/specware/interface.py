@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides methods to generate C language interfaces. """
 
-# Copyright (C) 2020, 2021 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -60,6 +60,10 @@ def _get_group_identifiers(groups: _ItemMap) -> list[str]:
     return [item["identifier"] for item in groups.values()]
 
 
+def _get_cite(ctx: ItemGetValueContext) -> str:
+    return ctx.item["title"]
+
+
 class _InterfaceMapper(ItemMapper):
 
     def __init__(self, node: "_Node"):
@@ -99,6 +103,8 @@ class _InterfaceMapper(ItemMapper):
         self.add_get_value("interface/unspecified-union:/name",
                            get_value_unspecified_type)
         self.add_get_value("interface/variable:/name", self._get_value_hash)
+        self.add_get_value("reference:/cite", _get_cite)
+        self.add_get_value("reference:/cite-long", _get_cite)
 
     @contextmanager
     def code(self) -> Iterator[None]:

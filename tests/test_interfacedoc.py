@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the interfacedoc module. """
 
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -1055,7 +1055,7 @@ Function description. References to {term}`xs <x>`,
 {ref}`InterfaceEnum`, {c:macro}`DEFINE`, {ref}`InterfaceVERYLONGMACRO`,
 Variable, {c:macro}`ENUMERATOR_0`, `struct Struct`, {ref}`a`, interface,
 {ref}`GroupA`, and Group F. Second parameter is `Param1`. Mention
-{c:type}`struct US`.
+{c:type}`struct US`. Cite {cite}`RefMisc`.
 
 ```foobar
 these two lines
