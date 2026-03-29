@@ -28,10 +28,11 @@ import pytest
 
 from specitems import EmptyItemCache, Item, ItemCache, ItemSelection
 
-from specware import (augment_with_test_links, gather_api_items,
-                      gather_related_items, get_items_by_type_map,
-                      get_constraint_items, get_interface_items,
-                      get_interface_and_requirement_items,
+from specware import (augment_with_test_case_links, augment_with_test_links,
+                      gather_api_items, gather_related_items,
+                      gather_test_cases, gather_benchmarks_and_test_suites,
+                      get_items_by_type_map, get_constraint_items,
+                      get_interface_items, get_interface_and_requirement_items,
                       get_requirement_items, get_validation_items,
                       is_pre_qualified, is_validation_by_test,
                       recursive_is_enabled, validate)
@@ -130,8 +131,9 @@ def _uids(items):
 
 
 def test_validate(tmpdir):
-    item_cache = create_item_cache(tmpdir, "spec-rtems")
+    item_cache = create_item_cache(tmpdir, ["spec-rtems", "spec-rtems-2"])
     augment_with_test_links(item_cache)
+    augment_with_test_case_links(item_cache)
     root = item_cache["/req/root"]
     assert "validated" not in root.view
     validate(root, _validate)
@@ -188,6 +190,17 @@ def test_validate(tmpdir):
         "/val/disable-newlib-reentrancy",
         "/val/perf",
         "/val/tc",
+        "/val/ts",
+    ]
+    test_suites = []
+    gather_benchmarks_and_test_suites(root, test_suites)
+    assert _uids(test_suites) == [
+        "/val/ts",
+    ]
+    test_cases = []
+    gather_test_cases(item_cache["/val/ts"], test_cases)
+    assert _uids(test_cases) == [
+        "/val/tc",
     ]
     items_by_type = get_items_by_type_map(related_items)
     assert sorted(items_by_type) == [
@@ -211,6 +224,7 @@ def test_validate(tmpdir):
         "requirement/non-functional/quality",
         "runtime-measurement-test",
         "test-case",
+        "test-suite",
         "validation/by-inspection",
     ]
     assert _uids(get_constraint_items(items_by_type)) == [

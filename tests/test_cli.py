@@ -64,6 +64,8 @@ build:
   base-directory-map:
   - source: {spec_build}
     target: {tmpdir}
+  - source: {spec_rtems}
+    target: {tmpdir}
 glossary:
   project-groups:
   - /glossary-general
@@ -91,6 +93,8 @@ interface-documentation:
 validation:
   base-directory-map:
   - source: {spec_build}
+    target: {tmpdir}
+  - source: {spec_rtems}
     target: {tmpdir}
 spec-documentation:
   target: items.rst

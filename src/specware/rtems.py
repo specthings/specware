@@ -143,6 +143,27 @@ def gather_related_items(root: Item) -> list[Item]:
     return sorted(related_items)
 
 
+def gather_benchmarks_and_test_suites(item: Item,
+                                      test_suites: list[Item]) -> None:
+    """ Gather all benchmarks and test suites associated with the item. """
+    for child in item.children(("requirement-refinement", "validation")):
+        if child.type in ("memory-benchmark", "test-suite"):
+            test_suites.append(child)
+        else:
+            gather_benchmarks_and_test_suites(child, test_suites)
+
+
+def gather_test_cases(item: Item, test_cases: list[Item]) -> None:
+    """ Gather all test cases associated with the item. """
+    for child in item.children(("runtime-measurement-request", "test-case")):
+        assert child.type in ("runtime-measurement-test",
+                              "requirement/functional/action",
+                              "requirement/non-functional/performance-runtime",
+                              "test-case")
+        test_cases.append(child)
+        gather_test_cases(child, test_cases)
+
+
 def get_items_by_type_map(items: Iterable[Item]) -> dict[str, list[Item]]:
     """ Get a dictionary with item sets by type. """
     items_by_type: dict[str, list[Item]] = {}
@@ -238,13 +259,16 @@ def _validate_design_target(_item: Item) -> bool:
 
 
 def _validate_test_case(item: Item) -> bool:
-    try:
-        # Make sure that the test case links to a proper test suite.  For this
-        # a corresponding build specification is required.
-        item.parent("test-case").parent("requirement-refinement")
-    except IndexError:
-        return False
-    return True
+    # Make sure that the test case links to proper test suites.  For this a
+    # corresponding build specification is required.
+    status = False
+    for test_suite in item.parents("test-case"):
+        try:
+            test_suite.parent("requirement-refinement")
+        except IndexError:
+            return False
+        status = True
+    return status
 
 
 def _validate_constraint(item: Item) -> bool:
