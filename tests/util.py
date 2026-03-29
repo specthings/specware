@@ -31,15 +31,19 @@ from specitems import ItemCache, ItemCacheConfig, item_is_enabled, load_data
 from specware import SpecWareTypeProvider
 
 
-def create_item_cache(tmp_dir: str, spec_dir: str) -> dict[str, str]:
+def create_item_cache(tmp_dir: str, spec_dir: str | list[str]) -> ItemCache:
     """
     Create an item cache configuration and copies a specification
     directory to the temporary tests directory.
     """
+    if isinstance(spec_dir, str):
+        spec_dir = [spec_dir]
     base = os.path.dirname(__file__)
-    config = ItemCacheConfig(
-        paths=[os.path.normpath(os.path.join(base, spec_dir))],
-        cache_directory=os.path.normpath(os.path.join(tmp_dir, "cache")))
+    config = ItemCacheConfig(paths=[
+        os.path.normpath(os.path.join(base, path)) for path in spec_dir
+    ],
+                             cache_directory=os.path.normpath(
+                                 os.path.join(tmp_dir, "cache")))
     uid = "/spec/other"
     other_types = {uid: load_data(os.path.join(base, f"spec-types/{uid}.yml"))}
     return ItemCache(config,
