@@ -142,12 +142,12 @@ def test_validate(tmpdir):
     assert is_validation_by_test(item_cache["/req/clock-gettime"])
     api_items = {}
     gather_api_items(item_cache, api_items)
-    assert [
-        (group, [item.uid for item in group_items])
-        for group, group_items in sorted(api_items.items())
-    ] == [("Application Configuration",
-           ["/if/clock-gettime", "/if/clock-nanosleep"]),
-          ("General System Configuration", ["/if/disable-newlib-reentrancy"])]
+    assert [(group, [item.uid for item in group_items])
+            for group, group_items in sorted(api_items.items())
+            ] == [("Application Configuration",
+                   ["/if/clock-gettime", "/if/clock-nanosleep"]),
+                  ("Application Configuration Group Name",
+                   ["/if/disable-newlib-reentrancy"])]
 
     related_items = gather_related_items(root)
     assert _uids(related_items) == [
