@@ -1,8 +1,8 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 1988, 2008 On-Line Applications Research Corporation (OAR)
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
 description: |
-  This section describes general system configuration options.
+  Application configuration group description.
 enabled-by: true
 index-entries: []
 interface-type: appl-config-group
@@ -11,6 +11,6 @@ links:
   uid: domain
 - role: requirement-refinement
   uid: ../req/api
-name: General System Configuration
+name: Application Configuration Group Name
 text: ''
 type: interface
