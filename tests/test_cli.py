@@ -116,6 +116,15 @@ def test_cliexport(tmpdir):
     config_file = _create_specview_yml(tmpdir)
     cliexport(["command", "--config-file", config_file])
     cliexport(["command", "--config-file", config_file, "tc.c"])
+    cliexport([
+        "command", "--config-file", config_file, "--no-code",
+        "--no-documentation"
+    ])
+    cliexport([
+        "command", "--config-file", config_file,
+        "--no-application-configuration-code", "--no-interface-code",
+        "--no-validation-code"
+    ])
 
 
 def test_cliexportheader(tmpdir):

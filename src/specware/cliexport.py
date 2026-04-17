@@ -57,11 +57,26 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                         type=str,
                         default=None,
                         help="use this configuration file")
-    parser.add_argument('--format',
+    parser.add_argument("--format",
                         choices=["markdown", "rest"],
                         type=str.lower,
                         default="markdown",
                         help="the output format of documentation files")
+    parser.add_argument("--no-application-configuration-code",
+                        action="store_true",
+                        help="do not generate application configuration code")
+    parser.add_argument("--no-code",
+                        action="store_true",
+                        help="do not generate source code")
+    parser.add_argument("--no-documentation",
+                        action="store_true",
+                        help="do not generate documentation sources")
+    parser.add_argument("--no-interface-code",
+                        action="store_true",
+                        help="do not generate interface code")
+    parser.add_argument("--no-validation-code",
+                        action="store_true",
+                        help="do not generate validation code")
     parser.add_argument("targets",
                         metavar="TARGET",
                         nargs="*",
@@ -73,28 +88,33 @@ def _generate_more(item_cache: ItemCache, config: dict,
                    args: argparse.Namespace) -> None:
     create_content, create_mapper, create_interface_mapper = _DOC_FORMAT[
         args.format]
-    generate_interfaces(config["interface"], item_cache)
     group_uids = [
         doc["group"] for doc in config["interface-documentation"]["groups"]
     ]
-    generate_application_configuration(config["appl-config"], group_uids,
-                                       item_cache, create_interface_mapper,
-                                       create_content)
-    some_item = next(iter(item_cache.values()))
-    generate_specification_documentation(
-        create_config(config["spec-documentation"], SpecDocumentConfig),
-        item_cache, create_mapper(some_item), create_content)
-    glossary_documents = config["glossary"].pop("documents")
-    glossary_config = create_config(config["glossary"], GlossaryConfig)
-    for document in glossary_documents:
-        glossary_config.documents.append(
-            create_config(document, DocumentGlossaryConfig))
-    generate_glossary(glossary_config, item_cache,
-                      create_interface_mapper(some_item, group_uids),
-                      create_content)
-    generate_interface_documentation(config["interface-documentation"],
-                                     item_cache, create_interface_mapper,
-                                     create_content)
+    if not args.no_code:
+        if not args.no_interface_code:
+            generate_interfaces(config["interface"], item_cache)
+        if not args.no_application_configuration_code:
+            generate_application_configuration(config["appl-config"],
+                                               group_uids, item_cache,
+                                               create_interface_mapper,
+                                               create_content)
+    if not args.no_documentation:
+        some_item = next(iter(item_cache.values()))
+        generate_specification_documentation(
+            create_config(config["spec-documentation"], SpecDocumentConfig),
+            item_cache, create_mapper(some_item), create_content)
+        glossary_documents = config["glossary"].pop("documents")
+        glossary_config = create_config(config["glossary"], GlossaryConfig)
+        for document in glossary_documents:
+            glossary_config.documents.append(
+                create_config(document, DocumentGlossaryConfig))
+        generate_glossary(glossary_config, item_cache,
+                          create_interface_mapper(some_item, group_uids),
+                          create_content)
+        generate_interface_documentation(config["interface-documentation"],
+                                         item_cache, create_interface_mapper,
+                                         create_content)
 
 
 def cliexport(argv: list[str] = sys.argv):
@@ -113,12 +133,13 @@ def cliexport(argv: list[str] = sys.argv):
             assert group.type == "glossary/group"
             augment_glossary_terms(group, [])
 
-        config_validation = config["validation"]
-        for mapping in config_validation["base-directory-map"]:
-            for key, value in mapping.items():
-                mapping[key] = os.path.normpath(
-                    os.path.join(working_directory, value))
-        generate_validation(config_validation, item_cache, args.targets)
+        if not args.no_code and not args.no_validation_code:
+            config_validation = config["validation"]
+            for mapping in config_validation["base-directory-map"]:
+                for key, value in mapping.items():
+                    mapping[key] = os.path.normpath(
+                        os.path.join(working_directory, value))
+            generate_validation(config_validation, item_cache, args.targets)
 
         if not args.targets:
             _generate_more(item_cache, config, args)
