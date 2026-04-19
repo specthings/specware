@@ -248,6 +248,7 @@ def test_validate(tmpdir):
         "/req/api",
     ]
     assert _uids(get_requirement_items(items_by_type)) == [
+        "/glossary-general",
         "/req/clock-gettime",
         "/req/clock-nanosleep",
         "/req/disable-newlib-reentrancy",
@@ -263,6 +264,7 @@ def test_validate(tmpdir):
         "/req/usage-constraints",
     ]
     assert _uids(get_interface_and_requirement_items(items_by_type)) == [
+        "/glossary-general",
         "/if/clock-gettime",
         "/if/clock-nanosleep",
         "/if/disable-newlib-reentrancy",

@@ -214,7 +214,7 @@ def get_requirement_items(items_by_type: dict[str, list[Item]]) -> list[Item]:
     return get_items_by_types(
         items_by_type,
         get_item_types_by_prefix(
-            items_by_type, "requirement/",
+            items_by_type, ("glossary/group", "requirement/"),
             ("requirement/non-functional/interface-requirement", )))
 
 
@@ -223,8 +223,8 @@ def get_interface_and_requirement_items(
     """ Get a sorted list of the interface and requirement items. """
     return get_items_by_types(
         items_by_type,
-        get_item_types_by_prefix(items_by_type,
-                                 ("interface/", "requirement/")))
+        get_item_types_by_prefix(
+            items_by_type, ("interface/", "glossary/group", "requirement/")))
 
 
 def get_validation_items(items_by_type: dict[str, list[Item]]) -> list[Item]:
