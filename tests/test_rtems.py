@@ -138,6 +138,8 @@ def test_validate(tmpdir):
     assert "validated" not in root.view
     validate(root, _validate)
     assert not root.view["validated"]
+    assert item_cache["/glossary-general"].view["validated"]
+    assert not item_cache["/glossary-empty"].view["validated"]
     assert not is_validation_by_test(root)
     assert is_validation_by_test(item_cache["/req/clock-gettime"])
     api_items = {}
@@ -154,13 +156,8 @@ def test_validate(tmpdir):
         "/constraint/bad",
         "/constraint/constant-not-pre-qualified",
         "/constraint/terminate",
+        "/glossary-empty",
         "/glossary-general",
-        "/glossary/api",
-        "/glossary/bad",
-        "/glossary/ecss",
-        "/glossary/softwareproduct",
-        "/glossary/sourcecode",
-        "/glossary/target",
         "/if/clock-gettime",
         "/if/clock-nanosleep",
         "/if/disable-newlib-reentrancy",
@@ -206,7 +203,6 @@ def test_validate(tmpdir):
     assert sorted(items_by_type) == [
         "constraint",
         "glossary/group",
-        "glossary/term",
         "interface/appl-config-group",
         "interface/appl-config-option/feature-enable",
         "interface/domain",
@@ -248,6 +244,7 @@ def test_validate(tmpdir):
         "/req/api",
     ]
     assert _uids(get_requirement_items(items_by_type)) == [
+        "/glossary-empty",
         "/glossary-general",
         "/req/clock-gettime",
         "/req/clock-nanosleep",
@@ -264,6 +261,7 @@ def test_validate(tmpdir):
         "/req/usage-constraints",
     ]
     assert _uids(get_interface_and_requirement_items(items_by_type)) == [
+        "/glossary-empty",
         "/glossary-general",
         "/if/clock-gettime",
         "/if/clock-nanosleep",

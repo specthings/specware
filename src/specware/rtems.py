@@ -112,8 +112,8 @@ _VALIDATION_LEAF = tuple(
     itertools.chain(_VALIDATION_METHOD.keys(), _CONTAINER_TYPE))
 
 _CHILD_ROLES = ("requirement-refinement", "interface-ingroup",
-                "interface-ingroup-hidden", "interface-function",
-                "glossary-member", "test-case", "validation")
+                "interface-ingroup-hidden", "interface-function", "test-case",
+                "validation")
 
 _PARENT_ROLES = ("function-implementation", "interface-enumerator",
                  "performance-runtime-limits")
@@ -243,11 +243,13 @@ def is_validation_by_test(item: Item) -> bool:
     return _VALIDATION_METHOD.get(item.type, "") == "validation by test"
 
 
-def _validate_glossary_term(item: Item, validated: bool) -> bool:
-    for item_2 in item.parents("glossary-member"):
-        if item_2.type != "glossary/group":
-            return False
-    return validated
+def _validate_glossary_group(item: Item, validated: bool) -> bool:
+    # A glossary group shall have at least one term and all members shall be
+    # terms.
+    terms = list(item.children("glossary-member"))
+    has_term = bool(terms)
+    all_terms_valid = all(term.type == "glossary/term" for term in terms)
+    return validated and has_term and all_terms_valid
 
 
 def _validate_design_target(_item: Item, validated: bool) -> bool:
@@ -280,7 +282,7 @@ def _validate_constraint(item: Item, validated: bool) -> bool:
 
 _VALIDATOR = {
     "constraint": _validate_constraint,
-    "glossary/term": _validate_glossary_term,
+    "glossary/group": _validate_glossary_group,
     "requirement/non-functional/design-target": _validate_design_target,
     "test-case": _validate_test_case
 }
