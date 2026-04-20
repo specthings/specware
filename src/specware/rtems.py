@@ -243,22 +243,22 @@ def is_validation_by_test(item: Item) -> bool:
     return _VALIDATION_METHOD.get(item.type, "") == "validation by test"
 
 
-def _validate_glossary_term(item: Item) -> bool:
+def _validate_glossary_term(item: Item, validated: bool) -> bool:
     for item_2 in item.parents("glossary-member"):
         if item_2.type != "glossary/group":
             return False
-    return True
+    return validated
 
 
-def _validate_design_target(_item: Item) -> bool:
+def _validate_design_target(_item: Item, validated: bool) -> bool:
     # Design targets are validated through tests results.  A design target is
     # validated, if at least one test result is available and there are no
     # unexpected failures in the test results.  Test results are not available
     # within the scope of the specware package.
-    return True
+    return validated
 
 
-def _validate_test_case(item: Item) -> bool:
+def _validate_test_case(item: Item, validated: bool) -> bool:
     # Make sure that the test case links to proper test suites.  For this a
     # corresponding build specification is required.
     status = False
@@ -267,15 +267,15 @@ def _validate_test_case(item: Item) -> bool:
             test_suite.parent("requirement-refinement")
         except IndexError:
             return False
-        status = True
+        status = validated
     return status
 
 
-def _validate_constraint(item: Item) -> bool:
+def _validate_constraint(item: Item, validated: bool) -> bool:
     for item_2 in item.parents("requirement-refinement"):
         if item_2.uid != "/req/usage-constraints":
             return False
-    return True
+    return validated
 
 
 _VALIDATOR = {
@@ -314,11 +314,10 @@ def _validate_tree(item: Item, validator: Callable[[Item, bool], bool],
     type_name = item.type
     if type_name in _SELF_VALIDATION:
         validation_dependencies.append((item.uid, _SELF_VALIDATION[type_name]))
+    elif type_name in _VALIDATOR:
+        validated = _VALIDATOR[type_name](item, validated)
     elif not validation_dependencies:
-        if type_name in _VALIDATOR:
-            validated = _VALIDATOR[type_name](item)
-        else:
-            validated = (not pre_qualified) or (type_name in _VALIDATION_LEAF)
+        validated = (not pre_qualified) or (type_name in _VALIDATION_LEAF)
     if type_name in _CONTAINER_TYPE:
         validation_dependencies.extend(
             (item_2.uid, "interface placement")
