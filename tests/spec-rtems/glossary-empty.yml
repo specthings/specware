@@ -1,0 +1,12 @@
+SPDX-License-Identifier: CC-BY-SA-4.0
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+glossary-type: group
+links:
+- role: requirement-refinement
+  uid: req/root
+name: Empty
+text: |
+  This glossary is empty.
+type: glossary
