@@ -88,7 +88,7 @@ def _generate_introduction(content: TextContent, mapper: ItemMapper,
                 brief = f" - {brief}"
             else:
                 brief = ""
-            ref = content.get_reference(make_label(f"Interface {name}"))
+            ref = content.reference(make_label(f"Interface {name}"))
             content.add_list_item(f"{ref}{brief}")
     content.add_licence_and_copyrights()
     content.write(target, beautify=True)
