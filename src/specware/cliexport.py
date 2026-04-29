@@ -101,9 +101,12 @@ def _generate_more(item_cache: ItemCache, config: dict,
                                                create_content)
     if not args.no_documentation:
         some_item = next(iter(item_cache.values()))
-        generate_specification_documentation(
-            create_config(config["spec-documentation"], SpecDocumentConfig),
-            item_cache, create_mapper(some_item), create_content)
+        mapper = create_mapper(some_item)
+        content = create_content()
+        spec_doc_config = create_config(config["spec-documentation"],
+                                        SpecDocumentConfig)
+        spec_doc_config.add_get_spec_name(mapper, content)
+        generate_specification_documentation(content, spec_doc_config, mapper)
         glossary_documents = config["glossary"].pop("documents")
         glossary_config = create_config(config["glossary"], GlossaryConfig)
         for document in glossary_documents:
