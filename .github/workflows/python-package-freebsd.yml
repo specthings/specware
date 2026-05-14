@@ -5,19 +5,28 @@
 name: Python package on FreeBSD
 on:
   push:
-    branches: [ "main" ]
+    branches:
+    - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+    - main
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     steps:
     - uses: actions/checkout@v6
+    - name: Cache for UV inside VM
+      uses: actions/cache@v5
+      with:
+        path: .freebsd/uv
+        key: freebsd-uv-${{ hashFiles('uv.lock') }}
+        restore-keys: |
+          freebsd-uv-
     - name: Make
       uses: vmactions/freebsd-vm@v1
       with:
         run: |
+          pkg update -f
           pkg install -y python3 py311-maturin py311-sqlite3 uv gmake rust
+          export UV_CACHE_DIR="$GITHUB_WORKSPACE/.freebsd/uv"
           gmake
