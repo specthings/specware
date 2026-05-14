@@ -19,8 +19,5 @@ jobs:
       uses: vmactions/freebsd-vm@v1
       with:
         run: |
-          pkg install -y python3
-          pkg install -y py311-sqlite3
-          pkg install -y uv
-          pkg install -y gmake
+          pkg install -y python3 py311-maturin py311-sqlite3 uv gmake rust
           gmake
