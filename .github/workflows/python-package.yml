@@ -5,28 +5,57 @@
 name: Python package
 on:
   push:
-    branches: [ "main" ]
+    branches:
+    - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+    - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
-        os: [macos-latest, ubuntu-latest]
+        python_version:
+        - '3.11'
+        - '3.12'
+        - '3.13'
+        - '3.14'
+        os:
+        - macos-latest
+        - ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python_version }}
       uses: actions/setup-python@v6
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python_version }}
     - name: Set up uv
       uses: astral-sh/setup-uv@v7
       with:
         enable-cache: true
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python_version }}
         version: 0.10.12
     - name: Make
-      run: make
+      id: make
+      run: |
+        make
+        git add -N .
+        {
+           echo "After formatting, the following changes were pending:"
+           echo '```diff'
+           git diff
+           echo '```'
+        } >.github/status/comment.md
+        status=$(test -z "$(git status --short)"; echo $?)
+        echo "status=$status" >>$GITHUB_OUTPUT
+        exit "$status"
+    - name: Upload comment artifact
+      if: always() && matrix.os == 'ubuntu-latest' && matrix.python_version == '3.13' && steps.make.outputs.status == '1' && github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: comment-md
+        path: .github/status/comment.md

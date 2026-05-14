@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
+# Copyright (C) 2026 embedded brains GmbH & Co. KG
+
+name: Manage PR comment
+on:
+  workflow_run:
+    workflows:
+    - Python package
+    types:
+    - completed
+jobs:
+  comment:
+    if: ${{ github.event.workflow_run.event == 'pull_request' && (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure') }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+    - name: Get associated PR number
+      id: pr
+      uses: actions/github-script@v7
+      env:
+        REPOSITORY: ${{ github.repository }}
+        COMMIT: ${{ github.event.workflow_run.head_sha }}
+      with:
+        script: |
+          const [owner, repo] = process.env.REPOSITORY.split('/');
+          const commit = process.env.COMMIT;
+          const pull_requests = await github.rest.pulls.list({
+            owner,
+            repo,
+            state: 'open',
+            per_page: 100
+          });
+          const match = pull_requests.data.find(pr => pr.head.sha === commit);
+          if (match) {
+            core.info(`PR #${match.number} matches with this workflow run`);
+            core.setOutput('pr', match.number);
+          } else {
+            core.setFailed('No PR is associated with this workflow run');
+          }
+    - name: Delete comment
+      if: ${{ github.event.workflow_run.conclusion == 'success' }}
+      uses: marocchino/sticky-pull-request-comment@v3
+      with:
+        number: ${{ steps.pr.outputs.pr }}
+        delete: true
+    - name: Download artifacts
+      if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+      uses: actions/download-artifact@v4
+      with:
+        name: comment-md
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ github.token }}
+        path: .
+    - name: Post comment
+      if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+      uses: marocchino/sticky-pull-request-comment@v3
+      with:
+        number: ${{ steps.pr.outputs.pr }}
+        path: comment.md
