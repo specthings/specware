@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the validation module. """
 
-# Copyright (C) 2020, 2024 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@ from specitems import EmptyItemCache, Item, ItemCache, item_is_enabled
 from specware import (augment_with_test_case_links, generate_validation,
                       SpecWareTypeProvider, TransitionMap)
 
-from .util import create_item_cache
+from .util import create_item_cache, get_and_clear_log
 
 
 def test_validation(tmpdir):
@@ -2698,7 +2698,7 @@ def _add_item(item_cache, uid, data, item_type):
     return item
 
 
-def test_validation_invalid_actions(tmpdir):
+def test_validation_invalid_actions(caplog, tmpdir):
     item_cache = EmptyItemCache(SpecWareTypeProvider({}))
     validation_config = {
         "base-directory-map": [{
@@ -2779,10 +2779,9 @@ def test_validation_invalid_actions(tmpdir):
         "requirement",
     }
     _add_item(item_cache, "/a", action_data, "requirement/functional/action")
-    match = ("the source file 'a.c' is not a source file of an "
-             "item of type 'build/test-program'")
-    with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+    generate_validation(validation_config, item_cache)
+    assert ("the source file 'a.c' is not a source file of an "
+            "item of type 'build/test-program'") in get_and_clear_log(caplog)
     test_program_data = {
         "SPDX-License-Identifier": spdx,
         "copyrights": [copyright],
