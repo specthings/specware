@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides methods to generate C language validation tests. """
 
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,6 +29,7 @@
 import itertools
 import functools
 import os
+import logging
 import re
 from typing import Any, Optional
 
@@ -1308,9 +1309,10 @@ class _SourceFile:
         """
         base_directory = self._base_directory
         if base_directory is None:
-            raise ValueError(
-                f"the source file '{self._file}' is not a source file of "
-                "an item of type 'build/test-program'")
+            logging.error(
+                "the source file '%s' is not a source file of "
+                "an item of type 'build/test-program'", self._file)
+            return
         content = CContent()
         includes: list[CInclude] = []
         local_includes: list[CInclude] = []
