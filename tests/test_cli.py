@@ -134,11 +134,18 @@ def test_cliexportheader(tmpdir):
     ])
 
 
-def test_cliverify(tmpdir, caplog):
+def test_cliverify_good(tmpdir):
     spec_dir = Path(__file__).parent / "spec-types"
     with contextlib.chdir(tmpdir):
-        cliverify(["command", "--log-level=ERROR", str(spec_dir)])
-    assert get_and_clear_log(caplog) == ""
+        exit_code = cliverify(["command", "--log-level=ERROR", str(spec_dir)])
+        assert exit_code == 0
+
+
+def test_cliverify_bad(tmpdir):
+    spec_dir = Path(__file__).parent / "spec-invalid-format"
+    with contextlib.chdir(tmpdir):
+        exit_code = cliverify(["command", "--log-level=ERROR", str(spec_dir)])
+        assert exit_code == 1
 
 
 def test_cliview(tmpdir):
