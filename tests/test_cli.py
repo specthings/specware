@@ -114,17 +114,21 @@ spec-documentation:
 
 def test_cliexport(tmpdir):
     config_file = _create_specview_yml(tmpdir)
-    cliexport(["command", "--config-file", config_file])
-    cliexport(["command", "--config-file", config_file, "tc.c"])
-    cliexport([
+    exit_code = cliexport(["command", "--config-file", config_file])
+    assert exit_code == 0
+    exit_code = cliexport(["command", "--config-file", config_file, "tc.c"])
+    assert exit_code == 0
+    exit_code = cliexport([
         "command", "--config-file", config_file, "--no-code",
         "--no-documentation"
     ])
-    cliexport([
+    assert exit_code == 0
+    exit_code = cliexport([
         "command", "--config-file", config_file,
         "--no-application-configuration-code", "--no-interface-code",
         "--no-validation-code"
     ])
+    assert exit_code == 0
 
 
 def test_cliexportheader(tmpdir):
