@@ -973,7 +973,7 @@ wheels = [
 
 [[package]]
 name = "specware"
-version = "1.2.2.dev1"
+version = "1.2.2"
 source = { editable = "." }
 dependencies = [
     { name = "specitems" },
