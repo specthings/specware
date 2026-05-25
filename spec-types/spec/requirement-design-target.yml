@@ -33,7 +33,7 @@ spec-info:
       target-hash:
         description: |
           It shall be the target hash.
-        spec-type: str
+        spec-type: str-or-list-str
     description: |
       This set of attributes specifies a design ${/glossary/target:/term}.
       Targets shall provide
