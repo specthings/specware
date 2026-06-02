@@ -968,13 +968,14 @@ dependencies = [
     { name = "mdformat-tables" },
     { name = "pyyaml" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/13/e738985e5b922c697821321c14d0d824a24fcf20b0f8dd9a03f76508d389/specitems-1.5.0.tar.gz", hash = "sha256:dd64fa50f3fb16dc804abe4d471266da83426c8f1caf760a81e7ae90fb64cc58", size = 57193, upload-time = "2026-06-02T02:16:24.076Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/83/56/747796c9f2abc9f86c65402386219582f1ba8271c52a8b6e2d524c3ae29d/specitems-1.5.0-py3-none-any.whl", hash = "sha256:8c68fcc17c441da6e0e52370e685f2525597c45eaff7276399b8e04011d97833", size = 80509, upload-time = "2026-06-02T02:16:23.131Z" },
 ]
 
 [[package]]
 name = "specware"
-version = "1.2.4.dev1"
+version = "1.2.4"
 source = { editable = "." }
 dependencies = [
     { name = "specitems" },
