@@ -261,9 +261,9 @@ def _states(transition_map: TransitionMap, co_idx: int,
 def _action_compact_table(item: Item) -> None:
     transition_map = TransitionMap(item, "N/A")
     rows: list[Iterable[str | int]] = [
-        ("Pre-Conditions", ) + (ROW_SPAN, ) *
+        ("Pre-Conditions", ) + (COL_SPAN, ) *
         (transition_map.pre_co_count - 1) + ("Post-Conditions", ) +
-        (ROW_SPAN, ) * (transition_map.post_co_count - 1)
+        (COL_SPAN, ) * (transition_map.post_co_count - 1)
     ]
     rows.append(
         tuple(
@@ -274,16 +274,16 @@ def _action_compact_table(item: Item) -> None:
             item.cache.enabled_set):
         if post_co[0]:
             post_co_row = ((transition_map.skip_idx_to_name(post_co[0]), ) +
-                           (ROW_SPAN, ) * (transition_map.post_co_count - 1))
+                           (COL_SPAN, ) * (transition_map.post_co_count - 1))
             post_co_col_span: tuple[str | int,
-                                    ...] = ((COL_SPAN, ) +
-                                            (COL_SPAN | ROW_SPAN, ) *
+                                    ...] = ((ROW_SPAN, ) +
+                                            (ROW_SPAN | COL_SPAN, ) *
                                             (transition_map.post_co_count - 1))
         else:
             post_co_row = tuple(
                 transition_map.post_co_idx_st_idx_to_st_name(co_idx, st_idx)
                 for co_idx, st_idx in enumerate(post_co[1:]))
-            post_co_col_span = (COL_SPAN, ) * transition_map.post_co_count
+            post_co_col_span = (ROW_SPAN, ) * transition_map.post_co_count
         for pre_co in pre_co_collection:
             pre_co_row = tuple(
                 _states(transition_map, co_idx, co_states)
