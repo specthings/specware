@@ -46,7 +46,7 @@ from specware import (MarkdownInterfaceMapper, SpecWareTypeProvider,
                       generate_validation, load_specware_config)
 
 _DOC_FORMAT = {
-    "markdown": (MarkdownContent, MarkdownMapper, MarkdownInterfaceMapper),
+    "myst": (MarkdownContent, MarkdownMapper, MarkdownInterfaceMapper),
     "rest": (SphinxContent, SphinxMapper, SphinxInterfaceMapper)
 }
 
@@ -58,9 +58,9 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                         default=None,
                         help="use this configuration file")
     parser.add_argument("--format",
-                        choices=["markdown", "rest"],
+                        choices=["myst", "rest"],
                         type=str.lower,
-                        default="markdown",
+                        default="myst",
                         help="the output format of documentation files")
     parser.add_argument("--no-application-configuration-code",
                         action="store_true",
