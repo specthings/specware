@@ -170,8 +170,22 @@ def test_cliview(tmpdir):
         "/req/clock-nanosleep"
     ])
     cliview([
+        "command", "--config-file", config_file, "--filter=action-table",
+        "--format=commonmark", "/req/clock-nanosleep"
+    ])
+    cliview([
         "command", "--config-file", config_file,
         "--filter=action-compact-table", "/req/clock-nanosleep"
+    ])
+    cliview([
+        "command", "--config-file", config_file,
+        "--filter=action-compact-table", "--format=commonmark",
+        "/req/clock-nanosleep"
+    ])
+    cliview([
+        "command", "--config-file", config_file,
+        "--filter=action-compact-table", "--format=myst",
+        "/req/clock-nanosleep"
     ])
     cliview([
         "command", "--config-file", config_file, "--filter=action-list",
@@ -181,6 +195,11 @@ def test_cliview(tmpdir):
     cliview([
         "command", "--config-file", config_file,
         "--filter=action-table-show-skip", "/req/clock-nanosleep"
+    ])
+    cliview([
+        "command", "--config-file", config_file,
+        "--filter=action-table-show-skip", "--format=myst",
+        "/req/clock-nanosleep"
     ])
     cliview(["command", "--config-file", config_file, "--filter=orphan"])
     cliview(
