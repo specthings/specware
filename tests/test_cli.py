@@ -120,13 +120,13 @@ def test_cliexport(tmpdir):
     assert exit_code == 0
     exit_code = cliexport([
         "command", "--config-file", config_file, "--no-code",
-        "--no-documentation"
+        "--no-documentation", "--format=myst"
     ])
     assert exit_code == 0
     exit_code = cliexport([
         "command", "--config-file", config_file,
         "--no-application-configuration-code", "--no-interface-code",
-        "--no-validation-code"
+        "--no-validation-code", "--format=rest"
     ])
     assert exit_code == 0
 
