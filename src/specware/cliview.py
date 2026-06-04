@@ -28,16 +28,23 @@ import argparse
 import contextlib
 import itertools
 import sys
-from typing import Any, Optional, Iterable
+from typing import Any, Callable, Optional, Iterable
 
-from specitems import (COL_SPAN, Item, ItemCache, ItemCacheConfig,
-                       ItemGetValueContext, ItemMapper, ROW_SPAN,
-                       SphinxContent, create_config)
+from specitems import (COL_SPAN, CommonMarkContent, Item, ItemCache,
+                       ItemCacheConfig, ItemGetValueContext, ItemMapper,
+                       MarkdownContent, ROW_SPAN, SphinxContent, TextContent,
+                       create_config)
 
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       gather_api_items, gather_build_files,
                       load_specware_config, recursive_is_enabled, Transition,
                       TransitionMap, validate, SpecWareTypeProvider)
+
+_DOC_FORMAT = {
+    "commonmark": CommonMarkContent,
+    "myst": MarkdownContent,
+    "rest": SphinxContent,
+}
 
 _CHILD_ROLES = [
     "requirement-refinement", "interface-ingroup", "interface-ingroup-hidden",
@@ -230,7 +237,8 @@ def _make_row(transition_map: TransitionMap, map_idx: int, variant: Transition,
              for co_idx, st_idx in enumerate(variant.post_cond))))
 
 
-def _action_table(item: Item, show_skip: bool) -> None:
+def _action_table(item: Item, show_skip: bool,
+                  create_content: Callable[[], TextContent]) -> None:
     header = ["Entry", "Descriptor"]
     if show_skip:
         header.append("Skip")
@@ -246,7 +254,7 @@ def _action_table(item: Item, show_skip: bool) -> None:
             item.cache.enabled_set):
         if show_skip or not variant.skip:
             rows.append(_make_row(transition_map, map_idx, variant, show_skip))
-    content = SphinxContent()
+    content = create_content()
     content.add_simple_table(rows)
     print(str(content))
 
@@ -258,7 +266,8 @@ def _states(transition_map: TransitionMap, co_idx: int,
         for st_idx in set(states))
 
 
-def _action_compact_table(item: Item) -> None:
+def _action_compact_table(item: Item,
+                          create_content: Callable[[], TextContent]) -> None:
     transition_map = TransitionMap(item, "N/A")
     rows: list[Iterable[str | int]] = [
         ("Pre-Conditions", ) + (COL_SPAN, ) *
@@ -290,7 +299,7 @@ def _action_compact_table(item: Item) -> None:
                 for co_idx, co_states in enumerate(pre_co))
             rows.append(pre_co_row + post_co_row)
             post_co_row = post_co_col_span
-    content = SphinxContent()
+    content = create_content()
     content.add_grid_table(rows, header_rows=2)
     print(str(content))
 
@@ -365,10 +374,7 @@ def _prepare_mapper(mapper: ItemMapper) -> None:
         mapper.add_get_value(type_path_key, _get_value_dummy)
 
 
-def cliview(argv: list[str] = sys.argv):
-    """ View the specification. """
-
-    # pylint: disable=too-many-branches
+def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config-file",
                         type=str,
@@ -393,11 +399,23 @@ def cliview(argv: list[str] = sys.argv):
         "--enabled",
         help=("a comma separated list of enabled options used to evaluate "
               "enabled-by expressions"))
+    parser.add_argument("--format",
+                        choices=["commonmark", "myst", "rest"],
+                        type=str.lower,
+                        default="rest",
+                        help="the output format used to render tables")
     parser.add_argument("UIDs",
                         metavar="UID",
                         nargs="*",
                         help="an UID of a specification item")
-    args = parser.parse_args(argv[1:])
+    return parser.parse_args(argv[1:])
+
+
+def cliview(argv: list[str] = sys.argv):
+    """ View the specification. """
+
+    # pylint: disable=too-many-branches
+    args = _parse_args(argv)
     config, working_directory = load_specware_config(args.config_file)
     with contextlib.chdir(working_directory):
         item_cache_config = create_config(config["spec"], ItemCacheConfig)
@@ -412,16 +430,17 @@ def cliview(argv: list[str] = sys.argv):
         root = item_cache["/req/root"]
         mapper = ItemMapper(root)
         _prepare_mapper(mapper)
+        create_content = _DOC_FORMAT[args.format]
 
         if args.filter == "action-table":
             for uid in args.UIDs:
-                _action_table(item_cache[uid], False)
+                _action_table(item_cache[uid], False, create_content)
         elif args.filter == "action-table-show-skip":
             for uid in args.UIDs:
-                _action_table(item_cache[uid], True)
+                _action_table(item_cache[uid], True, create_content)
         elif args.filter == "action-compact-table":
             for uid in args.UIDs:
-                _action_compact_table(item_cache[uid])
+                _action_compact_table(item_cache[uid], create_content)
         elif args.filter == "action-list":
             for uid in args.UIDs:
                 _action_list(item_cache[uid])
