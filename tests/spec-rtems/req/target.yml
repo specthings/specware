@@ -23,6 +23,7 @@ non-functional-type: design-target
 rationale: null
 references: []
 requirement-type: non-functional
+target-hash: jSEggJdaq6HLVWm6WphjIS-Kd7KR2SE3e6xm1GjjUf4=
 text: |
   The ${.:/name} shall be a target.
 type: requirement
