@@ -1,0 +1,71 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: |
+  A value of this type shall be an expression which defines under which
+  conditions the specification item or parts of it are enabled.  The expression
+  is evaluated with the use of an *enabled set*.  This is a set of strings
+  which indicate enabled features.
+spec-example: |
+  enabled-by:
+    and:
+    - SOME_FEATURE
+    - not: ANOTHER_FEATURE
+    - is-directory: path/to/directory
+    - is-file: path/to/file
+spec-info:
+  bool:
+    description: |
+      This expression evaluates directly to the boolean value.
+  dict:
+    attributes:
+      and:
+        description: |
+          The *and* operator evaluates to the *logical and* of the evaluation
+          results of the expressions in the list.
+        spec-type: build-enabled-by-list
+      eq:
+        description: |
+          The *eq* operator evaluates a list of strings with at least one
+          element.  If all strings are equal, then the evaluation result is
+          true, otherwise false.
+        spec-type: list-str
+      not:
+        description: |
+          The *not* operator evaluates to the *logical not* of the evaluation
+          results of the expression.
+        spec-type: build-enabled-by
+      or:
+        description: |
+          The *or* operator evaluates to the *logical or* of the evaluation
+          results of the expressions in the list.
+        spec-type: build-enabled-by-list
+      is-directory:
+        description: |
+          If the value is a path from the top source directory to a directory,
+          this expression evaluates to true, otherwise to false.
+        spec-type: str
+      is-file:
+        description: |
+          If the value is a path from the top source directory to a file, this
+          expression evaluates to true, otherwise to false.
+        spec-type: str
+    description: |
+      Each attribute defines an operator.
+    mandatory-attributes: exactly-one
+  list:
+    description: |
+      This list of expressions evaluates to the *logical or* of the evaluation
+      results of the expressions in the list.
+    spec-type: build-enabled-by
+  str:
+    description: |
+      If the value is in the *enabled set*, this expression evaluates to true,
+      otherwise to false.
+spec-name: Build Enabled-By Expression
+spec-type: build-enabled-by
+type: spec
