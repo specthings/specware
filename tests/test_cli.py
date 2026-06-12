@@ -140,8 +140,12 @@ def test_cliexportheader(tmpdir):
 
 def test_cliverify_good(tmpdir):
     spec_dir = Path(__file__).parent / "spec-types"
+    spec_dir_2 = Path(__file__).parent / "spec-rtems"
     with contextlib.chdir(tmpdir):
-        exit_code = cliverify(["command", "--log-level=ERROR", str(spec_dir)])
+        exit_code = cliverify(
+            ["command", "--log-level=ERROR",
+             str(spec_dir),
+             str(spec_dir_2)])
         assert exit_code == 0
 
 
