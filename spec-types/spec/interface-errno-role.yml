@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: errno
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      description:
+        description: |
+          It shall be the description of the erroneous result.
+        spec-type: str
+    description: |
+      It defines the interface error number role of links.
+      ${interface-function:/spec-name} items may reference `errno` constants
+      used to indicate erroneous results with a description.
+    mandatory-attributes: all
+spec-name: Interface Error Number Link Role
+spec-type: interface-errno-role
+type: spec

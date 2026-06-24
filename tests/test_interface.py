@@ -226,6 +226,16 @@ struct Struct;
  * are not wrapped
  * @endcode
  *
+ * @par Errors
+ * @parblock
+ * <table>
+ * <tr><th>Error Number</th><th>Description</th></tr>
+ * <tr><td>#DEFINE</td><td>
+ * The errno description.
+ * </td></tr>
+ * </table>
+ * @endparblock
+ *
  * @par Constraints
  * @parblock
  * The following constraints apply to this directive:
@@ -883,6 +893,16 @@ struct Struct;
  * these two lines
  * are not wrapped
  * @endcode
+ *
+ * @par Errors
+ * @parblock
+ * <table>
+ * <tr><th>Error Number</th><th>Description</th></tr>
+ * <tr><td>#DEFINE</td><td>
+ * The errno description.
+ * </td></tr>
+ * </table>
+ * @endparblock
  *
  * @par Constraints
  * @parblock

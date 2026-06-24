@@ -157,6 +157,13 @@ def _add_return(content: TextContent, mapper: ItemMapper, item: Item,
             content.add_definition_item(
                 value, mapper.substitute(retval["description"], item))
         content.wrap(mapper.substitute(ret["return"], item))
+    errnos = list(item.links_to_parents("errno"))
+    if errnos:
+        content.add_rubric("ERRORS:")
+        for link in errnos:
+            content.add_definition_item(
+                mapper.substitute(f"${{{link.item.uid}:/name}}", item),
+                mapper.substitute(link["description"], item))
 
 
 def _document_directive(content: TextContent, mapper: ItemMapper,
