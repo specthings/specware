@@ -401,7 +401,7 @@ Group A description. The directives provided by the Group A are:
 .. _GroupADirectives:
 
 Directives
-==========
+##########
 
 This section details the directives of the Group A. A subsection is dedicated
 to each of this manager's directives and lists the calling sequence,
@@ -455,12 +455,17 @@ Function description.  References to :term:`xs <x>`,
 :ref:`InterfaceEnum`, :c:macro:`DEFINE`, :ref:`InterfaceVERYLONGMACRO`,
 Variable, :c:macro:`ENUMERATOR_0`, ``struct Struct``, :ref:`a`, interface,
 :ref:`GroupA`, and Group F.  Second parameter is ``Param1``. Mention ``struct
-US``.
+US``.  Cite :cite:`RefMisc`.
 
 .. code-block:: foobar
 
     these two lines
     are not wrapped
+
+.. rubric:: ERRORS:
+
+:c:macro:`DEFINE`
+    The errno description.
 
 .. rubric:: CONSTRAINTS:
 
@@ -468,6 +473,7 @@ The following constraints apply to this directive:
 
 - Constraint A for :ref:`InterfaceFunction`.
 """
+        assert content == src.read()
 
     with open(types_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
@@ -1061,6 +1067,13 @@ Variable, {c:macro}`ENUMERATOR_0`, `struct Struct`, {ref}`a`, interface,
 these two lines
 are not wrapped
 ```
+
+```{eval-rst}
+.. rubric:: ERRORS:
+```
+
+{c:macro}`DEFINE`
+: The errno description.
 
 ```{eval-rst}
 .. rubric:: CONSTRAINTS:

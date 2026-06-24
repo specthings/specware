@@ -35,6 +35,10 @@ links:
   uid: ga
 - role: constraint
   uid: constraint-a
+- description: |
+    The errno description.
+  role: errno
+  uid: define
 name: Function
 notes: null
 params:

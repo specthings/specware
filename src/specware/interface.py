@@ -757,6 +757,19 @@ class _Node:
                                      f"@retval {retval['value']} "))
                 content.wrap(self.substitute_text(ret["return"]),
                              initial_indent="@return ")
+            errnos = list(item.links_to_parents("errno"))
+            if errnos:
+                content.add([
+                    "@par Errors", "@parblock", "<table>",
+                    "<tr><th>Error Number</th><th>Description</th></tr>"
+                ])
+                for link in errnos:
+                    errno = self.substitute_text(f"${{{link.item.uid}:/name}}")
+                    content.append(f"<tr><td>{errno}</td><td>")
+                    content.gap = False
+                    content.wrap(self.substitute_text(link["description"]))
+                    content.append("</td></tr>")
+                content.append(["</table>", "@endparblock"])
             content.add_paragraph("Notes", self.substitute_text(item["notes"]))
             constraints = [
                 self.substitute_text(parent["text"], parent)
