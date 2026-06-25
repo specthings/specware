@@ -1032,7 +1032,8 @@ class _HeaderFile:
         self._content.prepend_spdx_license_identifier()
         with self._content.file_block():
             self._content.add_ingroup(_get_group_identifiers(self._ingroups))
-            self._content.add_brief_description(self._item["brief"])
+            self._content.add_brief_description(
+                _Node(self, self._item).substitute_text(self._item["brief"]))
         self._content.add_copyrights_and_licenses()
         self._content.add_automatically_generated_warning()
         self._content.add(f"/* Generated from spec:{self._item.uid} */")
