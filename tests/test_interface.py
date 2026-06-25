@@ -60,7 +60,7 @@ def test_interface(tmpdir):
  * @ingroup GroupB
  * @ingroup GroupC
  *
- * @brief This header file defines X.
+ * @brief This header file defines x.
  */
 
 /*
