@@ -27,6 +27,6 @@ jobs:
       with:
         run: |
           pkg update -f
-          pkg install -y python3 py311-maturin py311-sqlite3 uv gmake rust
+          pkg install -y python3 py311-sqlite3 uv gmake rust
           export UV_CACHE_DIR="$GITHUB_WORKSPACE/.freebsd/uv"
           gmake
