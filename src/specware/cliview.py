@@ -63,24 +63,6 @@ def _get_value_dummy(_ctx: ItemGetValueContext) -> Any:
     return ""
 
 
-def _visit_action_conditions(item: Item, mapper: ItemMapper,
-                             name: str) -> None:
-    for index, condition in enumerate(item[name]):
-        for index_2, state in enumerate(condition["states"]):
-            mapper.substitute(state["text"], item,
-                              f"{name}[{index}]/states[{index_2}]/text")
-
-
-def _visit_action(item: Item, mapper: ItemMapper) -> None:
-    _visit_action_conditions(item, mapper, "pre-conditions")
-    _visit_action_conditions(item, mapper, "post-conditions")
-
-
-_VISITORS = {
-    "requirement/functional/action": _visit_action,
-}
-
-
 def _info(item: Item) -> str:
     if not item.view.get("pre-qualified", True):
         return ", not-pre-qualified"
@@ -100,6 +82,19 @@ _TEXT_ATTRIBUTES = [
 ]
 
 
+def _substitute(item: Item, mapper: ItemMapper, prefix: str,
+                data: Any) -> None:
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key in _TEXT_ATTRIBUTES:
+                mapper.substitute(value, item, prefix=prefix)
+            else:
+                _substitute(item, mapper, f"{prefix}/{key}", value)
+    elif isinstance(data, list):
+        for index, element in enumerate(data):
+            _substitute(item, mapper, f"{prefix}[{index}]", element)
+
+
 def _visit_item(item: Item, mapper: ItemMapper, level: int,
                 role: Optional[str], validated_filter: str) -> bool:
     validated = item.view.get("validated", True)
@@ -110,15 +105,7 @@ def _visit_item(item: Item, mapper: ItemMapper, level: int,
     role_info = "" if role is None else f", role={role}"
     print(
         f"{'  ' * level}{item.uid} (type={item.type}{role_info}{_info(item)})")
-    for name in _TEXT_ATTRIBUTES:
-        if name in item:
-            mapper.substitute(item[name], item)
-    try:
-        visitor = _VISITORS[item.type]
-    except KeyError:
-        pass
-    else:
-        visitor(item, mapper)
+    _substitute(item, mapper, "", item.data)
     return True
 
 
@@ -365,7 +352,8 @@ def _validate(_item: Item, validated: bool) -> bool:
 
 def _prepare_mapper(mapper: ItemMapper) -> None:
     for type_path_key in (
-            "glossary/term:/plural", "reference:/cite", "reference:/cite-long",
+            "interface:/spec", "glossary/term:/plural", "reference:/cite",
+            "reference:/cite-long",
             "requirement/functional/action:/text-template",
             "requirement/non-functional/performance-runtime:/environment",
             "requirement/non-functional/performance-runtime:/limit-condition",
