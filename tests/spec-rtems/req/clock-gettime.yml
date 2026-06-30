@@ -209,7 +209,7 @@ test-setup:
     StartTask( ctx->worker_id, Worker, 0 );
   description: null
 test-stop: null
-test-support:
+test-support: |
   static void Worker( rtems_task_argument arg )
   {
     (void) arg;

@@ -3,7 +3,8 @@ appl-config-option-type: integer
 copyrights:
 - Copyright (C) 2020 embedded brains GmbH & Co. KG
 default-value: 13
-description: description c
+description: |
+  description c
 enabled-by: true
 index-entries: []
 interface-type: appl-config-option

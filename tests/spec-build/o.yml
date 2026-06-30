@@ -3,8 +3,8 @@ enabled-by: true
 install:
 - source:
   - jkl
-- source: a/b
-  glob: c/**/*.h
+- glob: c/**/*.h
+  source: a/b
 links:
 - role: build-dependency
   uid: s
