@@ -1,8 +1,17 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+appl-config-option-type: feature
+copyrights:
+- Copyright (C) 2020 embedded brains GmbH & Co. KG
 default: default a
-description: description a
+description: |
+  description a
+enabled-by: true
 index-entries:
 - index a
+interface-type: appl-config-option
+links:
+- role: interface-ingroup
+  uid: g
 name: a
 notes: |
   notes a
@@ -34,12 +43,4 @@ notes: |
   * ${unspec-type:/name}
 
   * ${unspec-type-2:/name}
-appl-config-option-type: feature
-copyrights:
-- Copyright (C) 2020 embedded brains GmbH & Co. KG
-enabled-by: true
-interface-type: appl-config-option
-links:
-- role: interface-ingroup
-  uid: g
 type: interface

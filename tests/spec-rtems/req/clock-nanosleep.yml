@@ -412,30 +412,30 @@ transition-map:
     Status: Zero
     Timer:
     - if:
-       pre-conditions:
-         RQTpSec:
-         - Negative
-         - PastOrNow
+        pre-conditions:
+          RQTpSec:
+          - Negative
+          - PastOrNow
       then: Inactive
     - specified-by: ClockId
     Expire:
     - if:
-       pre-conditions:
-         RQTpSec:
-         - Negative
-         - PastOrNow
+        pre-conditions:
+          RQTpSec:
+          - Negative
+          - PastOrNow
       then: N/A
     - if:
-       pre-conditions:
-         RQTpSec: FarFuture
+        pre-conditions:
+          RQTpSec: FarFuture
       then: Last
     - else: Absolute
     Scheduler:
     - if:
-       pre-conditions:
-         RQTpSec:
-         - Negative
-         - PastOrNow
+        pre-conditions:
+          RQTpSec:
+          - Negative
+          - PastOrNow
       then: BlockUnblock
     - else: Block
     RMTp: Nop
@@ -447,33 +447,33 @@ transition-map:
     - 'Yes'
     RQTp:
     - Valid
-    RQTpSec: all
     RQTpNSec:
     - Valid
+    RQTpSec: all
     RMTp: all
 - enabled-by: true
   post-conditions:
     Status: Zero
     Timer:
     - if:
-       pre-conditions:
-         RQTpSec: PastOrNow
+        pre-conditions:
+          RQTpSec: PastOrNow
       then: Inactive
     - else: Monotonic
     Expire:
     - if:
-       pre-conditions:
-         RQTpSec: PastOrNow
+        pre-conditions:
+          RQTpSec: PastOrNow
       then: N/A
     - if:
-       pre-conditions:
-         RQTpSec: FarFuture
+        pre-conditions:
+          RQTpSec: FarFuture
       then: Last
     - else: Relative
     Scheduler:
     - if:
-       pre-conditions:
-         RQTpSec: PastOrNow
+        pre-conditions:
+          RQTpSec: PastOrNow
       then: BlockUnblock
     - else: Block
     RMTp:
@@ -490,12 +490,12 @@ transition-map:
     - 'No'
     RQTp:
     - Valid
+    RQTpNSec:
+    - Valid
     RQTpSec:
     - FarFuture
     - Future
     - PastOrNow
-    RQTpNSec:
-    - Valid
     RMTp: all
 - enabled-by: true
   post-conditions:
@@ -510,8 +510,8 @@ transition-map:
     Abstime: all
     RQTp:
     - Valid
-    RQTpSec: all
     RQTpNSec: all
+    RQTpSec: all
     RMTp: all
 - enabled-by: true
   post-conditions:
@@ -526,8 +526,8 @@ transition-map:
     Abstime: all
     RQTp:
     - 'Null'
-    RQTpSec: N/A
     RQTpNSec: N/A
+    RQTpSec: N/A
     RMTp: all
 - enabled-by: true
   post-conditions:
@@ -549,8 +549,8 @@ transition-map:
     Abstime: all
     RQTp:
     - 'Null'
-    RQTpSec: N/A
     RQTpNSec: N/A
+    RQTpSec: N/A
     RMTp: all
 - enabled-by: true
   post-conditions:
@@ -572,9 +572,9 @@ transition-map:
     Abstime: all
     RQTp:
     - Valid
-    RQTpSec: all
     RQTpNSec:
     - Invalid
+    RQTpSec: all
     RMTp: all
 - enabled-by: true
   post-conditions:
@@ -596,10 +596,10 @@ transition-map:
     - 'No'
     RQTp:
     - Valid
-    RQTpSec:
-    - Negative
     RQTpNSec:
     - Valid
+    RQTpSec:
+    - Negative
     RMTp: all
 - enabled-by: true
   post-conditions: NeedClock
@@ -609,9 +609,9 @@ transition-map:
     Abstime: all
     RQTp:
     - Valid
+    RQTpNSec: all
     RQTpSec:
     - Future
     - PastOrNow
-    RQTpNSec: all
     RMTp: all
 type: requirement
