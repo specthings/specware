@@ -13,6 +13,10 @@ spec-info:
     description: |
       This set of attributes defines for each post-condition the state after
       the action for a transition in an action requirement.
+    format:
+      type: list-order
+      path: /post-conditions
+      key: name
     generic-attributes:
       description: |
         There shall be exactly one generic attribute key for each

@@ -10,6 +10,8 @@ spec-example: null
 spec-info:
   none: null
   str:
+    format:
+      type: myst
     description: |
       It shall be the description of the interface.  The description should be
       short and concentrate on the average case.  All special cases, usage
