@@ -12,6 +12,10 @@ spec-info:
     description: null
   int:
     description: null
+    format:
+      default: '{}'
+      type: int-format-attribute
+      path: /format
   list:
     description: null
     spec-type: str

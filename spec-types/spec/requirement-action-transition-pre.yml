@@ -13,6 +13,10 @@ spec-info:
     description: |
       This set of attributes defines for each pre-condition the set of states
       before the action for a transition in an action requirement.
+    format:
+      type: list-order
+      path: /pre-conditions
+      key: name
     generic-attributes:
       description: |
         There shall be exactly one generic attribute key for each

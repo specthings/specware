@@ -13,6 +13,8 @@ spec-info:
     assert:
       not:
         re: \n\n
+    format:
+      type: myst
     description: |
       It shall be the brief description of the interface.  It should be a
       single sentence.
