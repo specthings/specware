@@ -52,7 +52,7 @@ _DOC_FORMAT = {
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=cliexport.__doc__)
     parser.add_argument("--config-file",
                         type=str,
                         default=None,
@@ -121,7 +121,9 @@ def _generate_more(item_cache: ItemCache, config: dict,
 
 
 def cliexport(argv: list[str] = sys.argv):
-    """ Export the specification to source and documentation files. """
+    """
+    Export the specification to the target source and documentation files.
+    """
     args = _parse_args(argv)
     with monitor_logging() as monitor:
         config, working_directory = load_specware_config(args.config_file)

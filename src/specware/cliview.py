@@ -375,7 +375,7 @@ def _prepare_mapper(mapper: ItemMapper) -> None:
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=cliview.__doc__)
     parser.add_argument("--config-file",
                         type=str,
                         default=None,
