@@ -47,8 +47,10 @@ classifiers = [
 [project.scripts]
 specwareexport = "specware.cliexport:cliexport"
 specwareexportheader = "specware.cliexportheader:cliexportheader"
-specwareverify = "specware.cliverify:cliverify"
 specwareview = "specware.cliview:cliview"
+
+[project.entry-points."specitems_type_provider.plugins"]
+specware = "specware.util:load_specware_types"
 
 [build-system]
 requires = ["uv_build>=0.10.0"]
