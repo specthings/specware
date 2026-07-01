@@ -13,7 +13,7 @@ spec-info:
       return:
         description: |
           It shall describe the interface return for unspecified return values.
-        spec-type: optional-str
+        spec-type: interface-description
       return-values:
         description: null
         spec-type: interface-return-value-list
