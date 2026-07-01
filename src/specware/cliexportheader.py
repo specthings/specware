@@ -39,7 +39,7 @@ from specware import (SpecWareTypeProvider, generate_header_file,
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=cliexportheader.__doc__)
     parser.add_argument("--config-file",
                         type=str,
                         default=None,
@@ -60,7 +60,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def cliexportheader(argv: list[str] = sys.argv):
-    """ Export the specified header to a header file. """
+    """ Export the specified header to its target file. """
     args = _parse_args(argv)
     config, working_directory = load_specware_config(args.config_file)
     with contextlib.chdir(working_directory):
