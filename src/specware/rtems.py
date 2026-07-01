@@ -238,6 +238,15 @@ def get_validation_items(items_by_type: dict[str, list[Item]]) -> list[Item]:
              "runtime-measurement-test", "test-case", "validation")))
 
 
+def get_benchmark_and_test_suite_items(
+        items_by_type: dict[str, list[Item]]) -> list[Item]:
+    """ Get a sorted list of the benchmark and test suite items. """
+    return get_items_by_types(
+        items_by_type,
+        get_item_types_by_prefix(items_by_type,
+                                 ("memory-benchmark", "test-suite")))
+
+
 def is_validation_by_test(item: Item) -> bool:
     """ Return true, if the item is a validation by test, otherwise false. """
     return _VALIDATION_METHOD.get(item.type, "") == "validation by test"

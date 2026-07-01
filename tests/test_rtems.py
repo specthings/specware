@@ -31,6 +31,7 @@ from specitems import EmptyItemCache, Item, ItemCache, ItemSelection
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       gather_api_items, gather_related_items,
                       gather_test_cases, gather_benchmarks_and_test_suites,
+                      get_benchmark_and_test_suite_items,
                       get_items_by_type_map, get_constraint_items,
                       get_interface_items, get_interface_and_requirement_items,
                       get_requirement_items, get_validation_items,
@@ -297,6 +298,9 @@ def test_validate(tmpdir):
         "/val/disable-newlib-reentrancy",
         "/val/perf",
         "/val/tc",
+    ]
+    assert _uids(get_benchmark_and_test_suite_items(items_by_type)) == [
+        "/val/ts",
     ]
 
     item_cache.add_item(
