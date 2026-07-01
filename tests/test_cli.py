@@ -29,6 +29,7 @@ from pathlib import Path
 
 from specware.cliexport import cliexport
 from specware.cliexportheader import cliexportheader
+from specware.clifind import clifind
 from specware.cliview import cliview
 
 from .util import get_and_clear_log
@@ -135,6 +136,11 @@ def test_cliexportheader(tmpdir):
     cliexportheader([
         "command", "--config-file", config_file, "/if/header-empty", "header.h"
     ])
+
+
+def test_clifind(tmpdir):
+    config_file = _create_specview_yml(tmpdir)
+    clifind(["command", "--config-file", config_file, "th"])
 
 
 def test_cliview(tmpdir):
