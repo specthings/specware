@@ -34,13 +34,17 @@ from specitems import (ItemDataByUID, load_config, pickle_load_data_by_uid,
                        SpecTypeProvider)
 
 
+def load_specware_types() -> ItemDataByUID:
+    """ Load the specware specification types. """
+    return pickle_load_data_by_uid(
+        os.path.join(os.path.dirname(__file__), "spec.pickle"))
+
+
 class SpecWareTypeProvider(SpecTypeProvider):
     """ This class provides a type system for specification ware items. """
 
     def __init__(self, data_by_uid: ItemDataByUID) -> None:
-        data_by_uid.update(
-            pickle_load_data_by_uid(
-                os.path.join(os.path.dirname(__file__), "spec.pickle")))
+        data_by_uid.update(load_specware_types())
         super().__init__(data_by_uid)
 
 

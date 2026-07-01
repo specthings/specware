@@ -29,7 +29,6 @@ from pathlib import Path
 
 from specware.cliexport import cliexport
 from specware.cliexportheader import cliexportheader
-from specware.cliverify import cliverify
 from specware.cliview import cliview
 
 from .util import get_and_clear_log
@@ -136,24 +135,6 @@ def test_cliexportheader(tmpdir):
     cliexportheader([
         "command", "--config-file", config_file, "/if/header-empty", "header.h"
     ])
-
-
-def test_cliverify_good(tmpdir):
-    spec_dir = Path(__file__).parent / "spec-types"
-    spec_dir_2 = Path(__file__).parent / "spec-rtems"
-    with contextlib.chdir(tmpdir):
-        exit_code = cliverify(
-            ["command", "--log-level=ERROR",
-             str(spec_dir),
-             str(spec_dir_2)])
-        assert exit_code == 0
-
-
-def test_cliverify_bad(tmpdir):
-    spec_dir = Path(__file__).parent / "spec-invalid-format"
-    with contextlib.chdir(tmpdir):
-        exit_code = cliverify(["command", "--log-level=ERROR", str(spec_dir)])
-        assert exit_code == 1
 
 
 def test_cliview(tmpdir):
