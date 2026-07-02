@@ -422,7 +422,7 @@ class _TestItem:
                 content.add_description_block(
                     self.substitute_text(info["brief"]),
                     self.substitute_text(info["description"]))
-                content.add(f"{info['member'].strip()};")
+                content.add(self.substitute_code(f"{info['member'].strip()};"))
             gap = content.gap
         content.gap = gap
         content.add(default_members)
