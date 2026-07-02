@@ -38,9 +38,9 @@ from specitems import (create_unique_link, Item, ItemCache,
 
 from .build import get_build_base_directory
 from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
-                       GenericContent, get_integer_type, get_value_params,
-                       get_value_doxygen_group, get_value_doxygen_function,
-                       get_value_unspecified_type)
+                       GenericContent, get_integer_type, get_value_compound,
+                       get_value_params, get_value_doxygen_group,
+                       get_value_doxygen_function, get_value_unspecified_type)
 from .transitionmap import TransitionMap
 
 _CaseToSuite = dict[str, list["_TestItem"]]
@@ -82,6 +82,8 @@ class _Mapper(ItemMapper):
         self.add_get_value("interface/group:/name", get_value_doxygen_group)
         self.add_get_value("interface/macro:/name", get_value_doxygen_function)
         self.add_get_value("interface/macro:/params/name", get_value_params)
+        self.add_get_value("interface/struct:/name", get_value_compound)
+        self.add_get_value("interface/union:/name", get_value_compound)
         self.add_get_value("interface/unspecified-function:/name",
                            get_value_doxygen_function)
         self.add_get_value("interface/unspecified-struct:/name",
