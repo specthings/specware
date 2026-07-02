@@ -10,6 +10,8 @@ spec-example: null
 spec-info:
   list:
     description: null
+    format:
+      type: unique
     spec-type: build-source
 spec-name: Build Source List
 spec-type: build-source-list
