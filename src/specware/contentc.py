@@ -590,7 +590,7 @@ def get_value_hash(ctx: ItemGetValueContext) -> Any:
 
 def get_value_params(ctx: ItemGetValueContext) -> Any:
     """ Get the value formatted as a parameter. """
-    return f"``{ctx.value[ctx.key]}``"
+    return f"`{ctx.value[ctx.key]}`"
 
 
 def forward_declaration(item: Item) -> str:

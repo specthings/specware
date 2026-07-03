@@ -218,7 +218,7 @@ struct Struct;
  *
  * Function description.  References to xs, VeryLongFunction(), ::Integer,
  * #Enum, #DEFINE, VERY_LONG_MACRO(), #Variable, ::ENUMERATOR_0, Struct, @ref
- * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is ``Param1``.
+ * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is `Param1`.
  * Mention struct US.  Cite Misc.
  *
  * @code
@@ -886,7 +886,7 @@ struct Struct;
  *
  * Function description.  References to xs, VeryLongFunction(), ::Integer,
  * #Enum, #DEFINE, VERY_LONG_MACRO(), #Variable, ::ENUMERATOR_0, Struct, @ref
- * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is ``Param1``.
+ * a, interface, @ref GroupA, and @ref GroupF.  Second parameter is `Param1`.
  * Mention struct US.  Cite Misc.
  *
  * @code
