@@ -23,7 +23,7 @@ spec-info:
           check before the state-specific code.  The code may use a local
           variable ``ctx`` which points to the test context, see
           ${test-context:/spec-name}.
-        spec-type: optional-str
+        spec-type: optional-clang-function-scope
       test-prologue:
         description: |
           If the value is present, then it shall be the test prologue code.
@@ -31,7 +31,7 @@ spec-info:
           check after the state-specific code.  The code may use a local
           variable ``ctx`` which points to the test context, see
           ${test-context:/spec-name}.
-        spec-type: optional-str
+        spec-type: optional-clang-function-scope
     description: |
       This set of attributes defines an action pre-condition or post-condition.
     mandatory-attributes: all

@@ -17,7 +17,7 @@ spec-info:
       code:
         description: |
           It shall be the test case check code.
-        spec-type: str
+        spec-type: clang-function-scope
       links:
         description: |
           The links should use the ${requirement-validation-role:/spec-name}

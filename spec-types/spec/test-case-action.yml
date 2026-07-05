@@ -17,7 +17,7 @@ spec-info:
       action-code:
         description: |
           It shall be the test case action code.
-        spec-type: str
+        spec-type: clang-function-scope
       checks:
         description: null
         spec-type: test-case-check-list

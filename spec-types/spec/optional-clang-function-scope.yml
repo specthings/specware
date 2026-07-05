@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    format:
+      scope: function
+      type: clang
+      style: default
+    description: |
+      The text shall be C language source code at function scope.
+  none: null
+spec-name: Optional C Language Function Scope Format
+spec-type: optional-clang-function-scope
+type: spec

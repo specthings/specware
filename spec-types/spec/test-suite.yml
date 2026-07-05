@@ -26,7 +26,7 @@ spec-info:
         description: |
           It shall be the test suite code.  The test suite code is placed at
           file scope in the target source file.
-        spec-type: str
+        spec-type: clang-file-scope
       test-description:
         description: |
           It shall be the test suite description.
