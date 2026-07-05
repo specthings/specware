@@ -37,7 +37,7 @@ spec-info:
 
           * *By review of design*: A rationale shall be provided to demonstrate
             how the requirement is satisfied implicitly by the software design.
-        spec-type: str
+        spec-type: myst
     description: |
       This set of attributes provides a requirement validation evidence.  The
       item shall have exactly one link to the validated requirement with the
