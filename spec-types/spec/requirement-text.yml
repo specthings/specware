@@ -134,6 +134,8 @@ spec-info:
       * versatile
 
       * when necessary
+    format:
+      type: myst
 spec-name: Requirement Text
 spec-type: requirement-text
 type: spec

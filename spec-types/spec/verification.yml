@@ -21,7 +21,7 @@ spec-info:
       text:
         description: |
           It shall state the verification.
-        spec-type: str
+        spec-type: myst
     description: |
       This set of attributes specifies a verification.  The item shall have at
       least one link to the verified item with the
