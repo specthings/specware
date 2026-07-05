@@ -36,7 +36,7 @@ spec-info:
           If the value is present, then it shall be the test context support
           code.  The context support code is placed at file scope before the
           test context definition.
-        spec-type: optional-str
+        spec-type: optional-clang-file-scope
       test-description:
         description: |
           If the value is present, then it shall be the test case description.
@@ -69,7 +69,7 @@ spec-info:
         description: |
           If the value is present, then it shall be the test case support code.
           The support code is placed at file scope before the test case code.
-        spec-type: optional-str
+        spec-type: optional-clang-file-scope
       test-target:
         description: |
           It shall be the path to the generated test case source file.
