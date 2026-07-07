@@ -2698,6 +2698,104 @@ def _add_item(item_cache, uid, data, item_type):
     return item
 
 
+def _na_chain_state(name):
+    return {"name": name, "test-code": None, "text": None}
+
+
+def _na_chain_condition(name, state_names):
+    return {
+        "name": name,
+        "states": [_na_chain_state(state_name) for state_name in state_names],
+        "test-epilogue": None,
+        "test-prologue": None,
+    }
+
+
+def test_transition_map_pre_cond_not_applicable_propagates_transitively():
+    # Regression test for a chain of three pre-conditions A -> B -> C, where
+    # B is applicable only if A is "NonEmpty" and C is applicable only if B
+    # is "Found".  C's own applicable clause names only its direct parent B,
+    # never A.  Whenever A is "Empty", B is N/A because of A, and C must
+    # become N/A as well, even though C's clause never mentions A.
+    item_cache = EmptyItemCache(SpecWareTypeProvider({}))
+    item = _add_item(
+        item_cache, "/na-chain", {
+            "post-conditions":
+            [{
+                "name": "R",
+                "states": [_na_chain_state("R0"),
+                           _na_chain_state("R1")],
+                "test-epilogue": None,
+                "test-prologue": None,
+            }],
+            "pre-conditions": [
+                _na_chain_condition("A", ["Empty", "NonEmpty"]),
+                _na_chain_condition("B", ["Found", "NotFound"]),
+                _na_chain_condition("C", ["First", "Second"]),
+            ],
+            "skip-reasons": {},
+            "transition-map": [{
+                "enabled-by": True,
+                "post-conditions": {
+                    "R": "R0",
+                },
+                "pre-conditions": {
+                    "A": "all",
+                    "B": {
+                        "applicable": {
+                            "pre-conditions": {
+                                "A": "NonEmpty",
+                            },
+                        },
+                    },
+                    "C": {
+                        "applicable": {
+                            "pre-conditions": {
+                                "B": "Found",
+                            },
+                        },
+                    },
+                },
+            }],
+        }, "requirement/functional/action")
+
+    transition_map = TransitionMap(item)
+    a_idx = transition_map.pre_co_name_to_co_idx("A")
+    b_idx = transition_map.pre_co_name_to_co_idx("B")
+    c_idx = transition_map.pre_co_name_to_co_idx("C")
+    not_na = (0, ) * transition_map.pre_co_count
+
+    seen_a_empty = False
+    seen_a_non_empty_b_found = False
+    seen_a_non_empty_b_not_found = False
+    for map_idx, variant in transition_map.get_variants([]):
+        # Decode the raw (not-applicable-agnostic) pre-condition states of
+        # this map index using the public API.
+        raw_states = transition_map.map_idx_to_pre_co_states(map_idx, not_na)
+        if raw_states[a_idx] == 0:
+            # A is "Empty": B is N/A because of A, so C must be N/A too,
+            # even though C's own applicable clause never mentions A.
+            seen_a_empty = True
+            assert variant.pre_cond_na[b_idx] == 1
+            assert variant.pre_cond_na[c_idx] == 1
+        elif raw_states[b_idx] == 0:
+            # A is "NonEmpty" and B is "Found": B is applicable and C's own
+            # direct dependency on B is satisfied, so C stays applicable.
+            seen_a_non_empty_b_found = True
+            assert variant.pre_cond_na[b_idx] == 0
+            assert variant.pre_cond_na[c_idx] == 0
+        else:
+            # A is "NonEmpty" and B is "NotFound": B is applicable, but C's
+            # own direct dependency on B is not satisfied, so C is N/A.
+            seen_a_non_empty_b_not_found = True
+            assert variant.pre_cond_na[b_idx] == 0
+            assert variant.pre_cond_na[c_idx] == 1
+
+    assert seen_a_empty
+    assert seen_a_non_empty_b_found
+    assert seen_a_non_empty_b_not_found
+
+
 def test_validation_invalid_actions(caplog, tmpdir):
     item_cache = EmptyItemCache(SpecWareTypeProvider({}))
     validation_config = {
