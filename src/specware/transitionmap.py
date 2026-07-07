@@ -378,19 +378,6 @@ class TransitionMap:
             map_idx //= count
         return ", ".join(reversed(conditions))
 
-    def map_idx_to_unconditional_pre_co_states(
-            self, map_idx: int) -> tuple[int, ...]:
-        """
-        Map the transition map index and the associated pre-condition state
-        indices.
-        """
-        co_states = []
-        for condition in reversed(self._item["pre-conditions"]):
-            count = len(condition["states"])
-            co_states.append(int(map_idx % count))
-            map_idx //= count
-        return tuple(reversed(co_states))
-
     def map_idx_to_pre_co_states(
             self, map_idx: int, pre_cond_na: tuple[int,
                                                    ...]) -> tuple[int, ...]:
@@ -492,10 +479,20 @@ class TransitionMap:
             f"{{{self._map_index_to_pre_conditions(map_idx)}}}")
 
     def _make_pre_cond_na(self, map_idx: int, the_pre_cond_na: Any,
-                          skip: list[int]) -> int:
+                          skip: list[int],
+                          resolved_pre_cond_na: tuple[int, ...]) -> int:
         if isinstance(the_pre_cond_na, int):
             return the_pre_cond_na
-        pre_co_states = self.map_idx_to_unconditional_pre_co_states(map_idx)
+        # Use the pre-condition states already resolved for earlier
+        # pre-conditions (in declaration order) so that a pre-condition
+        # which is N/A because of one of its ancestors is seen as N/A here
+        # as well, even if this pre-condition's own applicable/
+        # not-applicable/skip clause only names its direct parent.  This
+        # way, the N/A status transitively propagates along the whole
+        # dependency chain instead of having to be repeated in every
+        # dependent clause.
+        pre_co_states = self.map_idx_to_pre_co_states(map_idx,
+                                                      resolved_pre_cond_na)
         ctx = _CondExpContext(self, map_idx, pre_co_states, tuple(), -1, None)
         if _cond_bool_exp(
                 ctx,
@@ -513,11 +510,12 @@ class TransitionMap:
         # pylint: disable=too-many-arguments
         # pylint: disable=too-many-positional-arguments
         skip = [skip_post_cond[0]]
-        pre_cond_na = tuple(
-            self._make_pre_cond_na(map_idx, the_pre_cond_na, skip)
-            for the_pre_cond_na in pre_cond_na)
-        variant = Transition(desc_idx, enabled_by, skip[0], pre_cond_na,
-                             skip_post_cond[1:])
+        resolved_pre_cond_na = [0] * len(pre_cond_na)
+        for co_idx, the_pre_cond_na in enumerate(pre_cond_na):
+            resolved_pre_cond_na[co_idx] = self._make_pre_cond_na(
+                map_idx, the_pre_cond_na, skip, tuple(resolved_pre_cond_na))
+        variant = Transition(desc_idx, enabled_by, skip[0],
+                             tuple(resolved_pre_cond_na), skip_post_cond[1:])
         for co_idx in range(len(variant.post_cond)):
             variant = self._map_post_cond(map_idx, co_idx, variant)
         return variant
