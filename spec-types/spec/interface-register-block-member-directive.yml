@@ -19,7 +19,7 @@ spec-info:
         description: |
           It shall be the address of the register block member relative to the
           base address of the register block.
-        spec-type: int
+        spec-type: interface-register-block-offset
       variants:
         description: null
         spec-type: interface-register-block-member-variant-list
