@@ -34,6 +34,11 @@ from specware.cliview import cliview
 
 from .util import get_and_clear_log
 
+_FILES = Path(__file__).parent.absolute() / "files"
+_FAKE_CLANG_FORMAT = _FILES / "clang-format"
+_FAKE_CLANG_FORMAT_FAIL = _FILES / "clang-format-fail"
+_FAKE_CLANG_FORMAT_UNAVAILABLE = _FILES / "clang-format-unavailable"
+
 
 def _create_specview_yml(tmpdir):
     base = Path(__file__).parent.absolute()
@@ -131,11 +136,94 @@ def test_cliexport(tmpdir):
     assert exit_code == 0
 
 
+def test_cliexport_format_code(tmpdir, caplog):
+    config_file = _create_specview_yml(tmpdir)
+    exit_code = cliexport([
+        "command", "--config-file", config_file, "--format-code",
+        f"--clang-format-path={_FAKE_CLANG_FORMAT}",
+        "--clang-format-style=llvm"
+    ])
+    assert exit_code == 0
+
+    # The C language files are formatted and the assumed file name is the
+    # target file path
+    for name in ["tc.c", "ts.c", "th"]:
+        target = Path(tmpdir) / name
+        assert target.read_text(encoding="utf-8").splitlines()[0] == (
+            f"/* fake clang-format: style=llvm filename={target} */")
+    appl_config = Path(tmpdir) / "appl-config.h"
+    assert appl_config.read_text(encoding="utf-8").splitlines()[0] == (
+        "/* fake clang-format: style=llvm filename=appl-config.h */")
+
+    # The documentation files are not formatted
+    for name in ["directives.rst", "acfg.rst", "glossary.md"]:
+        target = Path(tmpdir) / name
+        assert "fake clang-format" not in target.read_text(encoding="utf-8")
+
+    exit_code = cliexport([
+        "command", "--config-file", config_file, "--format-code",
+        f"--clang-format-path={_FAKE_CLANG_FORMAT_FAIL}"
+    ])
+    assert exit_code == 1
+    assert "the clang-format tool failed with exit status 1: " \
+        "fake clang-format cannot format this" in get_and_clear_log(caplog)
+
+    exit_code = cliexport([
+        "command", "--config-file", config_file, "--format-code",
+        f"--clang-format-path={_FAKE_CLANG_FORMAT_UNAVAILABLE}"
+    ])
+    assert exit_code == 1
+    assert (f"cannot run the clang-format tool "
+            f"'{_FAKE_CLANG_FORMAT_UNAVAILABLE}': it failed with exit "
+            f"status 1: fake clang-format is unavailable"
+            in get_and_clear_log(caplog))
+
+    exit_code = cliexport([
+        "command", "--config-file", config_file, "--format-code",
+        "--clang-format-path=there-is-no-such-clang-format"
+    ])
+    assert exit_code == 1
+    assert ("cannot run the clang-format tool "
+            "'there-is-no-such-clang-format': [Errno 2] "
+            "No such file or directory" in get_and_clear_log(caplog))
+
+
 def test_cliexportheader(tmpdir):
     config_file = _create_specview_yml(tmpdir)
-    cliexportheader([
+    exit_code = cliexportheader([
         "command", "--config-file", config_file, "/if/header-empty", "header.h"
     ])
+    assert exit_code == 0
+
+
+def test_cliexportheader_format_code(tmpdir, caplog):
+    config_file = _create_specview_yml(tmpdir)
+    header = Path(tmpdir) / "header.h"
+    exit_code = cliexportheader([
+        "command", "--config-file", config_file, "--format-code",
+        f"--clang-format-path={_FAKE_CLANG_FORMAT}", "/if/header-empty",
+        str(header)
+    ])
+    assert exit_code == 0
+    assert header.read_text(encoding="utf-8").splitlines()[0] == (
+        f"/* fake clang-format: style=file filename={header} */")
+
+    exit_code = cliexportheader([
+        "command", "--config-file", config_file, "--format-code",
+        f"--clang-format-path={_FAKE_CLANG_FORMAT_FAIL}", "/if/header-empty",
+        str(header)
+    ])
+    assert exit_code == 1
+    assert "the clang-format tool failed" in get_and_clear_log(caplog)
+
+    exit_code = cliexportheader([
+        "command", "--config-file", config_file, "--format-code",
+        "--clang-format-path=there-is-no-such-clang-format",
+        "/if/header-empty",
+        str(header)
+    ])
+    assert exit_code == 1
+    assert "cannot run the clang-format tool" in get_and_clear_log(caplog)
 
 
 def test_clifind(tmpdir):

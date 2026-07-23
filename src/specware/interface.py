@@ -33,9 +33,10 @@ import itertools
 import os
 from typing import Any, Callable, Iterator, NamedTuple, Optional
 
-from specitems import (Item, ItemCache, ItemGetValueContext, ItemGetValueMap,
-                       ItemMapper, GenericContent, get_value_default,
-                       get_value_plural, Link, to_camel_case)
+from specitems import (ClangFormatter, Item, ItemCache, ItemGetValueContext,
+                       ItemGetValueMap, ItemMapper, GenericContent,
+                       get_value_default, get_value_plural, Link,
+                       to_camel_case)
 
 from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
                        forward_declaration, get_value_compound,
@@ -941,14 +942,19 @@ def _merge_enabled_by(options: dict[str, str], link: Link) -> Any:
 class _HeaderFile:
     """ A header file. """
 
-    def __init__(self, item: Item, options: dict[str, str],
-                 enabled: list[str]):
+    # pylint: disable=too-many-instance-attributes
+    def __init__(self,
+                 item: Item,
+                 options: dict[str, str],
+                 enabled: list[str],
+                 formatter: Optional[ClangFormatter] = None):
         self._item = item
         self._content = CContent()
         self._content.register_license_and_copyrights_of_item(item)
         self._ingroups = _get_ingroups(item)
         self._includes: list[Item] = []
         self._nodes: dict[str, _Node] = {}
+        self._formatter = formatter
         self.options = options
         self.enabled = enabled
 
@@ -1075,7 +1081,7 @@ class _HeaderFile:
         else:
             file_path = os.path.join(domain_path, self._item["prefix"],
                                      self._item["path"])
-        self._content.write(file_path)
+        self._content.write(file_path, formatter=self._formatter)
 
 
 class _ZephyrHeaderFile(_HeaderFile):
@@ -1094,7 +1100,8 @@ _HEADER_FILE = {"default": _HeaderFile, "zephyr": _ZephyrHeaderFile}
 
 def _generate_header_file(item: Item, domains: dict[str, str],
                           options: dict[str, str], enabled: list[str],
-                          style: str, file_path: Optional[str]) -> None:
+                          style: str, file_path: Optional[str],
+                          formatter: Optional[ClangFormatter]) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
 
@@ -1106,7 +1113,7 @@ def _generate_header_file(item: Item, domains: dict[str, str],
             return
     else:
         domain_path = None
-    header_file = _HEADER_FILE[style](item, options, enabled)
+    header_file = _HEADER_FILE[style](item, options, enabled, formatter)
     header_file.generate_nodes()
     header_file.finalize()
     header_file.write(domain_path, file_path)
@@ -1123,25 +1130,30 @@ def _gather_options(item_level_interfaces: list[str],
     return options
 
 
-def generate_interfaces(config: dict, item_cache: ItemCache) -> None:
+def generate_interfaces(config: dict,
+                        item_cache: ItemCache,
+                        formatter: Optional[ClangFormatter] = None) -> None:
     """
     Generate header files according to the configuration.
 
     Args:
         config: A dictionary with configuration entries.
         item_cache: The specification item cache containing the interfaces.
+        formatter: The optional formatter used to format the header files.
     """
     domains = config["domains"]
     enabled = config["enabled"]
     style = config.get("style", "default")
     options = _gather_options(config["item-level-interfaces"], item_cache)
     for item in item_cache.items_by_type.get("interface/header-file", []):
-        _generate_header_file(item, domains, options, enabled, style, None)
+        _generate_header_file(item, domains, options, enabled, style, None,
+                              formatter)
 
 
 def generate_header_file(config: dict,
                          header_file: Item,
-                         file_path: Optional[str] = None) -> None:
+                         file_path: Optional[str] = None,
+                         formatter: Optional[ClangFormatter] = None) -> None:
     """
     Generate the header file according to the configuration.
 
@@ -1149,8 +1161,10 @@ def generate_header_file(config: dict,
         config: A dictionary with configuration entries.
         header_file: The header file specification item.
         file_path: The optional file path of the header file.
+        formatter: The optional formatter used to format the header file.
     """
     options = _gather_options(config["item-level-interfaces"],
                               header_file.cache)
     _generate_header_file(header_file, config["domains"], options,
-                          config["enabled"], config["style"], file_path)
+                          config["enabled"], config["style"], file_path,
+                          formatter)

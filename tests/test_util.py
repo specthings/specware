@@ -30,7 +30,8 @@ from pathlib import Path
 import pytest
 import subprocess
 
-from specware import load_specware_config, run_command
+from specware import (load_specware_config, log_clang_format_failure,
+                      run_command)
 import specware
 
 from .util import get_and_clear_log
@@ -112,3 +113,21 @@ DEBUG 2"""
              r"status 42 with output: \['runtime error'\]$")
     with pytest.raises(RuntimeError, match=match):
         run_command(["cmd", "arg"], "cwd", None, {"env": 123}, status=0)
+
+
+def test_log_clang_format_failure(caplog):
+    caplog.set_level(logging.DEBUG)
+
+    log_clang_format_failure(
+        subprocess.CalledProcessError(1, "cmd", stderr="  text  \n"))
+    assert get_and_clear_log(caplog) == (
+        "ERROR the clang-format tool failed with exit status 1: text")
+
+    log_clang_format_failure(
+        subprocess.CalledProcessError(2, "cmd", stderr=b"binary \xff\n"))
+    assert get_and_clear_log(caplog) == (
+        "ERROR the clang-format tool failed with exit status 2: binary �")
+
+    log_clang_format_failure(subprocess.CalledProcessError(3, "cmd"))
+    assert get_and_clear_log(caplog) == (
+        "ERROR the clang-format tool failed with exit status 3: ")

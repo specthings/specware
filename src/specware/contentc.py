@@ -31,8 +31,8 @@ import sys
 from typing import (Any, Callable, Iterable, Iterator, Match, NamedTuple,
                     Optional)
 
-from specitems import (Content, GenericContent, Item, ItemGetValueContext,
-                       MARKDOWN_ROLES)
+from specitems import (ClangFormatter, Content, GenericContent, Item,
+                       ItemGetValueContext, MARKDOWN_ROLES)
 
 BSD_2_CLAUSE_LICENSE = """Redistribution and use in source and binary \
 forms, with or without
@@ -153,6 +153,23 @@ class CContent(Content):
 
     def convert(self, text: str) -> str:
         return MARKDOWN_ROLES.sub(_role_to_doxygen, text)
+
+    def write(self,
+              path: str,
+              beautify: bool = False,
+              formatter: Optional[ClangFormatter] = None) -> None:
+        """Write the content to the file specified by the path.
+
+        Args:
+            path: The path to the file to write.
+            beautify: If true, then beautify the content.
+            formatter: If not None, then format the content with this formatter
+                before it is written.  The path is used as the assumed file
+                name of the formatter.
+        """
+        if formatter is not None:
+            self._lines = formatter.format_text(str(self), path).splitlines()
+        super().write(path, beautify)
 
     def add_directive_begin(self, prefix: str, directive: str) -> None:
         self.add("@code")

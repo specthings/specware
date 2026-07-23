@@ -31,9 +31,9 @@ import functools
 import os
 import logging
 import re
-from typing import Any, Optional
+from typing import Any, Iterable, Optional
 
-from specitems import (create_unique_link, Item, ItemCache,
+from specitems import (ClangFormatter, create_unique_link, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, get_value_plural)
 
 from .build import get_build_base_directory
@@ -149,11 +149,12 @@ class _TestItem:
     """ A test item with a default implementation for test cases. """
 
     # pylint: disable=too-many-public-methods
-    def __init__(self, item: Item):
+    def __init__(self, item: Item, formatter: Optional[ClangFormatter] = None):
         self.item = item
         self._args: dict[str, list[str]] = {}
         self._context = f"{self.ident}_Context"
         self._mapper = _Mapper(item)
+        self._formatter = formatter
 
     def __getitem__(self, key: str):
         return self.item[key]
@@ -451,7 +452,8 @@ class _TestItem:
             with content.extern_c():
                 with content.add_to_group(self.ident):
                     self.add_header_body(content, header)
-        content.write(os.path.join(base_directory, header["target"]))
+        content.write(os.path.join(base_directory, header["target"]),
+                      formatter=self._formatter)
 
     def _add_fixture(self, content: CContent, instance: str) -> Optional[str]:
         setup = self.add_wrapped_method(content, "test-setup", "Setup")
@@ -770,8 +772,8 @@ def _add_condition_enum(content: CContent, co_idx_to_enum: _IdxToX) -> None:
 class _ActionRequirementTestItem(_TestItem):
     """ An action requirement test item. """
 
-    def __init__(self, item: Item):
-        super().__init__(item)
+    def __init__(self, item: Item, formatter: Optional[ClangFormatter] = None):
+        super().__init__(item, formatter)
         self._mapper.add_get_value(("requirement/functional/action:"
                                     "/pre-conditions/states/test-code/skip"),
                                    self._skip_pre_condition)
@@ -1260,11 +1262,14 @@ class _RuntimeMeasurementTestItem(_TestItem):
 class _SourceFile:
     """ A test source file. """
 
-    def __init__(self, filename: str):
+    def __init__(self,
+                 filename: str,
+                 formatter: Optional[ClangFormatter] = None):
         self._file = filename
         self._test_suites: list[_TestItem] = []
         self._test_cases: list[_TestItem] = []
         self._base_directory: str | None = None
+        self._formatter = formatter
 
     @property
     def test_suites(self) -> list[_TestItem]:
@@ -1287,23 +1292,25 @@ class _SourceFile:
 
     def add_fatal_error_test(self, item: Item) -> None:
         """ Add the fatal error test to the source file. """
-        self._test_suites.append(_FatalErrorItem(item))
+        self._test_suites.append(_FatalErrorItem(item, self._formatter))
 
     def add_test_suite(self, item: Item) -> None:
         """ Add the test suite to the source file. """
-        self._test_suites.append(_TestSuiteItem(item))
+        self._test_suites.append(_TestSuiteItem(item, self._formatter))
 
     def add_test_case(self, item: Item) -> None:
         """ Add the test case to the source file. """
-        self._test_cases.append(_TestItem(item))
+        self._test_cases.append(_TestItem(item, self._formatter))
 
     def add_action_requirement_test(self, item: Item) -> None:
         """ Add the action requirement test to the source file. """
-        self._test_cases.append(_ActionRequirementTestItem(item))
+        self._test_cases.append(
+            _ActionRequirementTestItem(item, self._formatter))
 
     def add_runtime_measurement_test(self, item: Item) -> None:
-        """ Add theruntime measurement test to the source file. """
-        self._test_cases.append(_RuntimeMeasurementTestItem(item))
+        """ Add the runtime measurement test to the source file. """
+        self._test_cases.append(
+            _RuntimeMeasurementTestItem(item, self._formatter))
 
     def generate(self, test_case_to_suites: _CaseToSuite) -> None:
         """
@@ -1336,7 +1343,8 @@ class _SourceFile:
             item.generate(content, base_directory, test_case_to_suites)
         for item in sorted(self._test_suites, key=lambda x: x.name):
             item.generate(content, base_directory, test_case_to_suites)
-        content.write(os.path.join(base_directory, self._file))
+        content.write(os.path.join(base_directory, self._file),
+                      formatter=self._formatter)
 
 
 def _gather_build_source_files(item: Item, files: list[str]):
@@ -1364,62 +1372,81 @@ class _TestProgram:
         """ Is the source files of the test program. """
         return self._source_files
 
-    def add_source_files(self, source_files: dict[str, _SourceFile],
+    def add_source_files(self, source_files: "_SourceFiles",
                          base_directory_map: list[dict[str, str]]) -> None:
         """
         Add the source files of the test program which are present in the
         source file map.
         """
         for filename in self._build_source_files:
-            source_file = source_files.get(filename, None)
+            source_file = source_files.get(filename)
             if source_file is not None:
                 source_file.set_base_directory(self, base_directory_map)
                 self._source_files.append(source_file)
 
 
-def _get_source_file(filename: str,
-                     source_files: dict[str, _SourceFile]) -> _SourceFile:
-    return source_files.setdefault(filename, _SourceFile(filename))
+class _SourceFiles:
+    """ The test source files gathered from the specification. """
+
+    def __init__(self, formatter: Optional[ClangFormatter] = None):
+        self._formatter = formatter
+        self._source_files: dict[str, _SourceFile] = {}
+
+    def __getitem__(self, filename: str) -> _SourceFile:
+        return self._source_files[filename]
+
+    def get(self, filename: str) -> Optional[_SourceFile]:
+        """ Return the source file of the file name or None. """
+        return self._source_files.get(filename, None)
+
+    def get_or_create(self, filename: str) -> _SourceFile:
+        """ Return the source file, create it if it does not exist. """
+        return self._source_files.setdefault(
+            filename, _SourceFile(filename, self._formatter))
+
+    def values(self) -> Iterable[_SourceFile]:
+        """ Return the source files. """
+        return self._source_files.values()
 
 
 def _gather_action_requirement_test(
-        item: Item, source_files: dict[str, _SourceFile],
+        item: Item, source_files: _SourceFiles,
         _test_programs: list[_TestProgram]) -> None:
-    src = _get_source_file(item["test-target"], source_files)
+    src = source_files.get_or_create(item["test-target"])
     src.add_action_requirement_test(item)
 
 
-def _gather_fatal_error_test(item: Item, source_files: dict[str, _SourceFile],
+def _gather_fatal_error_test(item: Item, source_files: _SourceFiles,
                              _test_programs: list[_TestProgram]) -> None:
-    src = _get_source_file(item["test-target"], source_files)
+    src = source_files.get_or_create(item["test-target"])
     src.add_fatal_error_test(item)
 
 
 def _gather_runtime_measurement_test(
-        item: Item, source_files: dict[str, _SourceFile],
+        item: Item, source_files: _SourceFiles,
         _test_programs: list[_TestProgram]) -> None:
-    src = _get_source_file(item["test-target"], source_files)
+    src = source_files.get_or_create(item["test-target"])
     src.add_runtime_measurement_test(item)
 
 
-def _gather_test_case(item: Item, source_files: dict[str, _SourceFile],
+def _gather_test_case(item: Item, source_files: _SourceFiles,
                       _test_programs: list[_TestProgram]) -> None:
-    src = _get_source_file(item["test-target"], source_files)
+    src = source_files.get_or_create(item["test-target"])
     src.add_test_case(item)
 
 
-def _gather_test_program(item: Item, _source_files: dict[str, _SourceFile],
+def _gather_test_program(item: Item, _source_files: _SourceFiles,
                          test_programs: list[_TestProgram]) -> None:
     test_programs.append(_TestProgram(item))
 
 
-def _gather_test_suite(item: Item, source_files: dict[str, _SourceFile],
+def _gather_test_suite(item: Item, source_files: _SourceFiles,
                        _test_programs: list[_TestProgram]) -> None:
-    src = _get_source_file(item["test-target"], source_files)
+    src = source_files.get_or_create(item["test-target"])
     src.add_test_suite(item)
 
 
-def _gather_default(_item: Item, _source_files: dict[str, _SourceFile],
+def _gather_default(_item: Item, _source_files: _SourceFiles,
                     _test_programs: list[_TestProgram]) -> None:
     pass
 
@@ -1436,9 +1463,11 @@ _GATHER = {
 
 
 def _gather(
-    item_cache: ItemCache, base_directory_map: list[dict[str, str]]
-) -> tuple[dict[str, _SourceFile], _CaseToSuite]:
-    source_files: dict[str, _SourceFile] = {}
+    item_cache: ItemCache,
+    base_directory_map: list[dict[str, str]],
+    formatter: Optional[ClangFormatter] = None
+) -> tuple[_SourceFiles, _CaseToSuite]:
+    source_files = _SourceFiles(formatter)
     test_programs: list[_TestProgram] = []
     for item in item_cache.values():
         enabled_by = item["enabled-by"]
@@ -1463,7 +1492,8 @@ def _gather(
 
 def generate_validation(config: dict,
                         item_cache: ItemCache,
-                        targets: Optional[list[str]] = None) -> None:
+                        targets: Optional[list[str]] = None,
+                        formatter: Optional[ClangFormatter] = None) -> None:
     """
     Generate source files and build specification items for validation test
     suites and test cases according to the configuration.
@@ -1472,9 +1502,12 @@ def generate_validation(config: dict,
         config: The validation generation configuration.
         item_cache: The item cache containing the validation test suites and
             test cases.
+        targets: The optional target files to generate.
+        formatter: The optional formatter used to format the source files.
     """
     source_files, test_case_to_suites = _gather(item_cache,
-                                                config["base-directory-map"])
+                                                config["base-directory-map"],
+                                                formatter)
 
     if not targets:
         for src in source_files.values():

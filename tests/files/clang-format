@@ -1,0 +1,25 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-2-Clause
+#
+# A fake clang-format tool which marks the formatted content.
+
+style=
+filename=
+
+for arg in "$@"; do
+	case "${arg}" in
+	--version)
+		echo "clang-format version 1.2.3 (fake)"
+		exit 0
+		;;
+	--style=*)
+		style="${arg#--style=}"
+		;;
+	--assume-filename=*)
+		filename="${arg#--assume-filename=}"
+		;;
+	esac
+done
+
+echo "/* fake clang-format: style=${style} filename=${filename} */"
+cat
