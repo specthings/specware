@@ -24,14 +24,89 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import argparse
 import logging
 import os
 from pathlib import Path
 import subprocess
 from typing import Optional, Union
 
-from specitems import (ItemDataByUID, load_config, pickle_load_data_by_uid,
-                       SpecTypeProvider)
+from specitems import (ClangFormatter, ItemDataByUID, load_config,
+                       pickle_load_data_by_uid, SpecTypeProvider)
+
+
+class ClangFormatError(Exception):
+    """ Indicates that the clang-format tool cannot be used. """
+
+
+def add_clang_format_arguments(parser: argparse.ArgumentParser) -> None:
+    """ Add the clang-format command line arguments to the parser. """
+    parser.add_argument("--format-code",
+                        action="store_true",
+                        help="format the generated C language files with the "
+                        "clang-format tool")
+    parser.add_argument("--clang-format-path",
+                        default="clang-format",
+                        help="the path to the clang-format executable")
+    parser.add_argument("--clang-format-style",
+                        default="file",
+                        help="the style used by the clang-format tool; the "
+                        "value is passed to the --style option of the tool "
+                        "(default: file)")
+
+
+def create_clang_formatter(
+        args: argparse.Namespace) -> Optional[ClangFormatter]:
+    """
+    Create the formatter for generated C language files according to the
+    command line arguments.
+
+    The availability of the clang-format tool is checked before any file is
+    generated.
+
+    Args:
+        args: The parsed command line arguments.
+
+    Returns:
+        The formatter or None if the formatting is disabled.
+
+    Raises:
+        ClangFormatError: The clang-format tool cannot be run.
+    """
+    if not args.format_code:
+        return None
+    formatter = ClangFormatter(args.clang_format_path, args.clang_format_style)
+    try:
+        formatter.check_available()
+    except OSError as err:
+        raise ClangFormatError(f"cannot run the clang-format tool "
+                               f"'{args.clang_format_path}': {err}") from err
+    except subprocess.CalledProcessError as err:
+        raise ClangFormatError(
+            f"cannot run the clang-format tool "
+            f"'{args.clang_format_path}': it failed with exit status "
+            f"{err.returncode}: {_get_stderr(err)}") from err
+    return formatter
+
+
+def _get_stderr(err: subprocess.CalledProcessError) -> str:
+    """
+    Return the standard error output of the error as text.
+
+    The standard error output is optional and may be text or binary data.
+    """
+    stderr = err.stderr
+    if stderr is None:
+        return ""
+    if isinstance(stderr, bytes):
+        stderr = stderr.decode("utf-8", "replace")
+    return stderr.strip()
+
+
+def log_clang_format_failure(err: subprocess.CalledProcessError) -> None:
+    """ Log the failure of the clang-format tool. """
+    logging.error("the clang-format tool failed with exit status %s: %s",
+                  err.returncode, _get_stderr(err))
 
 
 def load_specware_types() -> ItemDataByUID:

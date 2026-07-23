@@ -29,13 +29,18 @@ file.
 
 import argparse
 import contextlib
+import logging
+import subprocess
 import sys
+from typing import Optional
 
-from specitems import (ItemCache, ItemCacheConfig, create_config,
-                       item_is_enabled)
+from specitems import (ClangFormatter, ItemCache, ItemCacheConfig,
+                       create_config, item_is_enabled, monitor_logging)
 
-from specware import (SpecWareTypeProvider, generate_header_file,
-                      load_specware_config)
+from specware import (ClangFormatError, SpecWareTypeProvider,
+                      add_clang_format_arguments, create_clang_formatter,
+                      generate_header_file, load_specware_config,
+                      log_clang_format_failure)
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -48,6 +53,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                         type=str,
                         default="default",
                         help="use this coding style")
+    add_clang_format_arguments(parser)
     parser.add_argument("uid",
                         metavar="UID",
                         nargs=1,
@@ -59,9 +65,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv[1:])
 
 
-def cliexportheader(argv: list[str] = sys.argv):
-    """ Export the specified header to its target file. """
-    args = _parse_args(argv)
+def _export_header(args: argparse.Namespace,
+                   formatter: Optional[ClangFormatter]) -> None:
     config, working_directory = load_specware_config(args.config_file)
     with contextlib.chdir(working_directory):
         config["enabled"] = []
@@ -70,4 +75,17 @@ def cliexportheader(argv: list[str] = sys.argv):
                                type_provider=SpecWareTypeProvider({}),
                                is_item_enabled=item_is_enabled)
         generate_header_file(config["interface"], item_cache[args.uid[0]],
-                             args.file[0])
+                             args.file[0], formatter)
+
+
+def cliexportheader(argv: list[str] = sys.argv):
+    """ Export the specified header to its target file. """
+    args = _parse_args(argv)
+    with monitor_logging() as monitor:
+        try:
+            _export_header(args, create_clang_formatter(args))
+        except ClangFormatError as err:
+            logging.error("%s", err)
+        except subprocess.CalledProcessError as err:
+            log_clang_format_failure(err)
+        return monitor.get_status().exit_code()

@@ -29,21 +29,27 @@ documentation files.
 
 import argparse
 import contextlib
+import logging
 import os
+import subprocess
 import sys
+from typing import Optional
 
-from specitems import (Content, DocumentGlossaryConfig, GlossaryConfig,
-                       ItemCache, ItemCacheConfig, MarkdownContent,
-                       MarkdownMapper, SpecDocumentConfig, SphinxContent,
-                       SphinxMapper, augment_glossary_terms, create_config,
-                       generate_glossary, generate_specification_documentation,
-                       item_is_enabled, monitor_logging)
+from specitems import (ClangFormatter, Content, DocumentGlossaryConfig,
+                       GlossaryConfig, ItemCache, ItemCacheConfig,
+                       MarkdownContent, MarkdownMapper, SpecDocumentConfig,
+                       SphinxContent, SphinxMapper, augment_glossary_terms,
+                       create_config, generate_glossary,
+                       generate_specification_documentation, item_is_enabled,
+                       monitor_logging)
 
-from specware import (MarkdownInterfaceMapper, SpecWareTypeProvider,
-                      SphinxInterfaceMapper,
+from specware import (ClangFormatError, MarkdownInterfaceMapper,
+                      SpecWareTypeProvider, SphinxInterfaceMapper,
+                      add_clang_format_arguments, create_clang_formatter,
                       generate_application_configuration,
                       generate_interface_documentation, generate_interfaces,
-                      generate_validation, load_specware_config)
+                      generate_validation, load_specware_config,
+                      log_clang_format_failure)
 
 _DOC_FORMAT = {
     "myst": (MarkdownContent, MarkdownMapper, MarkdownInterfaceMapper),
@@ -77,6 +83,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--no-validation-code",
                         action="store_true",
                         help="do not generate validation code")
+    add_clang_format_arguments(parser)
     parser.add_argument("targets",
                         metavar="TARGET",
                         nargs="*",
@@ -85,7 +92,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def _generate_more(item_cache: ItemCache, config: dict,
-                   args: argparse.Namespace) -> None:
+                   args: argparse.Namespace,
+                   formatter: Optional[ClangFormatter]) -> None:
     create_content, create_mapper, create_interface_mapper = _DOC_FORMAT[
         args.format]
     group_uids = [
@@ -93,12 +101,12 @@ def _generate_more(item_cache: ItemCache, config: dict,
     ]
     if not args.no_code:
         if not args.no_interface_code:
-            generate_interfaces(config["interface"], item_cache)
+            generate_interfaces(config["interface"], item_cache, formatter)
         if not args.no_application_configuration_code:
             generate_application_configuration(config["appl-config"],
                                                group_uids, item_cache,
                                                create_interface_mapper,
-                                               create_content)
+                                               create_content, formatter)
     if not args.no_documentation:
         some_item = next(iter(item_cache.values()))
         mapper = create_mapper(some_item)
@@ -120,35 +128,44 @@ def _generate_more(item_cache: ItemCache, config: dict,
                                          create_content)
 
 
+def _export(args: argparse.Namespace,
+            formatter: Optional[ClangFormatter]) -> None:
+    config, working_directory = load_specware_config(args.config_file)
+    Content.AUTOMATICALLY_GENERATED_WARNING = config.get(
+        "automatically-generated-warning",
+        Content.AUTOMATICALLY_GENERATED_WARNING)
+    with contextlib.chdir(working_directory):
+        item_cache = ItemCache(create_config(config["spec"], ItemCacheConfig),
+                               type_provider=SpecWareTypeProvider({}),
+                               is_item_enabled=item_is_enabled)
+        for uid in config["glossary"]["project-groups"]:
+            group = item_cache[uid]
+            assert group.type == "glossary/group"
+            augment_glossary_terms(group, [])
+
+        if not args.no_code and not args.no_validation_code:
+            config_validation = config["validation"]
+            for mapping in config_validation["base-directory-map"]:
+                for key, value in mapping.items():
+                    mapping[key] = os.path.normpath(
+                        os.path.join(working_directory, value))
+            generate_validation(config_validation, item_cache, args.targets,
+                                formatter)
+
+        if not args.targets:
+            _generate_more(item_cache, config, args, formatter)
+
+
 def cliexport(argv: list[str] = sys.argv):
     """
     Export the specification to the target source and documentation files.
     """
     args = _parse_args(argv)
     with monitor_logging() as monitor:
-        config, working_directory = load_specware_config(args.config_file)
-        Content.AUTOMATICALLY_GENERATED_WARNING = config.get(
-            "automatically-generated-warning",
-            Content.AUTOMATICALLY_GENERATED_WARNING)
-        with contextlib.chdir(working_directory):
-            item_cache = ItemCache(create_config(config["spec"],
-                                                 ItemCacheConfig),
-                                   type_provider=SpecWareTypeProvider({}),
-                                   is_item_enabled=item_is_enabled)
-            for uid in config["glossary"]["project-groups"]:
-                group = item_cache[uid]
-                assert group.type == "glossary/group"
-                augment_glossary_terms(group, [])
-
-            if not args.no_code and not args.no_validation_code:
-                config_validation = config["validation"]
-                for mapping in config_validation["base-directory-map"]:
-                    for key, value in mapping.items():
-                        mapping[key] = os.path.normpath(
-                            os.path.join(working_directory, value))
-                generate_validation(config_validation, item_cache,
-                                    args.targets)
-
-            if not args.targets:
-                _generate_more(item_cache, config, args)
+        try:
+            _export(args, create_clang_formatter(args))
+        except ClangFormatError as err:
+            logging.error("%s", err)
+        except subprocess.CalledProcessError as err:
+            log_clang_format_failure(err)
         return monitor.get_status().exit_code()

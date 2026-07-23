@@ -28,9 +28,9 @@ Provides methods to generate the application configuration documentation.
 
 from typing import Any, Callable, Optional
 
-from specitems import (Content, EnabledSet, GenericContent, get_value_plural,
-                       Item, ItemCache, ItemGetValueContext, ItemMapper,
-                       TextContent)
+from specitems import (ClangFormatter, Content, EnabledSet, GenericContent,
+                       get_value_plural, Item, ItemCache, ItemGetValueContext,
+                       ItemMapper, TextContent)
 
 from .contentc import (CContent, get_value_double_colon,
                        get_value_doxygen_function, get_value_doxygen_group,
@@ -151,9 +151,16 @@ class _TextContentAdaptor(_ContentAdaptor):
 class _DoxygenContentAdaptor(_ContentAdaptor):
     # pylint: disable=attribute-defined-outside-init
 
-    def __init__(self, mapper: ItemMapper) -> None:
+    def __init__(self,
+                 mapper: ItemMapper,
+                 formatter: Optional[ClangFormatter] = None) -> None:
         super().__init__(mapper, CContent())
+        self._formatter = formatter
         self._reset()
+
+    def write(self, filename: str):
+        """ Write the content to the file specified by the path. """
+        self.content.write(filename, beautify=True, formatter=self._formatter)
 
     def _reset(self) -> None:
         self._name = ""
@@ -351,9 +358,14 @@ def _add_doxygen_get_values(mapper: ItemMapper) -> None:
 
 
 def generate_application_configuration(
-        config: dict, group_uids: list[str], item_cache: ItemCache,
+        config: dict,
+        group_uids: list[str],
+        item_cache: ItemCache,
         create_mapper: Callable[[Item, list[str]], ItemMapper],
-        create_content: Callable[[], TextContent]) -> None:
+        create_content: Callable[[], TextContent],
+        formatter: Optional[ClangFormatter] = None) -> None:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     """
     Generate the application configuration documentation sources according to
     the configuration.
@@ -365,12 +377,14 @@ def generate_application_configuration(
         create_mapper: The item mapper constructor to create mappers used for
             content substitutions.
         create_content: The content builder constructor.
+        formatter: The optional formatter used to format the Doxygen header
+            file.
     """
     some_item = next(iter(item_cache.values()))
     text_mapper = create_mapper(some_item, group_uids)
     doxygen_mapper = ItemMapper(some_item)
     _add_doxygen_get_values(doxygen_mapper)
-    doxygen_content = _DoxygenContentAdaptor(doxygen_mapper)
+    doxygen_content = _DoxygenContentAdaptor(doxygen_mapper, formatter)
     doxygen_content.content.add_automatically_generated_warning()
     with doxygen_content.content.defgroup_block(
             "RTEMSApplConfig", "Application Configuration Options"):

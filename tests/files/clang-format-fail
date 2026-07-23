@@ -1,0 +1,12 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-2-Clause
+#
+# A fake clang-format tool which is available, but fails to format.
+
+if [ "$1" = "--version" ]; then
+	echo "clang-format version 1.2.3 (fake)"
+	exit 0
+fi
+
+echo "fake clang-format cannot format this" >&2
+exit 1
