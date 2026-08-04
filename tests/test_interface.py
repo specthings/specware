@@ -1010,7 +1010,7 @@ void Function6( int Param0 );
 /* R bits */
 
 /* RBNS address offsets */
-#define RBNS_R 0x0U
+#define RBNS_O_R 0x0U
 
 /**
  * @ingroup GroupC

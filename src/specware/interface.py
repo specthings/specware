@@ -860,7 +860,10 @@ class _ZephyrNode(_Node):
                                         ctx: _RegisterMemberContext,
                                         offset: int) -> GenericContent:
         name, alias = _get_register_name(definition)
-        define = f"#define {item['name'].upper()}_{alias.upper()}"
+        prefix = item.get("offset-prefix", None)
+        if prefix is None:
+            prefix = item["name"]
+        define = f"#define {prefix.upper()}_{alias.upper()}"
         count = definition["count"]
         if count == 1:
             return f"{define} {offset:#x}U"

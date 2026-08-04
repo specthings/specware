@@ -17,6 +17,7 @@ definition:
     name: R
   offset: 0
   variants: []
+offset-prefix: rbns_o
 register-prefix: null
 register-block-group: RBNS
 register-block-size: null
