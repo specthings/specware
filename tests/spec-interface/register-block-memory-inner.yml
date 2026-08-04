@@ -3,43 +3,32 @@ brief: |
   Brief.
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+- default:
+    count: 1
+    name: X
+  offset: 0
+  variants: []
+- default:
+    count: 1
+    name: Y
+  offset: 4
+  variants: []
 description: null
 enabled-by: true
-identifier: RBM
+identifier: RBMI
 index-entries: []
 interface-type: register-block
 links:
 - role: interface-placement
   uid: h
-- name: INNER
-  role: register-block-include
-  uid: register-block-memory-inner
-definition:
-- default:
-    count: 1
-    name: W0
-  offset: 0
-  variants: []
-- default:
-    count: 1
-    name: W1
-  offset: 4
-  variants: []
-- default:
-    count: 1
-    name: W0
-  offset: 8
-  variants: []
-- default:
-    count: 2
-    name: INNER
-  offset: 16
-  variants: []
+name: rbmi
+notes: null
 offset-prefix: null
-register-prefix: null
-register-block-group: RBM
-register-block-size: 32
+register-block-group: RBMI
+register-block-size: 8
 register-domain: memory
+register-prefix: null
 registers:
 - bits:
   - default: []
@@ -47,7 +36,7 @@ registers:
   brief: |
     Brief.
   description: null
-  name: W0
+  name: X
   width: 32
 - bits:
   - default: []
@@ -55,8 +44,6 @@ registers:
   brief: |
     Brief.
   description: null
-  name: W1
+  name: Y
   width: 32
-name: rbm
-notes: null
 type: interface

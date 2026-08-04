@@ -905,6 +905,13 @@ class _ZephyrNode(_Node):
                         ctx=ctx,
                         offset=member["offset"])))
 
+    def _add_register_block_includes(self,
+                                     ctx: _RegisterMemberContext) -> None:
+        super()._add_register_block_includes(ctx)
+        for link in self.item.links_to_parents("register-block-include"):
+            # Register block structures are not typedefed in this style
+            ctx.regs[link["name"]]["type"] = f"struct {link.item['name']}"
+
     def _get_register_member_definition(
             self, _item: Item, _prefix: str, definition: Any,
             ctx: _RegisterMemberContext) -> GenericContent:

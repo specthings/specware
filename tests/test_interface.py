@@ -552,6 +552,53 @@ typedef struct irqamp {
   #define MACRO( Param0 ) ( ( Param0 ) + 1 )
 #endif
 
+/* Generated from spec:/register-block-memory-inner */
+
+/**
+ * @defgroup RBMI RBMI
+ *
+ * @brief This group contains the RBMI interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup RBMIX Brief. (X)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/** @} */
+
+/**
+ * @defgroup RBMIY Brief. (Y)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/** @} */
+
+/**
+ * @brief Brief.
+ */
+typedef struct rbmi {
+  /**
+   * @brief See @ref RBMIX.
+   */
+  uint32_t x;
+
+  /**
+   * @brief See @ref RBMIY.
+   */
+  uint32_t y;
+} rbmi;
+
+/** @} */
+
 /* Generated from spec:/register-block-memory */
 
 /**
@@ -602,6 +649,11 @@ typedef struct rbm {
   uint32_t w0_1;
 
   uint32_t reserved_c_10;
+
+  /**
+   * @brief See @ref RBMI.
+   */
+  rbmi inner[ 2 ];
 } rbm;
 
 /** @} */
@@ -1072,6 +1124,15 @@ void Function6( int Param0 );
   #define MACRO( Param0 ) ( ( Param0 ) + 1 )
 #endif
 
+/* X bits */
+
+/* Y bits */
+
+struct rbmi {
+  uint32_t x;
+  uint32_t y;
+};
+
 /* W0 bits */
 
 /* W1 bits */
@@ -1081,6 +1142,7 @@ struct rbm {
   uint32_t w1;
   uint32_t w0_1;
   uint32_t reserved_c_10;
+  struct rbmi inner[2];
 };
 
 /* R bits */
