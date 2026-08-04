@@ -1,0 +1,36 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Brief.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+- default:
+    count: 1
+    name: X
+  offset: 0
+  variants: []
+description: null
+enabled-by: true
+identifier: RBMNS
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-placement
+  uid: h
+name: rbmns
+notes: null
+offset-prefix: null
+register-block-group: RBMNS
+register-block-size: null
+register-domain: memory
+register-prefix: null
+registers:
+- bits:
+  - default: []
+    variants: []
+  brief: |
+    Brief.
+  description: null
+  name: X
+  width: 32
+type: interface

@@ -64,7 +64,7 @@ def test_interface(tmpdir):
  */
 
 /*
- * Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+ * Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -543,6 +543,60 @@ typedef struct irqamp {
   #define MACRO( Param0 ) ( ( Param0 ) + 1 )
 #endif
 
+/* Generated from spec:/register-block-memory */
+
+/**
+ * @defgroup RBM RBM
+ *
+ * @brief This group contains the RBM interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup RBMW0 Brief. (W0)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/** @} */
+
+/**
+ * @defgroup RBMW1 Brief. (W1)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/** @} */
+
+/**
+ * @brief Brief.
+ */
+typedef struct rbm {
+  /**
+   * @brief See @ref RBMW0.
+   */
+  uint32_t w0_0;
+
+  /**
+   * @brief See @ref RBMW1.
+   */
+  uint32_t w1;
+
+  /**
+   * @brief See @ref RBMW0.
+   */
+  uint32_t w0_1;
+
+  uint32_t reserved_c_10;
+} rbm;
+
+/** @} */
+
 /* Generated from spec:/register-block-no-size */
 
 /**
@@ -770,7 +824,7 @@ __attribute__((__const__)) static inline int VeryLongFunction(
 
     with open(file_path, "r") as src:
         content = """/*
- * Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+ * Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -1007,6 +1061,17 @@ void Function6( int Param0 );
   #define MACRO( Param0 ) ( ( Param0 ) + 1 )
 #endif
 
+/* W0 bits */
+
+/* W1 bits */
+
+struct rbm {
+  uint32_t w0_0;
+  uint32_t w1;
+  uint32_t w0_1;
+  uint32_t reserved_c_10;
+};
+
 /* R bits */
 
 /* RBNS address offsets */
@@ -1176,3 +1241,34 @@ __attribute__((__const__)) static inline int VeryLongFunction(
 #endif /* _H_H */
 """
         assert content == src.read()
+
+
+def _generate_header_file_with(tmpdir, style, spec_dir):
+    """ Generate the header file /h using an additional specification. """
+    item_cache = create_item_cache(tmpdir, ["spec-interface", spec_dir])
+    header_file_config = {
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": style
+    }
+    generate_header_file(header_file_config, item_cache["/h"],
+                         os.path.join(tmpdir, "header.h"))
+
+
+@pytest.mark.parametrize("style", ["default", "zephyr"])
+def test_interface_invalid_register_domain(tmpdir, style):
+    with pytest.raises(ValueError,
+                       match="register block '/rbid' has an invalid register "
+                       "domain 'invalid', expected one of: device, memory"):
+        _generate_header_file_with(tmpdir, style,
+                                   "spec-interface-invalid-domain")
+
+
+@pytest.mark.parametrize("style", ["default", "zephyr"])
+def test_interface_memory_register_block_without_size(tmpdir, style):
+    with pytest.raises(ValueError,
+                       match="register block '/rbmns' is in the 'memory' "
+                       "register domain and has no register block size"):
+        _generate_header_file_with(tmpdir, style,
+                                   "spec-interface-memory-no-size")

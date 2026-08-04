@@ -287,6 +287,22 @@ def _add_register_padding(content: CContent, new_offset: int, old_offset: int,
                     f"reserved_{old_offset:x}_{new_offset:x}{array};")
 
 
+_REGISTER_DOMAINS = ["device", "memory"]
+
+
+def _get_register_domain_and_size(item: Item) -> tuple[str, Any]:
+    domain = item.get("register-domain", "device")
+    if domain not in _REGISTER_DOMAINS:
+        raise ValueError(f"register block '{item.uid}' has an invalid "
+                         f"register domain '{domain}', expected one of: "
+                         f"{', '.join(_REGISTER_DOMAINS)}")
+    size = item["register-block-size"]
+    if domain == "memory" and size is None:
+        raise ValueError(f"register block '{item.uid}' is in the 'memory' "
+                         "register domain and has no register block size")
+    return domain, size
+
+
 def _get_register_name(definition: dict[str, Any]) -> tuple[str, str]:
     name = definition["name"]
     try:
@@ -526,7 +542,7 @@ class _Node:
         self.content.add(f"}} {self.item['name']};")
 
     def _add_register_members(self, ctx: _RegisterMemberContext) -> None:
-        size = self.item["register-block-size"]
+        _, size = _get_register_domain_and_size(self.item)
         if size is None:
             self._add_register_defines(ctx)
         else:
@@ -879,7 +895,49 @@ class _ZephyrNode(_Node):
                         ctx=ctx,
                         offset=member["offset"])))
 
+    def _get_register_member_definition(
+            self, _item: Item, _prefix: str, definition: Any,
+            ctx: _RegisterMemberContext) -> GenericContent:
+        name, alias = _get_register_name(definition)
+        count = definition["count"]
+        array = f"[{count}]" if count > 1 else ""
+        if ctx.reg_counts[alias] > 1:
+            index = ctx.reg_indices[alias]
+            ctx.reg_indices[alias] = index + 1
+            idx = f"_{index}"
+        else:
+            idx = ""
+        return f"{ctx.regs[name]['type']} {alias.lower()}{idx}{array};"
+
+    def _append_register_padding(self, new_offset: int, old_offset: int,
+                                 default_padding: int) -> None:
+        padding = CContent()
+        _add_register_padding(padding, new_offset, old_offset, default_padding)
+        self.content.append(padding)
+
+    def _add_register_struct(self, ctx: _RegisterMemberContext,
+                             size: int) -> None:
+        self.content.add(f"struct {self.item['name']} {{")
+        default_padding = min(*ctx.sizes.values(), 8)
+        offset = 0
+        with self.content.indent():
+            for index, member in enumerate(self.item["definition"]):
+                member_offset = member["offset"]
+                self._append_register_padding(member_offset, offset,
+                                              default_padding)
+                self.content.append(
+                    _add_definition(
+                        self, self.item, f"definition[{index}]", member,
+                        functools.partial(
+                            _ZephyrNode._get_register_member_definition,
+                            ctx=ctx)))
+                offset = member_offset + ctx.sizes[index]
+            assert offset <= size
+            self._append_register_padding(size, offset, default_padding)
+        self.content.add("};")
+
     def generate_register_block(self) -> None:
+        domain, size = _get_register_domain_and_size(self.item)
         self.header_file.add_includes(self.item.map("/zephyr/if/genmask"))
         for parent in self.item.parents("register-block-include"):
             self.header_file.add_includes(parent)
@@ -889,8 +947,12 @@ class _ZephyrNode(_Node):
         ctx = self._add_register_bits(group)
         self._add_register_block_includes(ctx)
         self._get_register_member_info(ctx)
-        self.content.add(f"/* {name} address offsets */")
-        self._add_register_defines(ctx)
+        if domain == "memory":
+            self.header_file.add_includes(self.item.map("/c/if/uint32_t"))
+            self._add_register_struct(ctx, size)
+        else:
+            self.content.add(f"/* {name} address offsets */")
+            self._add_register_defines(ctx)
 
 
 _ZEPHYR_NODE_GENERATORS = {

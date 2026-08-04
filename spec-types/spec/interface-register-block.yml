@@ -50,8 +50,14 @@ spec-info:
       register-block-size:
         description: |
           If the value is present, then it shall be the size of the register
-          block in units of the address space granule.
+          block in units of the address space granule.  The value shall be
+          present if the ``register-domain`` attribute value is ``memory``.
         spec-type: optional-int
+      register-domain:
+        description: |
+          If the value is present, then it shall be the address domain of the
+          register block, otherwise the address domain is ``device``.
+        spec-type: interface-register-domain
       register-prefix:
         description: |
           If the value is present, then it will be used to prefix register bit

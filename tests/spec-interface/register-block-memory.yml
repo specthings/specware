@@ -1,0 +1,54 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Brief.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RBM
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-placement
+  uid: h
+definition:
+- default:
+    count: 1
+    name: W0
+  offset: 0
+  variants: []
+- default:
+    count: 1
+    name: W1
+  offset: 4
+  variants: []
+- default:
+    count: 1
+    name: W0
+  offset: 8
+  variants: []
+offset-prefix: null
+register-prefix: null
+register-block-group: RBM
+register-block-size: 16
+register-domain: memory
+registers:
+- bits:
+  - default: []
+    variants: []
+  brief: |
+    Brief.
+  description: null
+  name: W0
+  width: 32
+- bits:
+  - default: []
+    variants: []
+  brief: |
+    Brief.
+  description: null
+  name: W1
+  width: 32
+name: rbm
+notes: null
+type: interface
