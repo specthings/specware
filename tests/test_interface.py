@@ -156,6 +156,15 @@ extern "C" {
     ((float_t) 123)
 #endif
 
+/* Generated from spec:/define-brief */
+
+/**
+ * @ingroup GroupA
+ *
+ * @brief Brief.
+ */
+#define DEFINE_BRIEF 1
+
 /* Generated from spec:/enum */
 
 /**
@@ -874,9 +883,6 @@ extern "C" {
  * @ingroup GroupA
  */
 
-/**
- * @ingroup GroupA
- */
 #if defined(A) || (B > C)
   #define DEFINE ((float_t) 456)
 #elif defined(C) && defined(D)
@@ -885,6 +891,11 @@ extern "C" {
   #define DEFINE \\
     ((float_t) 123)
 #endif
+
+/*
+ * Brief.
+ */
+#define DEFINE_BRIEF 1
 
 /**
  * @ingroup GroupB

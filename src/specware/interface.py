@@ -826,6 +826,16 @@ _NODE_GENERATORS = {
 
 class _ZephyrNode(_Node):
 
+    def generate_define(self) -> None:
+        brief = self.substitute_text(self.item["brief"])
+        if brief:
+            with self.content.comment_block():
+                self.content.wrap(brief)
+        self.content.append(
+            _add_definition(self, self.item, "definition",
+                            self.item["definition"],
+                            _Node._get_define_definition))
+
     def generate_directly(self) -> None:
         interface_type = self.item["interface-type"]
         _ZEPHYR_NODE_GENERATORS.get(interface_type,
@@ -956,6 +966,7 @@ class _ZephyrNode(_Node):
 
 
 _ZEPHYR_NODE_GENERATORS = {
+    "define": _ZephyrNode.generate_define,
     "register-block": _ZephyrNode.generate_register_block
 }
 
