@@ -29,14 +29,15 @@ import pytest
 from specitems import EmptyItemCache, Item, ItemCache, ItemSelection
 
 from specware import (augment_with_test_case_links, augment_with_test_links,
-                      gather_api_items, gather_related_items,
+                      gather_api_items, gather_export_related_items,
+                      gather_referencing_items, gather_related_items,
                       gather_test_cases, gather_benchmarks_and_test_suites,
                       get_benchmark_and_test_suite_items,
                       get_items_by_type_map, get_constraint_items,
                       get_interface_items, get_interface_and_requirement_items,
                       get_requirement_items, get_validation_items,
-                      is_pre_qualified, is_validation_by_test,
-                      recursive_is_enabled, validate)
+                      is_export_affected, is_pre_qualified,
+                      is_validation_by_test, recursive_is_enabled, validate)
 
 from .util import create_item_cache
 
@@ -322,3 +323,84 @@ def test_validate(tmpdir):
                        match=("/if/header-empty container member "
                               "/orphan has no validated status")):
         validate(root, _validate)
+
+
+def test_gather_export_related_items(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    related_items = gather_export_related_items(item_cache["/h"])
+    assert _uids(related_items) == [
+        "/constraint-a",
+        "/constraint/other",
+        "/constraint/type-opaque",
+        "/define",
+        "/define-brief",
+        "/enum",
+        "/enum3",
+        "/enumerator-0",
+        "/enumerator-1",
+        "/enumerator-2",
+        "/enumerator-b",
+        "/forward-decl",
+        "/func",
+        "/func2",
+        "/func6",
+        "/ga",
+        "/gb",
+        "/gc",
+        "/h",
+        "/h2",
+        "/h4",
+        "/h5",
+        "/h6",
+        "/h7",
+        "/h8",
+        "/h9",
+        "/irqamp",
+        "/irqamp-timestamp",
+        "/macro",
+        "/macro2",
+        "/register-block-memory",
+        "/register-block-memory-inner",
+        "/register-block-no-size",
+        "/s",
+        "/s2",
+        "/td",
+        "/td3",
+        "/u",
+        "/var",
+    ]
+
+    # The header file /h2 is included by /h.  It is reached through a shallow
+    # role, so it is related, however, it is not expanded.  Its member /enum4
+    # is not related to /h.
+    uids = _uids(related_items)
+    assert "/h2" in uids
+    assert "/enum4" in _uids(item_cache["/h2"].children("interface-placement"))
+    assert "/enum4" not in uids
+
+    assert is_export_affected(item_cache["/h"], {"/constraint-a"})
+    assert not is_export_affected(item_cache["/h"], {"/enum4"})
+    assert not is_export_affected(item_cache["/h"], set())
+
+
+def test_gather_referencing_items(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+
+    assert gather_referencing_items(item_cache, set()) == set()
+
+    # An absolute reference in a text attribute.  The referenced item need not
+    # exist, the substitution is reported by the content generation.
+    assert "/h" in gather_referencing_items(item_cache, {"/term"})
+
+    # A relative reference is resolved against the referencing item.
+    assert "/func" in gather_referencing_items(item_cache,
+                                               {"/unspecified-struct"})
+
+    # A reference nested in a list of dictionaries.
+    assert "/s2" in gather_referencing_items(item_cache, {"/c/if/uint32_t"})
+
+    # An item of the selection references itself through ${.:/name}, it is no
+    # referencing item.
+    assert "/h" not in gather_referencing_items(item_cache, {"/h", "/term"})
+
+    assert gather_referencing_items(item_cache, {"/does-not-exist"}) == set()

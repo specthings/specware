@@ -30,7 +30,8 @@ import pytest
 from specitems import EmptyItemCache, Item, ItemCache, item_is_enabled
 
 from specware import (augment_with_test_case_links, generate_validation,
-                      SpecWareTypeProvider, TransitionMap)
+                      get_affected_targets, SpecWareTypeProvider,
+                      TransitionMap)
 
 from .util import create_item_cache, get_and_clear_log
 
@@ -2952,3 +2953,30 @@ def test_validation_invalid_actions(caplog, tmpdir):
              "descriptor 1 of spec:/a for pre-condition set {A=A1}")
     with pytest.raises(ValueError, match=match):
         generate_validation(validation_config, item_cache)
+
+
+def test_get_affected_targets(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-validation")
+
+    assert get_affected_targets(item_cache, set()) == set()
+
+    # A test case contributes to the source file of its test target.
+    assert get_affected_targets(item_cache, {"/tc2"}) == {"tc12.c"}
+    assert get_affected_targets(item_cache,
+                                {"/tc3", "/ts"}) == {"tc34.c", "ts.c"}
+
+    # An action requirement is reached from the test cases which validate it.
+    assert get_affected_targets(item_cache, {"/directive"}) == {"tc12.c"}
+
+    # A test program provides the base directory and the source files of the
+    # test source files.
+    assert get_affected_targets(item_cache, {"/tp"}) == {
+        "action2.c", "action3.c", "tc12.c", "tc34.c", "ts.c"
+    }
+
+    # An item which contributes to no test source file at all.
+    assert get_affected_targets(item_cache, {"/obj"}) == set()
+
+    # A disabled item contributes to no test source file, in particular its
+    # test target is unknown to generate_validation().
+    assert get_affected_targets(item_cache, {"/tc-disabled"}) == set()

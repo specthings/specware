@@ -41,6 +41,7 @@ from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
                        GenericContent, get_integer_type, get_value_compound,
                        get_value_params, get_value_doxygen_group,
                        get_value_doxygen_function, get_value_unspecified_type)
+from .rtems import is_export_affected
 from .transitionmap import TransitionMap
 
 _CaseToSuite = dict[str, list["_TestItem"]]
@@ -1461,6 +1462,55 @@ _GATHER = {
     "test-suite": _gather_test_suite
 }
 
+# The items of these types provide the target file of a test source file.  The
+# build/test-program items provide no target file, they contribute the base
+# directory and the source files of a test program.
+_TEST_TARGET_TYPES = tuple(type_name for type_name in _GATHER
+                           if type_name != "build/test-program")
+
+
+def _is_gathered(item: Item) -> bool:
+    """
+    Return true, if the item contributes to a test source file, otherwise
+    false.
+
+    A disabled item contributes nothing, in particular its target file is no
+    source file known to generate_validation().
+    """
+    enabled_by = item["enabled-by"]
+    return not (isinstance(enabled_by, bool) and not enabled_by)
+
+
+def get_affected_targets(item_cache: ItemCache, uids: set[str]) -> set[str]:
+    """
+    Get the target files of the test source files which are affected by the
+    items specified by the UIDs.
+
+    Args:
+        item_cache: The item cache containing the validation test suites and
+            test cases.
+        uids: The UIDs of the items which changed.
+    """
+    targets: set[str] = set()
+    affected: set[str] = set()
+    for type_name in _TEST_TARGET_TYPES:
+        for item in item_cache.items_by_type.get(type_name, []):
+            if not _is_gathered(item):
+                continue
+            target = item["test-target"]
+            targets.add(target)
+            if target not in affected and is_export_affected(item, uids):
+                affected.add(target)
+    for item in item_cache.items_by_type.get("build/test-program", []):
+        if not _is_gathered(item) or not is_export_affected(item, uids):
+            continue
+        # The base directory and the source files of the test program
+        # determine where the test source files are written to.
+        files: list[str] = []
+        _gather_build_source_files(item, files)
+        affected.update(file for file in files if file in targets)
+    return affected
+
 
 def _gather(
     item_cache: ItemCache,
@@ -1470,8 +1520,7 @@ def _gather(
     source_files = _SourceFiles(formatter)
     test_programs: list[_TestProgram] = []
     for item in item_cache.values():
-        enabled_by = item["enabled-by"]
-        if isinstance(enabled_by, bool) and not enabled_by:
+        if not _is_gathered(item):
             continue
         _GATHER.get(item.type, _gather_default)(item, source_files,
                                                 test_programs)
