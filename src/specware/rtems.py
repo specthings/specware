@@ -25,7 +25,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import itertools
-from typing import Callable, Iterable
+import re
+from typing import Any, Callable, Iterable
 
 from specitems import (EnabledSet, Item, ItemCache, create_unique_link,
                        link_is_enabled, to_iterable)
@@ -141,6 +142,113 @@ def gather_related_items(root: Item) -> list[Item]:
     related_items: set[Item] = set()
     _visit_tree(root, related_items)
     return sorted(related_items)
+
+
+# The interface group membership roles are deliberately absent.  A group
+# contributes its identifier to the content generated for each of its members,
+# this is covered by the shallow parent roles.  Descending from a group to its
+# members would relate a header file which contains a group to every header
+# file which contains a member of that group.  The application configuration
+# aggregates the members of its groups, it descends on its own.
+_EXPORT_CHILD_ROLES = ("interface-function", "interface-placement",
+                       "requirement-refinement", "test-case", "validation")
+
+_EXPORT_PARENT_ROLES = _PARENT_ROLES + ("constraint", "errno",
+                                        "register-block-include")
+
+# Items reached through the shallow roles contribute to the generated content
+# of the visiting item, however, the items related to them do not.  Expanding
+# them would relate a header file to every item of each included header file
+# and to every member of each interface group.
+_EXPORT_SHALLOW_CHILD_ROLES = ("placement-order", )
+
+_EXPORT_SHALLOW_PARENT_ROLES = ("interface-include", "interface-ingroup",
+                                "interface-ingroup-hidden", "interface-target")
+
+
+def _visit_export_tree(item: Item, related_items: set[Item],
+                       expanded_items: set[Item]) -> None:
+    related_items.add(item)
+    if item in expanded_items:
+        return
+    # An item reached through a shallow role is added to the related items
+    # only.  It must not be added to the expanded items, otherwise it would
+    # block its expansion through a non-shallow role visited later on.
+    expanded_items.add(item)
+    related_items.update(
+        itertools.chain(item.children(_EXPORT_SHALLOW_CHILD_ROLES),
+                        item.parents(_EXPORT_SHALLOW_PARENT_ROLES)))
+    for item_2 in itertools.chain(item.children(_EXPORT_CHILD_ROLES),
+                                  item.parents(_EXPORT_PARENT_ROLES)):
+        _visit_export_tree(item_2, related_items, expanded_items)
+
+
+def _gather_export_related(root: Item) -> set[Item]:
+    related_items: set[Item] = set()
+    _visit_export_tree(root, related_items, set())
+    return related_items
+
+
+def gather_export_related_items(root: Item) -> list[Item]:
+    """
+    Gather a sorted list of all items which contribute to the content
+    generated for the root item.
+    """
+    return sorted(_gather_export_related(root))
+
+
+def is_export_affected(root: Item, uids: set[str]) -> bool:
+    """
+    Return true, if the content generated for the root item is affected by one
+    of the items specified by the UIDs, otherwise false.
+    """
+    # This runs once per generated file, so the related items are not sorted.
+    return any(item.uid in uids for item in _gather_export_related(root))
+
+
+# Matches the item UID of a substitution such as ${/some/item:/name}.  A
+# doubled designator escapes the substitution, this is not accounted for, it
+# merely adds a reference which does not exist.
+_REFERENCE = re.compile(r"[$@][{`]([a-zA-Z0-9._/-]+):")
+
+
+def _gather_references(item: Item, value: Any, references: set[str]) -> None:
+    if isinstance(value, str):
+        for match in _REFERENCE.finditer(value):
+            references.add(item.to_abs_uid(match.group(1)))
+    elif isinstance(value, dict):
+        for value_2 in value.values():
+            _gather_references(item, value_2, references)
+    elif isinstance(value, list):
+        for value_2 in value:
+            _gather_references(item, value_2, references)
+
+
+def gather_referencing_items(item_cache: ItemCache,
+                             uids: set[str]) -> set[str]:
+    """
+    Gather the UIDs of the items which reference one of the items specified by
+    the UIDs through a substitution such as ``${/some/item:/name}``.
+
+    A substitution is no link, so it is invisible to
+    gather_export_related_items().  An item which substitutes an attribute of
+    a changed item generates different content, so it changed as well.  Adding
+    the referencing items to a selection of changed items catches for example
+    a renamed interface.
+
+    The references are followed one level only.  Following them to a fixed
+    point would cover an attribute which is itself defined by a substitution,
+    however, it relates almost every item to every other item.
+    """
+    referencing: set[str] = set()
+    for item in item_cache.values():
+        if item.uid in uids:
+            continue
+        references: set[str] = set()
+        _gather_references(item, item.data, references)
+        if references & uids:
+            referencing.add(item.uid)
+    return referencing
 
 
 def gather_benchmarks_and_test_suites(item: Item,

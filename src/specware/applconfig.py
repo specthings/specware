@@ -26,6 +26,7 @@ Provides methods to generate the application configuration documentation.
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import itertools
 from typing import Any, Callable, Optional
 
 from specitems import (ClangFormatter, Content, EnabledSet, GenericContent,
@@ -36,6 +37,9 @@ from .contentc import (CContent, get_value_double_colon,
                        get_value_doxygen_function, get_value_doxygen_group,
                        get_value_doxygen_ref, get_value_hash,
                        get_value_header_file)
+from .rtems import is_export_affected
+
+_GROUP_MEMBER_ROLES = ("appl-config-group-member", "interface-ingroup")
 
 _FEATURE = "This configuration option is a boolean feature define."
 
@@ -357,13 +361,45 @@ def _add_doxygen_get_values(mapper: ItemMapper) -> None:
                          _get_value_doxygen_unspecfied_type)
 
 
+def is_application_configuration_affected(config: dict, item_cache: ItemCache,
+                                          uids: set[str]) -> bool:
+    """
+    Return true, if the application configuration is affected by one of the
+    items specified by the UIDs, otherwise false.
+
+    Args:
+        config: The application configuration generation configuration.
+        item_cache: The item cache containing the application configuration
+            groups and options.
+        uids: The UIDs of the items which changed.
+    """
+    for group_config in config["groups"]:
+        group = item_cache[group_config["uid"]]
+        # The group aggregates its members, so they have to be visited as
+        # well.  The group membership roles are not part of the export
+        # traversal, see gather_export_related_items().
+        for item in itertools.chain([group],
+                                    group.children(_GROUP_MEMBER_ROLES)):
+            if is_export_affected(item, uids):
+                return True
+    return False
+
+
+def _generate_documentation(config: dict, group_config: dict, group: Item,
+                            options: dict[str, Item],
+                            text_content: _TextContentAdaptor) -> None:
+    _generate(group, options, config["enabled-documentation"], text_content)
+    text_content.write(group_config["target"])
+
+
 def generate_application_configuration(
         config: dict,
         group_uids: list[str],
         item_cache: ItemCache,
         create_mapper: Callable[[Item, list[str]], ItemMapper],
         create_content: Callable[[], TextContent],
-        formatter: Optional[ClangFormatter] = None) -> None:
+        formatter: Optional[ClangFormatter] = None,
+        write_documentation: bool = True) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     """
@@ -379,6 +415,9 @@ def generate_application_configuration(
         create_content: The content builder constructor.
         formatter: The optional formatter used to format the Doxygen header
             file.
+        write_documentation: Write the documentation target of each group.
+            The Doxygen header file is written in any case.  It is a single
+            file which aggregates all groups.
     """
     some_item = next(iter(item_cache.values()))
     text_mapper = create_mapper(some_item, group_uids)
@@ -396,10 +435,10 @@ def generate_application_configuration(
         for child in group.children("interface-ingroup"):
             if child.type.startswith("interface/appl-config-option"):
                 options[child.uid] = child
-        text_content = _TextContentAdaptor(text_mapper, create_content())
-        _generate(group, options, config["enabled-documentation"],
-                  text_content)
-        text_content.write(group_config["target"])
+        if write_documentation:
+            _generate_documentation(
+                config, group_config, group, options,
+                _TextContentAdaptor(text_mapper, create_content()))
         _generate(group, options, config["enabled-source"], doxygen_content)
     doxygen_content.content.prepend_copyrights_and_licenses()
     doxygen_content.content.prepend([

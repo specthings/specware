@@ -29,7 +29,8 @@ import pytest
 
 from specitems import EmptyItemCache
 
-from specware import generate_header_file, generate_interfaces
+from specware import (generate_header_file, generate_interfaces,
+                      get_affected_header_files)
 
 from .util import create_item_cache
 
@@ -1345,3 +1346,39 @@ def test_interface_memory_register_block_without_size(tmpdir, style):
                        "register domain and has no register block size"):
         _generate_header_file_with(tmpdir, style,
                                    "spec-interface-memory-no-size")
+
+
+def test_get_affected_header_files(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+
+    # A constraint is reached through a role which is expanded.
+    assert get_affected_header_files(item_cache, {"/constraint-a"}) == {"/h"}
+
+    # A header file is related to itself and, through a shallow role, to the
+    # header files which include it.
+    assert get_affected_header_files(item_cache, {"/h2"}) == {"/h", "/h2"}
+
+    # A member of an included header file affects only that header file.
+    assert get_affected_header_files(item_cache, {"/enum4"}) == {"/h2"}
+
+    assert get_affected_header_files(item_cache, set()) == set()
+
+
+def test_generate_interfaces_selection(tmpdir):
+    base_directory = os.path.join(tmpdir, "base")
+    interface_config = {
+        "item-level-interfaces": ["/command-line"],
+        "domains": {
+            "/domain-abc": base_directory
+        },
+        "enabled": []
+    }
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    generate_interfaces(interface_config, item_cache, None, {"/h2"})
+
+    assert os.path.exists(os.path.join(base_directory, "include", "h2.h"))
+    assert not os.path.exists(os.path.join(base_directory, "include", "h.h"))
+
+    generate_interfaces(interface_config, item_cache, None, set())
+
+    assert not os.path.exists(os.path.join(base_directory, "include", "h.h"))

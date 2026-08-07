@@ -45,6 +45,7 @@ from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
                        get_value_forward_declaration, get_value_hash,
                        get_value_header_file, get_value_params,
                        get_value_unspecified_type)
+from .rtems import is_export_affected
 
 _ItemMap = dict[str, Item]
 _GetLines = Callable[["_Node", Item, str, Any], GenericContent]
@@ -1213,9 +1214,26 @@ def _gather_options(item_level_interfaces: list[str],
     return options
 
 
+def get_affected_header_files(item_cache: ItemCache,
+                              uids: set[str]) -> set[str]:
+    """
+    Get the UIDs of the header file items which are affected by the items
+    specified by the UIDs.
+
+    Args:
+        item_cache: The specification item cache containing the interfaces.
+        uids: The UIDs of the items which changed.
+    """
+    return set(
+        item.uid
+        for item in item_cache.items_by_type.get("interface/header-file", [])
+        if is_export_affected(item, uids))
+
+
 def generate_interfaces(config: dict,
                         item_cache: ItemCache,
-                        formatter: Optional[ClangFormatter] = None) -> None:
+                        formatter: Optional[ClangFormatter] = None,
+                        header_file_uids: Optional[set[str]] = None) -> None:
     """
     Generate header files according to the configuration.
 
@@ -1223,12 +1241,16 @@ def generate_interfaces(config: dict,
         config: A dictionary with configuration entries.
         item_cache: The specification item cache containing the interfaces.
         formatter: The optional formatter used to format the header files.
+        header_file_uids: The optional UIDs of the header file items to
+            generate.  All header files are generated if it is None.
     """
     domains = config["domains"]
     enabled = config["enabled"]
     style = config.get("style", "default")
     options = _gather_options(config["item-level-interfaces"], item_cache)
     for item in item_cache.items_by_type.get("interface/header-file", []):
+        if header_file_uids is not None and item.uid not in header_file_uids:
+            continue
         _generate_header_file(item, domains, options, enabled, style, None,
                               formatter)
 

@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import contextlib
+import os
 from pathlib import Path
 
 from specware.cliexport import cliexport
@@ -287,3 +288,105 @@ def test_cliview(tmpdir):
     cliview(["command", "--config-file", config_file, "--filter=design"])
     cliview(["command", "--config-file", config_file, "--filter=types"])
     cliview(["command", "--config-file", config_file, "--filter=build"])
+
+
+def _spec_rtems(*names):
+    base = Path(__file__).parent.absolute() / "spec-rtems"
+    return [str(base.joinpath(*name.split("/"))) for name in names]
+
+
+def test_cliexport_items(tmpdir):
+    config_file = _create_specview_yml(tmpdir)
+
+    # A test case is associated with its test source file only.
+    exit_code = cliexport(["command", "--config-file", config_file] +
+                          _spec_rtems("val/tc.yml"))
+    assert exit_code == 0
+    assert os.path.exists(os.path.join(tmpdir, "tc.c"))
+    assert not os.path.exists(os.path.join(tmpdir, "ts.c"))
+    assert not os.path.exists(os.path.join(tmpdir, "appl-config.h"))
+
+    # Documentation is not exported if a target is present.
+    assert not os.path.exists(os.path.join(tmpdir, "items.rst"))
+
+    # A target file and a specification item file combine.
+    exit_code = cliexport(["command", "--config-file", config_file, "ts.c"] +
+                          _spec_rtems("val/tc.yml"))
+    assert exit_code == 0
+    assert os.path.exists(os.path.join(tmpdir, "ts.c"))
+
+    # An interface item selects its header file.  The interface domain is
+    # not configured in this test, so no header file is written.
+    exit_code = cliexport(["command", "--config-file", config_file] +
+                          _spec_rtems("if/errno.yml"))
+    assert exit_code == 0
+
+    # An application configuration option regenerates the Doxygen header file.
+    exit_code = cliexport(["command", "--config-file", config_file] +
+                          _spec_rtems("if/disable-newlib-reentrancy.yml"))
+    assert exit_code == 0
+    assert os.path.exists(os.path.join(tmpdir, "appl-config.h"))
+    assert not os.path.exists(os.path.join(tmpdir, "acfg.rst"))
+
+
+def test_cliexport_items_without_association(tmpdir):
+    config_file = _create_specview_yml(tmpdir)
+
+    # A glossary term is associated with no source file at all.
+    exit_code = cliexport(["command", "--config-file", config_file] +
+                          _spec_rtems("glossary-empty.yml"))
+    assert exit_code == 0
+    assert not os.path.exists(os.path.join(tmpdir, "tc.c"))
+    assert not os.path.exists(os.path.join(tmpdir, "appl-config.h"))
+
+    # The code generation is disabled.
+    exit_code = cliexport(
+        ["command", "--config-file", config_file, "--no-code"] +
+        _spec_rtems("val/tc.yml"))
+    assert exit_code == 0
+    assert not os.path.exists(os.path.join(tmpdir, "tc.c"))
+
+    # The interface and application configuration code generation is disabled.
+    exit_code = cliexport([
+        "command", "--config-file", config_file, "--no-interface-code",
+        "--no-application-configuration-code"
+    ] + _spec_rtems("if/disable-newlib-reentrancy.yml"))
+    assert exit_code == 0
+    assert not os.path.exists(os.path.join(tmpdir, "appl-config.h"))
+
+
+def test_cliexport_unknown_item(tmpdir, caplog):
+    config_file = _create_specview_yml(tmpdir)
+    unknown = os.path.join(tmpdir, "unknown.yml")
+
+    exit_code = cliexport(["command", "--config-file", config_file, unknown])
+    assert exit_code == 1
+    assert get_and_clear_log(caplog) == (
+        "ERROR no specification item is associated with the file "
+        f"'{os.path.realpath(unknown)}'")
+    assert not os.path.exists(os.path.join(tmpdir, "tc.c"))
+
+
+def test_cliexport_item_via_symlink(tmpdir):
+    config_file = _create_specview_yml(tmpdir)
+    link = Path(tmpdir) / "tc-link.yml"
+    link.symlink_to(_spec_rtems("val/tc.yml")[0])
+
+    exit_code = cliexport(["command", "--config-file", config_file, str(link)])
+    assert exit_code == 0
+    assert os.path.exists(os.path.join(tmpdir, "tc.c"))
+
+
+def test_cliexport_item_via_two_paths(tmpdir):
+    config_file = _create_specview_yml(tmpdir)
+    real = _spec_rtems("val/tc.yml")[0]
+    link = Path(tmpdir) / "tc-link.yml"
+    link.symlink_to(real)
+
+    # The same item reached through its real path and through a symbolic link
+    # resolves to one UID.
+    exit_code = cliexport(
+        ["command", "--config-file", config_file, real,
+         str(link)])
+    assert exit_code == 0
+    assert os.path.exists(os.path.join(tmpdir, "tc.c"))

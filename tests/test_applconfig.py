@@ -29,6 +29,7 @@ import os
 from specitems import ItemMapper, MarkdownContent, SphinxContent
 
 from specware import (document_option, generate_application_configuration,
+                      is_application_configuration_affected,
                       MarkdownInterfaceMapper, SphinxInterfaceMapper)
 
 from .util import create_item_cache
@@ -1225,3 +1226,47 @@ The default value is 1.
 
 description k
 """
+
+
+def test_is_application_configuration_affected(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-applconfig")
+    applconfig_config = {"groups": [{"uid": "/g", "target": "g.rst"}]}
+
+    assert not is_application_configuration_affected(applconfig_config,
+                                                     item_cache, set())
+
+    # The group itself and each of its members.
+    assert is_application_configuration_affected(applconfig_config, item_cache,
+                                                 {"/g"})
+    assert is_application_configuration_affected(applconfig_config, item_cache,
+                                                 {"/a"})
+
+    # A constraint of a member.
+    assert is_application_configuration_affected(applconfig_config, item_cache,
+                                                 {"/max-two"})
+
+    assert not is_application_configuration_affected(applconfig_config,
+                                                     item_cache, {"/td"})
+
+
+def test_generate_application_configuration_no_documentation(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-applconfig")
+    doxygen_h = os.path.join(tmpdir, "no-doc.h")
+    g_rst = os.path.join(tmpdir, "no-doc.rst")
+    applconfig_config = {
+        "enabled-source": ["X"],
+        "enabled-documentation": ["X"],
+        "doxygen-target": doxygen_h,
+        "groups": [{
+            "uid": "/g",
+            "target": g_rst
+        }]
+    }
+    generate_application_configuration(applconfig_config, [],
+                                       item_cache,
+                                       SphinxInterfaceMapper,
+                                       SphinxContent,
+                                       write_documentation=False)
+
+    assert os.path.exists(doxygen_h)
+    assert not os.path.exists(g_rst)
