@@ -351,6 +351,15 @@ def test_cliview(tmpdir):
     cliview(["command", "--config-file", config_file, "--filter=build"])
 
 
+def test_cliview_no_enforcement(tmpdir, capsys):
+    config_file = _create_specview_yml(tmpdir)
+    cliview(
+        ["command", "--config-file", config_file, "--filter=no-enforcement"])
+    assert capsys.readouterr().out == """/constraint/bad
+/constraint/constant-not-pre-qualified
+"""
+
+
 def _spec_rtems(*names):
     base = Path(__file__).parent.absolute() / "spec-rtems"
     return [str(base.joinpath(*name.split("/"))) for name in names]

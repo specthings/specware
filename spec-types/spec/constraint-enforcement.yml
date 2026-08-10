@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - compile-time
+      - none
+      - run-time
+      - verification-build
+    description: |
+      It specifies how a violation of the constraint is detected.  A constraint
+      is an obligation on the user of the software product.  The software
+      cannot guarantee the obligation.  It can only report a violation.
+
+      The value ``compile-time`` states that the violation fails the build of
+      the software product.  The value ``run-time`` states that the software
+      product as delivered detects the violation while it runs.  The value
+      ``verification-build`` states that a detection mechanism exists.  A build
+      configuration for verification carries the mechanism.  The delivered
+      software product does not carry it.  The value ``none`` states that no
+      mechanism detects the violation.
+
+      A mechanism which only a verification build carries protects no user of
+      the delivery.  Therefore the value ``verification-build`` differs from
+      the value ``run-time``.
+
+      An absent attribute states nothing.  The value ``none`` states that the
+      author examined the question and found the violation undetectable.
+spec-name: Constraint Enforcement
+spec-type: constraint-enforcement
+type: spec

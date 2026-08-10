@@ -139,6 +139,14 @@ def _validation_count(item: Item) -> int:
     return len(list(child for child in item.children("validation")))
 
 
+def _no_enforcement(item_cache: ItemCache) -> None:
+    """ List the enabled constraints which carry no enforcement attribute. """
+    for item in sorted(item_cache.values()):
+        if item["type"] == "constraint" and item.enabled and ("enforcement"
+                                                              not in item):
+            print(item.uid)
+
+
 def _no_validation(item: Item, path: list[str]) -> list[str]:
     path_2 = path + [item.uid]
     leaf = _validation_count(item) == 0
@@ -590,10 +598,20 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                         help="use this configuration file")
     parser.add_argument('--filter',
                         choices=[
-                            "none", "api", "build", "orphan", "no-validation",
-                            "action-compact-table", "action-table",
-                            "action-table-show-skip", "action-list",
-                            "action-stats", "design", "registers", "types"
+                            "action-compact-table",
+                            "action-list",
+                            "action-stats",
+                            "action-table",
+                            "action-table-show-skip",
+                            "api",
+                            "build",
+                            "design",
+                            "no-enforcement",
+                            "no-validation",
+                            "none",
+                            "orphan",
+                            "registers",
+                            "types",
                         ],
                         type=str.lower,
                         default="none",
@@ -664,6 +682,8 @@ def cliview(argv: list[str] = sys.argv):
         elif args.filter == "no-validation":
             validate(root, _validate)
             _no_validation(root, [])
+        elif args.filter == "no-enforcement":
+            _no_enforcement(item_cache)
         elif args.filter == "api":
             validate(root, _validate)
             _list_api(item_cache)
