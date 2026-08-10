@@ -14,6 +14,11 @@ spec-example: null
 spec-info:
   dict:
     attributes:
+      enforcement:
+        description: |
+          If the value is present, then it shall state how a violation of the
+          constraint is detected.
+        spec-type: constraint-enforcement
       rationale:
         description: |
           If the value is present, then it shall state the rationale or
@@ -24,8 +29,12 @@ spec-info:
           It shall state the constraint.
         spec-type: requirement-text
     description: |
-      This set of attributes specifies a constraint.
-    mandatory-attributes: all
+      This set of attributes specifies a constraint.  The enforcement attribute
+      is optional.  An absent attribute states nothing about how a violation is
+      detected.
+    mandatory-attributes:
+    - rationale
+    - text
 spec-name: Constraint Item Type
 spec-type: constraint
 type: spec

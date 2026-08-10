@@ -157,6 +157,7 @@ def test_validate(tmpdir):
     assert _uids(related_items) == [
         "/constraint/bad",
         "/constraint/constant-not-pre-qualified",
+        "/constraint/not-enabled",
         "/constraint/terminate",
         "/glossary-empty",
         "/glossary-general",
@@ -228,6 +229,7 @@ def test_validate(tmpdir):
     assert _uids(get_constraint_items(items_by_type)) == [
         "/constraint/bad",
         "/constraint/constant-not-pre-qualified",
+        "/constraint/not-enabled",
         "/constraint/terminate",
     ]
     assert _uids(get_interface_items(items_by_type)) == [
