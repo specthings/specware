@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides utility methods. """
 
-# Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -29,7 +29,7 @@ import logging
 import os
 from pathlib import Path
 import subprocess
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from specitems import (ClangFormatter, ItemDataByUID, load_config,
                        pickle_load_data_by_uid, SpecTypeProvider)
@@ -101,6 +101,19 @@ def _get_stderr(err: subprocess.CalledProcessError) -> str:
     if isinstance(stderr, bytes):
         stderr = stderr.decode("utf-8", "replace")
     return stderr.strip()
+
+
+def get_register_member_name(definition: dict[str, Any]) -> tuple[str, str]:
+    """
+    Get the name and the alias of a member definition of a register block.
+    A member which carries no alias uses its name as the alias.
+    """
+    name = definition["name"]
+    try:
+        name, alias = name.split(":")
+    except ValueError:
+        alias = name
+    return name, alias
 
 
 def log_clang_format_failure(err: subprocess.CalledProcessError) -> None:

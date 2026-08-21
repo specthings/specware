@@ -1,0 +1,52 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - r
+      - w
+      - w1c
+      - w1s
+      - rc
+      - wc
+      - pop
+      - push
+      - cas
+      - cond
+    description: |
+      It specifies one property of a register bit field.  The following values
+      are defined:
+
+      * ``r``: A read of the field is defined.
+
+      * ``w``: A write to the field is defined.
+
+      * ``w1c``: A write of one to a bit of the field clears the bit.
+
+      * ``w1s``: A write of one to a bit of the field sets the bit.
+
+      * ``rc``: A read of the field clears the field.
+
+      * ``wc``: A write to the field clears the field.  The GRLIB IP Core
+        User's Manual uses ``wc`` for a field which a write of one clears.
+        That field is ``w1c`` here.
+
+      * ``pop``: A read of the field removes an element from a queue.
+
+      * ``push``: A write to the field adds an element to a queue.
+
+      * ``cas``: A write to the field uses a compare and swap protocol.
+
+      * ``cond``: An access to the field is valid only under a condition.  The
+        description of the field states the condition.
+spec-name: Register Bit Field Property
+spec-type: interface-register-bits-property
+type: spec

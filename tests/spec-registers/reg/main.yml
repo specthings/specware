@@ -1,0 +1,185 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: Main register block.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RegMain
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-ingroup
+  uid: group
+- role: interface-placement
+  uid: /if/header-empty
+- role: reference
+  uid: doc
+- name: INNER1
+  role: register-block-include
+  uid: inner
+- name: INNER2
+  role: register-block-include
+  uid: inner
+- name: NOSIZE
+  role: register-block-include
+  uid: nosize
+definition:
+- default:
+    count: 1
+    name: CTRL:CTRL0
+  offset: 0x0
+  variants: []
+- default:
+    count: 1
+    name: CTRL:CTRL1
+  offset: 0x4
+  variants: []
+- default:
+    count: 4
+    name: STAT
+  offset: 0x8
+  variants: []
+- default:
+    count: 1
+    name: INNER1
+  offset: 0x40
+  variants: []
+- default:
+    count: 4
+    name: INNER2
+  offset: 0x80
+  variants: []
+- default:
+    count: 2
+    name: NOSIZE
+  offset: 0xc0
+  variants: []
+name: main
+notes: null
+register-prefix: null
+register-block-group: MAIN
+register-block-size: 256
+registers:
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      description: null
+      enum:
+        'OFF': 0
+        'ON': 1
+      kind: bool
+      name: 'EN'
+      reset: 0
+      start: 0
+      width: 1
+    - properties: [r]
+      brief: null
+      description: null
+      enum:
+        A: 0
+        B: [1, 2]
+        C: [4, 6]
+      kind: enum
+      name: 'MODE'
+      reset: external
+      start: 1
+      width: 3
+    - properties: [r, w]
+      brief: null
+      description: null
+      kind: int
+      name: 'GAIN'
+      range: [-100, 100]
+      reset: 0
+      scale: value + 1
+      start: 4
+      unit: decibel steps
+      width: 8
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: 'BAD1'
+      scale: value +
+      start: 12
+      width: 2
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: 'BAD2'
+      scale: value / 2
+      start: 14
+      width: 2
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: 'BAD3'
+      scale: other + 1
+      start: 16
+      width: 2
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: 'BAD4'
+      scale: value + 1.5
+      start: 18
+      width: 2
+    - properties: [w1c]
+      brief: null
+      description: null
+      name: 'CLR'
+      start: 20
+      width: 1
+    - properties: []
+      brief: null
+      description: null
+      name: 'SPARE'
+      start: 21
+      width: 1
+    variants: []
+  brief: |
+    Control register
+  description: null
+  locator: table 66, p. 123
+  name: CTRL
+  width: 32
+- bits:
+  - default:
+    - properties: [r]
+      brief: null
+      description: null
+      kind: bool
+      name: 'BUSY'
+      start: 0
+      width: 1
+    variants:
+    - definition:
+      - properties: [r]
+        brief: null
+        description: null
+        kind: bool
+        name: 'SMP'
+        start: 1
+        width: 1
+      enabled-by: RTEMS_SMP
+  brief: |
+    Status register
+  description: null
+  name: STAT
+  width: 32
+- bits:
+  - default:
+    - properties: []
+      brief: null
+      description: null
+      kind: reserved
+      name: 'RSV'
+      start: 0
+      width: 32
+    variants: []
+  brief: |
+    Unplaced register
+  description: null
+  name: UNPLACED
+  width: 32
+type: interface

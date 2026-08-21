@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  list:
+    description: |
+      It shall be the closed interval of the ordinary values of a register bit
+      field.  The first element is the lowest ordinary value.  The second
+      element is the highest ordinary value.  A value outside the interval is
+      a special value.  The ${interface-register-bits-enum:/spec-name} names
+      the special values.
+    spec-type: int
+spec-name: Register Bit Field Value Range
+spec-type: interface-register-bits-range
+type: spec

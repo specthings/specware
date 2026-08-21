@@ -1,0 +1,41 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: Register block without a size.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RegNoSize
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-ingroup
+  uid: group
+- role: interface-placement
+  uid: /if/header-empty
+definition:
+- default:
+    count: 1
+    name: ONLY
+  offset: 0x0
+  variants: []
+name: nosize
+notes: null
+register-prefix: null
+register-block-group: NOSIZE
+register-block-size: null
+registers:
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: 'ANY'
+      start: 0
+      width: 4
+    variants: []
+  brief: |
+    Only register
+  description: null
+  name: ONLY
+  width: 32
+type: interface

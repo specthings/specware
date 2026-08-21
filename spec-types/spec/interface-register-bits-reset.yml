@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  int:
+    description: |
+      It shall be the value of the register bit field after a reset.
+  str:
+    assert:
+      in:
+      - not-reset
+      - external
+      - undefined
+    description: |
+      It specifies the state of a register bit field after a reset.  The
+      following values are defined:
+
+      * ``not-reset``: A reset does not change the field.
+
+      * ``external``: The field takes its value from outside the device.
+
+      * ``undefined``: The value of the field after a reset is not defined.
+spec-name: Register Bit Field Reset Value
+spec-type: interface-register-bits-reset
+type: spec

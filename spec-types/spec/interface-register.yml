@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2021 embedded brains GmbH & Co. KG
+- Copyright (C) 2021, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -19,6 +19,12 @@ spec-info:
       description:
         description: null
         spec-type: interface-description
+      locator:
+        description: |
+          It shall be the place of the register within the work of a link
+          with the ``reference`` role.  The format of the place is specific to
+          the work.  An example is ``41.7.2, p. 1389``.
+        spec-type: str
       name:
         description: |
           It shall be the name to identify the register definition.  The name
@@ -31,12 +37,18 @@ spec-info:
           It shall be the width of the register in bits.
         spec-type: int
     description: |
-      This set of attributes specifies a register.
+      This set of attributes specifies a register.  The ``locator`` attribute
+      is optional.  An attribute which has no value is absent.
     generic-attributes:
       description: null
       key-spec-type: name
       value-spec-type: any
-    mandatory-attributes: all
+    mandatory-attributes:
+    - bits
+    - brief
+    - description
+    - name
+    - width
 spec-name: Register Definition
 spec-type: interface-register
 type: spec
