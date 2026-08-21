@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2021 embedded brains GmbH & Co. KG
+- Copyright (C) 2021, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -13,33 +13,64 @@ spec-info:
     attributes:
       properties:
         description: |
-          It shall be the list of bit field properties.  Properties are for
-          example if the bit field can be read or written, or an access has
-          side-effects such as clearing a status.
-        spec-type: list-str
+          It shall be the list of the properties of the bit field.  A property
+          states what an access to the field does.
+        spec-type: interface-register-bits-properties
       brief:
         description: null
         spec-type: interface-brief
       description:
         description: null
         spec-type: interface-description
+      enum:
+        description: null
+        spec-type: interface-register-bits-enum
+      kind:
+        description: null
+        spec-type: interface-register-bits-kind
       name:
         description: |
           It shall be the name of the register bit field.
+        spec-type: str
+      range:
+        description: null
+        spec-type: interface-register-bits-range
+      reset:
+        description: null
+        spec-type: interface-register-bits-reset
+      scale:
+        description: |
+          It shall be the expression which computes the quantity from the
+          value of the bit field.  The expression uses the Python syntax.  The
+          name ``value`` denotes the value of the bit field.  An example is
+          ``value + 1``.
         spec-type: str
       start:
         description: |
           It shall be the start bit of the bit field.  Bit ``0`` is the
           least-significant bit.
         spec-type: int
+      unit:
+        description: |
+          It shall be the unit of the quantity which the bit field encodes.
+          An example is ``bytes``.  Write the unit as one word.
+        spec-type: str
       width:
         description: |
           It shall be the width in bits of the bit field.
         spec-type: int
     description: |
       This set of attributes specifies a register bit field.  Single bits are
-      bit fields with a width of one.
-    mandatory-attributes: all
+      bit fields with a width of one.  The ``enum``, ``kind``, ``range``,
+      ``reset``, ``scale`` and ``unit`` attributes are optional.  An attribute
+      which has no value is absent.
+    mandatory-attributes:
+    - brief
+    - description
+    - name
+    - properties
+    - start
+    - width
 spec-name: Register Bits Definition
 spec-type: interface-register-bits
 type: spec

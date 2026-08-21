@@ -1,0 +1,43 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: Inner register block.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RegInner
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-ingroup
+  uid: group
+- role: interface-placement
+  uid: /if/header-empty
+definition:
+- default:
+    count: 1
+    name: CNT
+  offset: 0x0
+  variants: []
+name: inner
+notes: null
+register-prefix: null
+register-block-group: INNER
+register-block-size: 16
+registers:
+- bits:
+  - default:
+    - properties: [r]
+      brief: null
+      description: null
+      kind: uint
+      name: 'VALUE'
+      reset: undefined
+      start: 0
+      width: 32
+    variants: []
+  brief: |
+    Counter register
+  description: null
+  name: CNT
+  width: 32
+type: interface

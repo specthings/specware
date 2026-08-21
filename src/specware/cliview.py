@@ -25,20 +25,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
+import ast
 import contextlib
 import itertools
 import sys
 from typing import Any, Callable, Optional, Iterable
 
 from specitems import (COL_SPAN, CommonMarkContent, Item, ItemCache,
-                       ItemCacheConfig, ItemGetValueContext, ItemMapper,
+                       ItemCacheConfig, ItemGetValueContext, ItemMapper, Link,
                        MarkdownContent, ROW_SPAN, SphinxContent, TextContent,
                        create_config)
 
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       gather_api_items, gather_build_files,
-                      load_specware_config, recursive_is_enabled, Transition,
-                      TransitionMap, validate, SpecWareTypeProvider)
+                      get_register_member_name, load_specware_config,
+                      recursive_is_enabled, Transition, TransitionMap,
+                      validate, SpecWareTypeProvider)
 
 _DOC_FORMAT = {
     "commonmark": CommonMarkContent,
@@ -346,6 +348,216 @@ def _list_api(item_cache: ItemCache) -> None:
             print(f"\t{item['name']}")
 
 
+_REGISTER_LEGEND = [
+    "# <offset|-> NAME <width> [xN @stride] [locator]",
+    "# <offset> [+N @stride] -> <uid>",
+    "# <bits> NAME props kind =reset [lo,hi] unit ~scale "
+    "NAME=v,NAME=lo..hi,NAME=v|v",
+]
+
+_SCALE_NODES = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.USub, ast.Add,
+                ast.Sub, ast.Mult, ast.FloorDiv, ast.Mod, ast.Pow, ast.Name,
+                ast.Load, ast.Constant)
+
+
+def _register_scale(scale: str) -> str:
+    try:
+        tree = ast.parse(scale, mode="eval")
+    except SyntaxError:
+        return "~?"
+    for node in ast.walk(tree):
+        if not isinstance(node, _SCALE_NODES):
+            return "~?"
+        if isinstance(node, ast.Name) and node.id != "value":
+            return "~?"
+        if isinstance(node, ast.Constant) and not isinstance(node.value, int):
+            return "~?"
+    return "~" + scale.replace(" ", "")
+
+
+def _register_properties(properties: list[str]) -> str:
+    parts = [prop for prop in properties if len(prop) > 1]
+    short = "".join(prop for prop in properties if len(prop) == 1)
+    if short:
+        parts.insert(0, short)
+    return ",".join(parts)
+
+
+def _register_enum_value(value: Any) -> str:
+    if isinstance(value, int):
+        return str(value)
+    if value == list(range(value[0], value[-1] + 1)):
+        return f"{value[0]}..{value[-1]}"
+    return "|".join(str(entry) for entry in value)
+
+
+def _register_enum_key(item: tuple[str, Any]) -> int:
+    value = item[1]
+    return value if isinstance(value, int) else value[0]
+
+
+def _register_enum(enum: dict[str, Any]) -> str:
+    return ",".join(
+        f"{name}={_register_enum_value(value)}"
+        for name, value in sorted(enum.items(), key=_register_enum_key))
+
+
+def _register_bit(bit: dict[str, Any]) -> str:
+    start = bit["start"]
+    width = bit["width"]
+    bits = f"{start + width - 1}:{start}" if width > 1 else str(start)
+    parts = [bits, bit["name"], _register_properties(bit["properties"])]
+    kind = bit.get("kind", None)
+    if kind is not None:
+        parts.append(kind)
+    reset = bit.get("reset", None)
+    if reset is not None:
+        parts.append(f"={reset}")
+    value_range = bit.get("range", None)
+    if value_range is not None:
+        parts.append(f"[{value_range[0]},{value_range[1]}]")
+    unit = bit.get("unit", None)
+    if unit is not None:
+        parts.append("_".join(unit.split()))
+    scale = bit.get("scale", None)
+    if scale is not None:
+        parts.append(_register_scale(scale))
+    enum = bit.get("enum", None)
+    if enum is not None:
+        parts.append(_register_enum(enum))
+    return "  " + " ".join(part for part in parts if part)
+
+
+def _register_definitions(directive: dict[str, Any]) -> list[Any]:
+    definitions = [directive["default"]]
+    definitions.extend(variant["definition"]
+                       for variant in directive["variants"])
+    return definitions
+
+
+def _register_bits(register: dict[str, Any]) -> tuple[int, int]:
+    count = 0
+    unclassified = 0
+    for directive in register["bits"]:
+        for definition in _register_definitions(directive):
+            for bit in definition:
+                count += 1
+                if "kind" not in bit:
+                    unclassified += 1
+                print(_register_bit(bit))
+    return count, unclassified
+
+
+def _register_include(offset: int, definition: dict[str, Any],
+                      block: Item) -> None:
+    count = definition["count"]
+    place = f"{offset:#x}"
+    if count > 1:
+        size = block["register-block-size"]
+        stride = "?" if size is None else f"{size:#x}"
+        place += f" +{count} @{stride}"
+    print(f"{place} -> {block.uid}")
+
+
+def _register_member(place: str, definition: dict[str, Any],
+                     register: dict[str, Any], alias: str) -> None:
+    count = definition["count"]
+    parts = [place, alias.upper(), str(register["width"])]
+    if count > 1:
+        parts.append(f"x{count} @{register['width'] // 8:#x}")
+    locator = register.get("locator", None)
+    if locator is not None:
+        parts.append(locator)
+    print(" ".join(parts))
+
+
+def _register_placed(item: Item, includes: dict[str, Item],
+                     registers: dict[str,
+                                     Any], seen: set[str]) -> tuple[int, int]:
+    count = 0
+    unclassified = 0
+    for member in item["definition"]:
+        for definition in _register_definitions(member):
+            name, alias = get_register_member_name(definition)
+            if name in includes:
+                _register_include(member["offset"], definition, includes[name])
+                continue
+            _register_member(f"{member['offset']:#x}", definition,
+                             registers[name], alias)
+            if name not in seen:
+                seen.add(name)
+                bits = _register_bits(registers[name])
+                count += bits[0]
+                unclassified += bits[1]
+    return count, unclassified
+
+
+def _register_unplaced(registers: dict[str, Any],
+                       seen: set[str]) -> tuple[int, int]:
+    count = 0
+    unclassified = 0
+    for name, register in registers.items():
+        if name in seen:
+            continue
+        _register_member("-", {"count": 1, "name": name}, register, name)
+        bits = _register_bits(register)
+        count += bits[0]
+        unclassified += bits[1]
+    return count, unclassified
+
+
+def _register_block(item: Item) -> tuple[int, int]:
+    parts = [item["name"]]
+    size = item["register-block-size"]
+    if size is not None:
+        parts.append(f"size {size}")
+    parts.extend(link.item["title"]
+                 for link in item.links_to_parents("reference", _any_link))
+    print(" ".join(parts))
+    includes = dict(
+        (link["name"], link.item)
+        for link in item.links_to_parents("register-block-include", _any_link))
+    registers = dict(
+        (register["name"], register) for register in item["registers"])
+    seen: set[str] = set()
+    placed = _register_placed(item, includes, registers, seen)
+    unplaced = _register_unplaced(registers, seen)
+    return placed[0] + unplaced[0], placed[1] + unplaced[1]
+
+
+def _any_link(_link: Link) -> bool:
+    return True
+
+
+def _register_blocks(item: Item, blocks: list[Item],
+                     visited: set[str]) -> None:
+    if item.uid in visited:
+        return
+    visited.add(item.uid)
+    if item.get("interface-type", None) == "register-block":
+        blocks.append(item)
+    for link in item.links_to_children(is_link_enabled=_any_link):
+        _register_blocks(link.item, blocks, visited)
+
+
+def _registers(item_cache: ItemCache, uids: list[str]) -> None:
+    blocks: list[Item] = []
+    visited: set[str] = set()
+    for uid in uids:
+        _register_blocks(item_cache[uid], blocks, visited)
+    blocks.sort(key=lambda block: block.uid)
+    for line in _REGISTER_LEGEND:
+        print(line)
+    count = 0
+    unclassified = 0
+    for block in blocks:
+        block_count, block_unclassified = _register_block(block)
+        count += block_count
+        unclassified += block_unclassified
+    print("---")
+    print(f"{count} fields, {unclassified} without kind")
+
+
 def _validate(_item: Item, validated: bool) -> bool:
     return validated
 
@@ -373,7 +585,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                             "none", "api", "build", "orphan", "no-validation",
                             "action-compact-table", "action-table",
                             "action-table-show-skip", "action-list",
-                            "action-stats", "design", "types"
+                            "action-stats", "design", "registers", "types"
                         ],
                         type=str.lower,
                         default="none",
@@ -447,6 +659,8 @@ def cliview(argv: list[str] = sys.argv):
         elif args.filter == "api":
             validate(root, _validate)
             _list_api(item_cache)
+        elif args.filter == "registers":
+            _registers(item_cache, args.UIDs)
         elif args.filter == "design":
             _design(item_cache)
         elif args.filter == "types":

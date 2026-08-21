@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the command line interfaces. """
 
-# Copyright (C) 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -230,6 +230,64 @@ def test_cliexportheader_format_code(tmpdir, caplog):
 def test_clifind(tmpdir):
     config_file = _create_specview_yml(tmpdir)
     clifind(["command", "--config-file", config_file, "th"])
+
+
+REGISTERS = """# <offset|-> NAME <width> [xN @stride] [locator]
+# <offset> [+N @stride] -> <uid>
+# <bits> NAME props kind =reset [lo,hi] unit ~scale NAME=v,NAME=lo..hi,NAME=v|v
+inner size 16
+0x0 CNT 32
+  31:0 VALUE r uint =undefined
+main size 256 Vendor Manual DS123
+0x0 CTRL0 32 table 66, p. 123
+  0 EN rw bool =0 OFF=0,ON=1
+  3:1 MODE r enum =external A=0,B=1..2,C=4|6
+  11:4 GAIN rw int =0 [-100,100] decibel_steps ~value+1
+  13:12 BAD1 rw ~?
+  15:14 BAD2 rw ~?
+  17:16 BAD3 rw ~?
+  19:18 BAD4 rw ~?
+  20 CLR w1c
+  21 SPARE
+0x4 CTRL1 32 table 66, p. 123
+0x8 STAT 32 x4 @0x4
+  0 BUSY r bool
+  1 SMP r bool
+0x40 -> /reg/inner
+0x80 +4 @0x10 -> /reg/inner
+0xc0 +2 @? -> /reg/nosize
+- UNPLACED 32
+  31:0 RSV reserved
+nosize
+0x0 ONLY 32
+  3:0 ANY rw
+---
+14 fields, 7 without kind
+"""
+
+
+def _create_registers_yml(tmpdir):
+    base = Path(__file__).parent.absolute()
+    config_file = Path(tmpdir) / "registers.yml"
+    with open(config_file, "w", encoding="utf-8") as out:
+        out.write(f"""spec:
+  cache-directory: cache
+  paths:
+  - {base / "spec-build"}
+  - {base / "spec-rtems"}
+  - {base / "spec-registers"}
+  resolve-proxies: true
+""")
+    return str(config_file)
+
+
+def test_cliview_registers(tmpdir, capsys):
+    config_file = _create_registers_yml(tmpdir)
+    cliview([
+        "command", "--config-file", config_file, "--filter=registers",
+        "/reg/group", "/reg/group"
+    ])
+    assert capsys.readouterr().out == REGISTERS
 
 
 def test_cliview(tmpdir):

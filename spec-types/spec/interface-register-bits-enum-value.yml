@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  int:
+    description: |
+      It shall be the field value of the enumerator.
+  list:
+    description: |
+      It shall be the list of field values of the enumerator.  A list gives
+      more than one field value for one enumerator.  The first element of the
+      list is the value of the generated define.
+    spec-type: int
+spec-name: Register Bit Field Enumerator Value
+spec-type: interface-register-bits-enum-value
+type: spec

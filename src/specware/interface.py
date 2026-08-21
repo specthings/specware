@@ -46,6 +46,7 @@ from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
                        get_value_header_file, get_value_params,
                        get_value_unspecified_type)
 from .rtems import is_export_affected
+from .util import get_register_member_name
 
 _ItemMap = dict[str, Item]
 _GetLines = Callable[["_Node", Item, str, Any], GenericContent]
@@ -304,13 +305,61 @@ def _get_register_domain_and_size(item: Item) -> tuple[str, Any]:
     return domain, size
 
 
-def _get_register_name(definition: dict[str, Any]) -> tuple[str, str]:
-    name = definition["name"]
-    try:
-        name, alias = name.split(":")
-    except ValueError:
-        alias = name
-    return name, alias
+def _get_register_bits_signed_get(base: str, width: int) -> list[str]:
+    if width == 64:
+        return [
+            f"#define {base}_GET( _reg ) \\",
+            f"  ( (int64_t) ( ( ( _reg ) & {base}_MASK ) >> \\",
+            f"    {base}_SHIFT ) )"
+        ]
+    sign = 1 << (width - 1)
+    cast, usfx, ssfx = (("int64_t", "ULL", "LL") if width > 31 else
+                        ("int32_t", "U", ""))
+    return [
+        f"#define {base}_GET( _reg ) \\",
+        f"  ( ( ({cast}) ( ( ( ( _reg ) & {base}_MASK ) >> \\",
+        f"    {base}_SHIFT ) ^ {sign:#x}{usfx} ) ) - \\",
+        f"    {sign:#x}{ssfx} )"
+    ]
+
+
+def _get_register_bits_accessors(base: str, start: int, width: int, end: int,
+                                 signed: bool) -> list[str]:
+    mask = ((1 << width) - 1) << start
+    sfx = "ULL" if end > 32 else "U"
+    lines = [
+        f"#define {base}_SHIFT {start}", f"#define {base}_MASK {mask:#x}{sfx}"
+    ]
+    if signed:
+        val = f"( ({'uint64_t' if end > 32 else 'uint32_t'}) ( _val ) )"
+        lines.extend(_get_register_bits_signed_get(base, width))
+    else:
+        val = "( (uint64_t) ( _val ) )" if start >= 32 else "( _val )"
+        lines.extend([
+            f"#define {base}_GET( _reg ) \\",
+            f"  ( ( ( _reg ) & {base}_MASK ) >> \\", f"    {base}_SHIFT )"
+        ])
+    lines.extend([
+        f"#define {base}_SET( _reg, _val ) \\",
+        f"  ( ( ( _reg ) & ~{base}_MASK ) | \\",
+        f"    ( ( {val} << {base}_SHIFT ) & \\", f"      {base}_MASK ) )",
+        f"#define {base}( _val ) \\", f"  ( ( {val} << {base}_SHIFT ) & \\",
+        f"    {base}_MASK )"
+    ])
+    return lines
+
+
+def _get_register_bits_enum_defines(base: str, suffix: str,
+                                    bit: dict[str, Any]) -> list[str]:
+    enum = bit.get("enum", None)
+    if enum is None:
+        return []
+    values = sorted((value if isinstance(value, int) else value[0], name)
+                    for name, value in enum.items())
+    return [
+        f"#define {base}_{name.upper()} {value}{suffix}"
+        for value, name in values
+    ]
 
 
 _CONSTRAINT_TARGET = {
@@ -493,7 +542,7 @@ class _Node:
                     itertools.chain(default,
                                     (variant["definition"]
                                      for variant in member["variants"]))):
-                name, alias = _get_register_name(definition)
+                name, alias = get_register_member_name(definition)
                 assert name.lower() != "reserved"
                 count = definition["count"]
                 if index_2 == 0:
@@ -698,30 +747,20 @@ class _Node:
             if index != 0:
                 lines.append("")
             if width == 1:
-                val = 1 << start
-                lines.append(f"#define {base} {val:#x}{sfx}")
+                lines.append(f"#define {base} {1 << start:#x}{sfx}")
             else:
-                mask = ((1 << width) - 1) << start
-                lines.extend([
-                    f"#define {base}_SHIFT {start}",
-                    f"#define {base}_MASK {mask:#x}{sfx}",
-                    f"#define {base}_GET( _reg ) \\",
-                    f"  ( ( ( _reg ) & {base}_MASK ) >> \\",
-                    f"    {base}_SHIFT )",
-                    f"#define {base}_SET( _reg, _val ) \\",
-                    f"  ( ( ( _reg ) & ~{base}_MASK ) | \\",
-                    f"    ( ( ( _val ) << {base}_SHIFT ) & \\",
-                    f"      {base}_MASK ) )", f"#define {base}( _val ) \\",
-                    f"  ( ( ( _val ) << {base}_SHIFT ) & \\",
-                    f"    {base}_MASK )"
-                ])
+                lines.extend(
+                    _get_register_bits_accessors(
+                        base, start, width, end,
+                        bit.get("kind", None) == "int"))
+            lines.extend(_get_register_bits_enum_defines(base, sfx, bit))
         return lines
 
     def _get_register_define_definition(self, item: Item, _prefix: str,
                                         definition: Any,
                                         ctx: _RegisterMemberContext,
                                         offset: int) -> GenericContent:
-        name, alias = _get_register_name(definition)
+        name, alias = get_register_member_name(definition)
         count = definition["count"]
         assert count == 1
         content = CContent()
@@ -734,7 +773,7 @@ class _Node:
     def _get_register_member_definition(
             self, _item: Item, _prefix: str, definition: Any,
             ctx: _RegisterMemberContext) -> GenericContent:
-        name, alias = _get_register_name(definition)
+        name, alias = get_register_member_name(definition)
         count = definition["count"]
         array = f"[ {count} ]" if count > 1 else ""
         if ctx.reg_counts[alias] > 1:
@@ -861,6 +900,7 @@ class _ZephyrNode(_Node):
             else:
                 lines.append(
                     f"#define {base} GENMASK{sfx}({end - 1}, {start})")
+            lines.extend(_get_register_bits_enum_defines(base, "", bit))
         return lines
 
     def _add_register_bits(self, group: str) -> _RegisterMemberContext:
@@ -886,7 +926,7 @@ class _ZephyrNode(_Node):
                                         definition: Any,
                                         ctx: _RegisterMemberContext,
                                         offset: int) -> GenericContent:
-        name, alias = _get_register_name(definition)
+        name, alias = get_register_member_name(definition)
         prefix = item.get("offset-prefix", None)
         if prefix is None:
             prefix = item["name"]
@@ -916,7 +956,7 @@ class _ZephyrNode(_Node):
     def _get_register_member_definition(
             self, _item: Item, _prefix: str, definition: Any,
             ctx: _RegisterMemberContext) -> GenericContent:
-        name, alias = _get_register_name(definition)
+        name, alias = get_register_member_name(definition)
         count = definition["count"]
         array = f"[{count}]" if count > 1 else ""
         if ctx.reg_counts[alias] > 1:

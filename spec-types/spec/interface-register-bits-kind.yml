@@ -1,0 +1,39 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - uint
+      - int
+      - enum
+      - bool
+      - bits
+      - reserved
+    description: |
+      It specifies what the bits of a register bit field encode.  The
+      following values are defined:
+
+      * ``uint``: The field encodes an unsigned integer.
+
+      * ``int``: The field encodes a signed integer in two's complement
+        representation.
+
+      * ``enum``: The field encodes a fixed set of codes.  The
+        ${interface-register-bits-enum:/spec-name} names the codes.
+
+      * ``bool``: The field is a flag of one bit.
+
+      * ``bits``: The bits of the field are independent of each other.
+
+      * ``reserved``: The field has no domain.
+spec-name: Register Bit Field Kind
+spec-type: interface-register-bits-kind
+type: spec

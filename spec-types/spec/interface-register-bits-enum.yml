@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies the enumerators of a register bit
+      field.  Each attribute name is the name of an enumerator.  Each
+      attribute value is the field value or the field values of the
+      enumerator.  A field of the ``uint`` kind or the ``int`` kind uses this
+      set to name the values which are not ordinary numbers.  An enumerator
+      name which YAML reads as a boolean needs quotes.  Examples are ``ON``,
+      ``OFF``, ``YES`` and ``NO``.
+    generic-attributes:
+      description: null
+      key-spec-type: str
+      value-spec-type: interface-register-bits-enum-value
+    mandatory-attributes: all
+spec-name: Register Bit Field Enumerators
+spec-type: interface-register-bits-enum
+type: spec

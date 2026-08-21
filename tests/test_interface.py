@@ -448,6 +448,39 @@ typedef struct irqamp_timestamp {
   ( ( ( _val ) << IRQAMP_ILEVEL_IL_15_1_SHIFT ) & \\
     IRQAMP_ILEVEL_IL_15_1_MASK )
 
+#define IRQAMP_ILEVEL_IL_0 0x1U
+#define IRQAMP_ILEVEL_IL_0_DISABLED 0U
+#define IRQAMP_ILEVEL_IL_0_ENABLED 1U
+
+#define IRQAMP_ILEVEL_SEL_SHIFT 16
+#define IRQAMP_ILEVEL_SEL_MASK 0x30000U
+#define IRQAMP_ILEVEL_SEL_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_ILEVEL_SEL_MASK ) >> \\
+    IRQAMP_ILEVEL_SEL_SHIFT )
+#define IRQAMP_ILEVEL_SEL_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ILEVEL_SEL_MASK ) | \\
+    ( ( ( _val ) << IRQAMP_ILEVEL_SEL_SHIFT ) & \\
+      IRQAMP_ILEVEL_SEL_MASK ) )
+#define IRQAMP_ILEVEL_SEL( _val ) \\
+  ( ( ( _val ) << IRQAMP_ILEVEL_SEL_SHIFT ) & \\
+    IRQAMP_ILEVEL_SEL_MASK )
+#define IRQAMP_ILEVEL_SEL_A 0U
+#define IRQAMP_ILEVEL_SEL_B 1U
+
+#define IRQAMP_ILEVEL_OFFSET_SHIFT 18
+#define IRQAMP_ILEVEL_OFFSET_MASK 0x3fc0000U
+#define IRQAMP_ILEVEL_OFFSET_GET( _reg ) \\
+  ( ( (int32_t) ( ( ( ( _reg ) & IRQAMP_ILEVEL_OFFSET_MASK ) >> \\
+    IRQAMP_ILEVEL_OFFSET_SHIFT ) ^ 0x80U ) ) - \\
+    0x80 )
+#define IRQAMP_ILEVEL_OFFSET_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_ILEVEL_OFFSET_MASK ) | \\
+    ( ( ( (uint32_t) ( _val ) ) << IRQAMP_ILEVEL_OFFSET_SHIFT ) & \\
+      IRQAMP_ILEVEL_OFFSET_MASK ) )
+#define IRQAMP_ILEVEL_OFFSET( _val ) \\
+  ( ( ( (uint32_t) ( _val ) ) << IRQAMP_ILEVEL_OFFSET_SHIFT ) & \\
+    IRQAMP_ILEVEL_OFFSET_MASK )
+
 /** @} */
 
 /**
@@ -457,6 +490,68 @@ typedef struct irqamp_timestamp {
  *
  * @{
  */
+
+/** @} */
+
+/**
+ * @defgroup IrqampTFULL Full width signed register (TFULL)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_TFULL_FULL_SHIFT 0
+#define IRQAMP_TFULL_FULL_MASK 0xffffffffffffffffULL
+#define IRQAMP_TFULL_FULL_GET( _reg ) \\
+  ( (int64_t) ( ( ( _reg ) & IRQAMP_TFULL_FULL_MASK ) >> \\
+    IRQAMP_TFULL_FULL_SHIFT ) )
+#define IRQAMP_TFULL_FULL_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_TFULL_FULL_MASK ) | \\
+    ( ( ( (uint64_t) ( _val ) ) << IRQAMP_TFULL_FULL_SHIFT ) & \\
+      IRQAMP_TFULL_FULL_MASK ) )
+#define IRQAMP_TFULL_FULL( _val ) \\
+  ( ( ( (uint64_t) ( _val ) ) << IRQAMP_TFULL_FULL_SHIFT ) & \\
+    IRQAMP_TFULL_FULL_MASK )
+
+/** @} */
+
+/**
+ * @defgroup IrqampTSTAMP Timestamp register (TSTAMP)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_TSTAMP_DELTA_SHIFT 0
+#define IRQAMP_TSTAMP_DELTA_MASK 0xffffffffffULL
+#define IRQAMP_TSTAMP_DELTA_GET( _reg ) \\
+  ( ( (int64_t) ( ( ( ( _reg ) & IRQAMP_TSTAMP_DELTA_MASK ) >> \\
+    IRQAMP_TSTAMP_DELTA_SHIFT ) ^ 0x8000000000ULL ) ) - \\
+    0x8000000000LL )
+#define IRQAMP_TSTAMP_DELTA_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_TSTAMP_DELTA_MASK ) | \\
+    ( ( ( (uint64_t) ( _val ) ) << IRQAMP_TSTAMP_DELTA_SHIFT ) & \\
+      IRQAMP_TSTAMP_DELTA_MASK ) )
+#define IRQAMP_TSTAMP_DELTA( _val ) \\
+  ( ( ( (uint64_t) ( _val ) ) << IRQAMP_TSTAMP_DELTA_SHIFT ) & \\
+    IRQAMP_TSTAMP_DELTA_MASK )
+
+#define IRQAMP_TSTAMP_RATE_SHIFT 40
+#define IRQAMP_TSTAMP_RATE_MASK 0xfff0000000000ULL
+#define IRQAMP_TSTAMP_RATE_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_TSTAMP_RATE_MASK ) >> \\
+    IRQAMP_TSTAMP_RATE_SHIFT )
+#define IRQAMP_TSTAMP_RATE_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_TSTAMP_RATE_MASK ) | \\
+    ( ( ( (uint64_t) ( _val ) ) << IRQAMP_TSTAMP_RATE_SHIFT ) & \\
+      IRQAMP_TSTAMP_RATE_MASK ) )
+#define IRQAMP_TSTAMP_RATE( _val ) \\
+  ( ( ( (uint64_t) ( _val ) ) << IRQAMP_TSTAMP_RATE_SHIFT ) & \\
+    IRQAMP_TSTAMP_RATE_MASK )
+
+#define IRQAMP_TSTAMP_FLAG 0x8000000000000000ULL
 
 /** @} */
 
@@ -1062,9 +1157,24 @@ void Function6( int Param0 );
 #define IRQAMP_TIMESTAMP_ITSTMPAC 0xcU
 
 /* ILEVEL bits */
+#define IRQAMP_ILEVEL_IL_0 BIT(0)
+#define IRQAMP_ILEVEL_IL_0_DISABLED 0
+#define IRQAMP_ILEVEL_IL_0_ENABLED 1
 #define IRQAMP_ILEVEL_IL_15_1 GENMASK(15, 1)
+#define IRQAMP_ILEVEL_SEL GENMASK(17, 16)
+#define IRQAMP_ILEVEL_SEL_A 0
+#define IRQAMP_ILEVEL_SEL_B 1
+#define IRQAMP_ILEVEL_OFFSET GENMASK(25, 18)
 
 /* IPEND8 bits */
+
+/* TFULL bits */
+#define IRQAMP_TFULL_FULL GENMASK64(63, 0)
+
+/* TSTAMP bits */
+#define IRQAMP_TSTAMP_DELTA GENMASK64(39, 0)
+#define IRQAMP_TSTAMP_RATE GENMASK64(51, 40)
+#define IRQAMP_TSTAMP_FLAG BIT64(63)
 
 /* IRQ(A)MP address offsets */
 #define IRQAMP_FOOBAR 0x0U

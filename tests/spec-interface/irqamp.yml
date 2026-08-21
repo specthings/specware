@@ -3,7 +3,7 @@ brief: |
   This structure defines the ${.:/register-block-group} register block memory
   map.
 copyrights:
-- Copyright (C) 2021 embedded brains GmbH & Co. KG
+- Copyright (C) 2021, 2026 embedded brains GmbH & Co. KG
 description: null
 enabled-by: true
 identifier: Irqamp
@@ -46,16 +46,48 @@ register-block-size: 1024
 registers:
 - bits:
   - default:
-    - access: [r, w]
+    - properties: [r, w]
       brief: null
       description: null
       name: 'IL_15_1'
       start: 1
       width: 15
+    - properties: [r, w]
+      brief: null
+      description: null
+      enum:
+        DISABLED: 0
+        ENABLED: 1
+      kind: bool
+      name: 'IL_0'
+      reset: 0
+      start: 0
+      width: 1
+    - properties: [r]
+      brief: null
+      description: null
+      enum:
+        A: 0
+        B: [1, 2]
+      kind: enum
+      name: 'SEL'
+      reset: external
+      start: 16
+      width: 2
+    - properties: [r, w]
+      brief: null
+      description: null
+      kind: int
+      name: 'OFFSET'
+      reset: 0
+      start: 18
+      unit: cycles
+      width: 8
     variants: []
   brief: |
     Interrupt level register
   description: null
+  locator: table 66, p. 123
   name: ILEVEL
   width: 32
 - bits:
@@ -66,6 +98,55 @@ registers:
   description: null
   name: IPEND8
   width: 8
+- bits:
+  - default:
+    - properties: [r]
+      brief: null
+      description: null
+      kind: int
+      name: 'FULL'
+      reset: 0
+      start: 0
+      width: 64
+    variants: []
+  brief: |
+    Full width signed register
+  description: null
+  name: TFULL
+  width: 64
+- bits:
+  - default:
+    - properties: [r]
+      brief: null
+      description: null
+      kind: int
+      name: 'DELTA'
+      reset: not-reset
+      start: 0
+      width: 40
+    - properties: [r, w]
+      brief: null
+      description: null
+      kind: uint
+      name: 'RATE'
+      range: [1, 4095]
+      scale: value + 1
+      start: 40
+      unit: cycles
+      width: 12
+    - properties: [r, w1c]
+      brief: null
+      description: null
+      name: 'FLAG'
+      reset: 0
+      start: 63
+      width: 1
+    variants: []
+  brief: |
+    Timestamp register
+  description: null
+  name: TSTAMP
+  width: 64
 name: irqamp
 notes: null
 type: interface
