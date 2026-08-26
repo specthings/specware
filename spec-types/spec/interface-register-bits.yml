@@ -19,12 +19,23 @@ spec-info:
       brief:
         description: null
         spec-type: interface-brief
+      count:
+        description: |
+          It shall be the count of the bit fields of the run.  The manual
+          gives a run of bit fields one name and a decimal index.  A field
+          which has no count is a run of one.
+        spec-type: int
       description:
         description: null
         spec-type: interface-description
       enum:
         description: null
         spec-type: interface-register-bits-enum
+      first-index:
+        description: |
+          It shall be the index which the manual gives to the bit field at
+          the start bit.  The default is ``0``.
+        spec-type: int
       kind:
         description: null
         spec-type: interface-register-bits-kind
@@ -48,7 +59,14 @@ spec-info:
       start:
         description: |
           It shall be the start bit of the bit field.  Bit ``0`` is the
-          least-significant bit.
+          least-significant bit.  A run starts the field of the first index
+          at this bit.
+        spec-type: int
+      stride:
+        description: |
+          It shall be the bit step from one index of the run to the next.  A
+          negative stride counts down the register.  The default is the width
+          of the bit field.
         spec-type: int
       unit:
         description: |
@@ -61,9 +79,15 @@ spec-info:
         spec-type: int
     description: |
       This set of attributes specifies a register bit field.  Single bits are
-      bit fields with a width of one.  The ``enum``, ``kind``, ``range``,
-      ``reset``, ``scale`` and ``unit`` attributes are optional.  An attribute
-      which has no value is absent.
+      bit fields with a width of one.  The ``count``, ``enum``,
+      ``first-index``, ``kind``, ``range``, ``reset``, ``scale``, ``stride``
+      and ``unit`` attributes are optional.  An attribute which has no value
+      is absent.
+
+      A count greater than one specifies a run of bit fields.  The field of
+      the index ``i`` starts at bit ``start + stride * ( i - first-index )``.
+      The index runs from ``first-index`` to ``first-index + count - 1``.  The
+      name is the base of the run and carries no index.
     mandatory-attributes:
     - brief
     - description

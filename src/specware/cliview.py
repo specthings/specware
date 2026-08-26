@@ -38,9 +38,9 @@ from specitems import (COL_SPAN, CommonMarkContent, Item, ItemCache,
 
 from specware import (augment_with_test_case_links, augment_with_test_links,
                       gather_api_items, gather_build_files,
-                      get_register_member_name, load_specware_config,
-                      recursive_is_enabled, Transition, TransitionMap,
-                      validate, SpecWareTypeProvider)
+                      get_register_bits_run, get_register_member_name,
+                      load_specware_config, recursive_is_enabled, Transition,
+                      TransitionMap, validate, SpecWareTypeProvider)
 
 _DOC_FORMAT = {
     "commonmark": CommonMarkContent,
@@ -353,6 +353,8 @@ _REGISTER_LEGEND = [
     "# <offset> [+N @stride] -> <uid>",
     "# <bits> NAME props kind =reset [lo,hi] unit ~scale "
     "NAME=v,NAME=lo..hi,NAME=v|v",
+    "# a run gives the bits of its first index, NAME[<first>..<last>] "
+    "and @<stride>",
 ]
 
 _SCALE_NODES = (ast.Expression, ast.BinOp, ast.UnaryOp, ast.USub, ast.Add,
@@ -406,7 +408,13 @@ def _register_bit(bit: dict[str, Any]) -> str:
     start = bit["start"]
     width = bit["width"]
     bits = f"{start + width - 1}:{start}" if width > 1 else str(start)
-    parts = [bits, bit["name"], _register_properties(bit["properties"])]
+    count, stride, first = get_register_bits_run(bit)
+    name = bit["name"]
+    parts = [bits, name]
+    if count > 1:
+        parts[1] = f"{name}[{first}..{first + count - 1}]"
+        parts.append(f"@{stride}")
+    parts.append(_register_properties(bit["properties"]))
     kind = bit.get("kind", None)
     if kind is not None:
         parts.append(kind)

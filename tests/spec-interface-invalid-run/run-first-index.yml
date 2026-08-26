@@ -1,0 +1,44 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Brief.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+- default:
+    count: 1
+    name: X
+  offset: 0
+  variants: []
+description: null
+enabled-by: true
+identifier: RunFirstIndex
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-placement
+  uid: h-run-first-index
+name: run-first-index
+notes: null
+offset-prefix: null
+register-block-group: RUNFIRSTINDEX
+register-block-size: 4
+register-domain: device
+register-prefix: null
+registers:
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      count: 2
+      first-index: -1
+      start: 0
+      width: 4
+      description: null
+      name: 'R'
+    variants: []
+  brief: |
+    Brief.
+  description: null
+  name: X
+  width: 32
+type: interface

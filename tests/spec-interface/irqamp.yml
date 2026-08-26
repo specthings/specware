@@ -147,6 +147,83 @@ registers:
   description: null
   name: TSTAMP
   width: 64
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      count: 10
+      description: null
+      first-index: 10
+      kind: uint
+      name: 'S'
+      start: 0
+      width: 2
+    - properties: [r, w]
+      brief: null
+      count: 4
+      description: null
+      name: 'F'
+      start: 20
+      stride: 3
+      width: 1
+    variants: []
+  brief: |
+    Ascending run register
+  description: null
+  name: RUNA
+  width: 32
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      count: 4
+      description: null
+      enum:
+        A: 0
+        B: 1
+      kind: enum
+      name: 'E'
+      start: 0
+      width: 5
+    - properties: [r, w]
+      brief: null
+      count: 3
+      description: null
+      kind: int
+      name: 'D'
+      start: 28
+      stride: -4
+      width: 4
+    variants: []
+  brief: |
+    Descending run register
+  description: null
+  name: RUNB
+  width: 32
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      count: 3
+      description: null
+      kind: int
+      name: 'W'
+      start: 24
+      stride: 12
+      width: 12
+    - properties: [r, w]
+      brief: null
+      count: 4
+      description: null
+      name: 'V'
+      start: 60
+      width: 1
+    variants: []
+  brief: |
+    Wide run register
+  description: null
+  name: RUNC
+  width: 64
 name: irqamp
 notes: null
 type: interface

@@ -31,7 +31,7 @@ from contextlib import contextmanager
 import functools
 import itertools
 import os
-from typing import Any, Callable, Iterator, NamedTuple, Optional
+from typing import (Any, Callable, Iterator, NamedTuple, NoReturn, Optional)
 
 from specitems import (ClangFormatter, Item, ItemCache, ItemGetValueContext,
                        ItemGetValueMap, ItemMapper, GenericContent,
@@ -46,7 +46,7 @@ from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
                        get_value_header_file, get_value_params,
                        get_value_unspecified_type)
 from .rtems import is_export_affected
-from .util import get_register_member_name
+from .util import get_register_bits_run, get_register_member_name
 
 _ItemMap = dict[str, Item]
 _GetLines = Callable[["_Node", Item, str, Any], GenericContent]
@@ -305,48 +305,122 @@ def _get_register_domain_and_size(item: Item) -> tuple[str, Any]:
     return domain, size
 
 
-def _get_register_bits_signed_get(base: str, width: int) -> list[str]:
+def _get_register_bits_define(name: str, body: str) -> list[str]:
+    """ Get a define.  A line longer than 79 columns continues below. """
+    line = f"#define {name} {body}"
+    if len(line) <= 79:
+        return [line]
+    return [f"#define {name} \\", f"  {body}"]
+
+
+def _get_register_bits_signed_get(base: str, width: int, idx: str,
+                                  arg: str) -> list[str]:
     if width == 64:
         return [
-            f"#define {base}_GET( _reg ) \\",
-            f"  ( (int64_t) ( ( ( _reg ) & {base}_MASK ) >> \\",
-            f"    {base}_SHIFT ) )"
+            f"#define {base}_GET( _reg{arg} ) \\",
+            f"  ( (int64_t) ( ( ( _reg ) & {base}_MASK{idx} ) >> \\",
+            f"    {base}_SHIFT{idx} ) )"
         ]
     sign = 1 << (width - 1)
     cast, usfx, ssfx = (("int64_t", "ULL", "LL") if width > 31 else
                         ("int32_t", "U", ""))
     return [
-        f"#define {base}_GET( _reg ) \\",
-        f"  ( ( ({cast}) ( ( ( ( _reg ) & {base}_MASK ) >> \\",
-        f"    {base}_SHIFT ) ^ {sign:#x}{usfx} ) ) - \\",
+        f"#define {base}_GET( _reg{arg} ) \\",
+        f"  ( ( ({cast}) ( ( ( ( _reg ) & {base}_MASK{idx} ) >> \\",
+        f"    {base}_SHIFT{idx} ) ^ {sign:#x}{usfx} ) ) - \\",
         f"    {sign:#x}{ssfx} )"
     ]
 
 
-def _get_register_bits_accessors(base: str, start: int, width: int, end: int,
-                                 signed: bool) -> list[str]:
-    mask = ((1 << width) - 1) << start
+def _get_register_bits_accessors(base: str, start: int, width: int,
+                                 signed: bool, shift: str) -> list[str]:
+    end = start + width
     sfx = "ULL" if end > 32 else "U"
-    lines = [
-        f"#define {base}_SHIFT {start}", f"#define {base}_MASK {mask:#x}{sfx}"
-    ]
+    if shift:
+        idx = "( _i )"
+        arg = ", _i"
+        mask = f"( {(1 << width) - 1:#x}{sfx} << {base}_SHIFT( _i ) )"
+    else:
+        idx = ""
+        arg = ""
+        shift = str(start)
+        mask = f"{((1 << width) - 1) << start:#x}{sfx}"
+    lines = _get_register_bits_define(f"{base}_SHIFT{idx}", shift)
+    lines.extend(_get_register_bits_define(f"{base}_MASK{idx}", mask))
     if signed:
         val = f"( ({'uint64_t' if end > 32 else 'uint32_t'}) ( _val ) )"
-        lines.extend(_get_register_bits_signed_get(base, width))
+        lines.extend(_get_register_bits_signed_get(base, width, idx, arg))
     else:
         val = "( (uint64_t) ( _val ) )" if start >= 32 else "( _val )"
         lines.extend([
-            f"#define {base}_GET( _reg ) \\",
-            f"  ( ( ( _reg ) & {base}_MASK ) >> \\", f"    {base}_SHIFT )"
+            f"#define {base}_GET( _reg{arg} ) \\",
+            f"  ( ( ( _reg ) & {base}_MASK{idx} ) >> \\",
+            f"    {base}_SHIFT{idx} )"
         ])
     lines.extend([
-        f"#define {base}_SET( _reg, _val ) \\",
-        f"  ( ( ( _reg ) & ~{base}_MASK ) | \\",
-        f"    ( ( {val} << {base}_SHIFT ) & \\", f"      {base}_MASK ) )",
-        f"#define {base}( _val ) \\", f"  ( ( {val} << {base}_SHIFT ) & \\",
-        f"    {base}_MASK )"
+        f"#define {base}_SET( _reg, _val{arg} ) \\",
+        f"  ( ( ( _reg ) & ~{base}_MASK{idx} ) | \\",
+        f"    ( ( {val} << {base}_SHIFT{idx} ) & \\",
+        f"      {base}_MASK{idx} ) )", f"#define {base}( _val{arg} ) \\",
+        f"  ( ( {val} << {base}_SHIFT{idx} ) & \\", f"    {base}_MASK{idx} )"
     ])
     return lines
+
+
+def _raise_register_bits_error(uid: str, reg_name: str, bit: dict[str, Any],
+                               message: str) -> NoReturn:
+    """ Raise an error which names a register bit field. """
+    raise ValueError(f"bit field '{bit['name']}' of register '{reg_name}' of "
+                     f"register block '{uid}' {message}")
+
+
+def _check_register_bits_run(uid: str, reg_name: str, reg_width: int,
+                             bit: dict[str, Any]) -> None:
+    """ Check the count, the stride and the first index of a bit field. """
+    count, stride, first = get_register_bits_run(bit)
+    if count < 1:
+        _raise_register_bits_error(
+            uid, reg_name, bit,
+            f"has an invalid count of {count}, expected at least 1")
+    if count == 1:
+        return
+    width = bit["width"]
+    if stride == 0:
+        _raise_register_bits_error(uid, reg_name, bit, "has a stride of zero")
+    if abs(stride) < width:
+        _raise_register_bits_error(
+            uid, reg_name, bit, f"has a stride of {stride} and a width of "
+            f"{width}, expected an absolute stride of at least the width")
+    if first < 0:
+        _raise_register_bits_error(
+            uid, reg_name, bit,
+            f"has an invalid first index of {first}, expected at least 0")
+    start = bit["start"]
+    last = start + stride * (count - 1)
+    low = min(start, last)
+    high = max(start, last) + width - 1
+    if low < 0 or high >= reg_width:
+        _raise_register_bits_error(
+            uid, reg_name, bit, f"occupies the bits {low} to {high} outside "
+            f"of the register of {reg_width} bits")
+
+
+def _get_register_bits_shift(start: int, stride: int, first: int) -> str:
+    """ Get the C expression which gives the start bit of the index _i. """
+    index = "( _i )" if first == 0 else f"( ( _i ) - {first} )"
+    term = index if abs(stride) == 1 else f"{abs(stride)} * {index}"
+    if start == 0 and stride > 0:
+        return f"( {term} )"
+    return f"( {start} {'+' if stride > 0 else '-'} {term} )"
+
+
+def _get_register_bits_prefix(item: Item, reg_name: str) -> str:
+    """ Get the define prefix of the bit fields of a register. """
+    prefix = item["register-prefix"]
+    if prefix is None:
+        prefix = item["name"]
+    prefix = f"{prefix}_{reg_name}_" if prefix else f"{reg_name}_"
+    return prefix.upper()
 
 
 def _get_register_bits_enum_defines(base: str, suffix: str,
@@ -360,6 +434,67 @@ def _get_register_bits_enum_defines(base: str, suffix: str,
         f"#define {base}_{name.upper()} {value}{suffix}"
         for value, name in values
     ]
+
+
+def _get_register_bits_lines(uid: str, reg_name: str, reg_width: int,
+                             base: str, bit: dict[str, Any]) -> list[str]:
+    """ Get the defines of one register bit field of the default style. """
+    _check_register_bits_run(uid, reg_name, reg_width, bit)
+    start = bit["start"]
+    width = bit["width"]
+    count, stride, first = get_register_bits_run(bit)
+    lines = []  # list[str]
+    shift = ""
+    if count > 1:
+        start = max(start, start + stride * (count - 1))
+        shift = _get_register_bits_shift(bit["start"], stride, first)
+        lines.append(f"/* _i is {first} to {first + count - 1} */")
+    sfx = "ULL" if start + width > 32 else "U"
+    if width == 1:
+        if shift:
+            lines.extend(
+                _get_register_bits_define(f"{base}( _i )",
+                                          f"( {1:#x}{sfx} << {shift} )"))
+        else:
+            lines.extend(
+                _get_register_bits_define(base, f"{1 << start:#x}{sfx}"))
+    else:
+        lines.extend(
+            _get_register_bits_accessors(base, start, width,
+                                         bit.get("kind", None) == "int",
+                                         shift))
+    lines.extend(_get_register_bits_enum_defines(base, sfx, bit))
+    return lines
+
+
+def _get_zephyr_register_bits_lines(uid: str, reg_name: str, reg_width: int,
+                                    base: str, bit: dict[str,
+                                                         Any]) -> list[str]:
+    """ Get the defines of one register bit field of the Zephyr style. """
+    _check_register_bits_run(uid, reg_name, reg_width, bit)
+    start = bit["start"]
+    width = bit["width"]
+    count, stride, first = get_register_bits_run(bit)
+    lines = []  # list[str]
+    if count > 1:
+        last = max(start, start + stride * (count - 1))
+        sfx = "64" if last + width > 32 else ""
+        shift = _get_register_bits_shift(start, stride, first)
+        lines.append(f"/* _i is {first} to {first + count - 1} */")
+        if width == 1:
+            body = f"BIT{sfx}{shift}"
+        else:
+            body = f"GENMASK{sfx}( {shift} + {width - 1}, {shift} )"
+        lines.extend(_get_register_bits_define(f"{base}( _i )", body))
+    else:
+        sfx = "64" if start + width > 32 else ""
+        if width == 1:
+            body = f"BIT{sfx}({start})"
+        else:
+            body = f"GENMASK{sfx}({start + width - 1}, {start})"
+        lines.extend(_get_register_bits_define(base, body))
+    lines.extend(_get_register_bits_enum_defines(base, "", bit))
+    return lines
 
 
 _CONSTRAINT_TARGET = {
@@ -519,7 +654,8 @@ class _Node:
                         self, self.item, f"registers[{index}]/bits[{index_2}]",
                         bits,
                         functools.partial(_Node._get_register_bits_definition,
-                                          reg_name=name)))
+                                          reg_name=name,
+                                          reg_width=width)))
             self.content.add_close_group()
         return ctx
 
@@ -731,29 +867,17 @@ class _Node:
         return line + body
 
     def _get_register_bits_definition(self, _item: Item, _prefix: str,
-                                      definition: Any,
-                                      reg_name: str) -> GenericContent:
+                                      definition: Any, reg_name: str,
+                                      reg_width: int) -> GenericContent:
         lines = []  # list[str]
-        prefix = self.item["register-prefix"]
-        if prefix is None:
-            prefix = self.item["name"]
-        prefix = f"{prefix}_{reg_name}_" if prefix else f"{reg_name}_"
+        prefix = _get_register_bits_prefix(self.item, reg_name)
         for index, bit in enumerate(definition):
-            start = bit["start"]
-            width = bit["width"]
-            end = start + width
-            sfx = "ULL" if end > 32 else "U"
-            base = f"{prefix.upper()}{bit['name'].upper()}"
             if index != 0:
                 lines.append("")
-            if width == 1:
-                lines.append(f"#define {base} {1 << start:#x}{sfx}")
-            else:
-                lines.extend(
-                    _get_register_bits_accessors(
-                        base, start, width, end,
-                        bit.get("kind", None) == "int"))
-            lines.extend(_get_register_bits_enum_defines(base, sfx, bit))
+            lines.extend(
+                _get_register_bits_lines(self.item.uid, reg_name, reg_width,
+                                         f"{prefix}{bit['name'].upper()}",
+                                         bit))
         return lines
 
     def _get_register_define_definition(self, item: Item, _prefix: str,
@@ -882,25 +1006,15 @@ class _ZephyrNode(_Node):
                                     _NODE_GENERATORS[interface_type])(self)
 
     def _get_register_bits_definition(self, _item: Item, _prefix: str,
-                                      definition: Any,
-                                      reg_name: str) -> GenericContent:
+                                      definition: Any, reg_name: str,
+                                      reg_width: int) -> GenericContent:
         lines = []  # list[str]
-        prefix = self.item["register-prefix"]
-        if prefix is None:
-            prefix = self.item["name"]
-        prefix = f"{prefix}_{reg_name}_" if prefix else f"{reg_name}_"
+        prefix = _get_register_bits_prefix(self.item, reg_name)
         for bit in sorted(definition, key=lambda x: x["start"]):
-            start = bit["start"]
-            width = bit["width"]
-            end = start + width
-            sfx = "64" if end > 32 else ""
-            base = f"{prefix.upper()}{bit['name'].upper()}"
-            if width == 1:
-                lines.append(f"#define {base} BIT{sfx}({start})")
-            else:
-                lines.append(
-                    f"#define {base} GENMASK{sfx}({end - 1}, {start})")
-            lines.extend(_get_register_bits_enum_defines(base, "", bit))
+            lines.extend(
+                _get_zephyr_register_bits_lines(
+                    self.item.uid, reg_name, reg_width,
+                    f"{prefix}{bit['name'].upper()}", bit))
         return lines
 
     def _add_register_bits(self, group: str) -> _RegisterMemberContext:
@@ -919,7 +1033,8 @@ class _ZephyrNode(_Node):
                         bits,
                         functools.partial(
                             _ZephyrNode._get_register_bits_definition,
-                            reg_name=name)))
+                            reg_name=name,
+                            reg_width=width)))
         return ctx
 
     def _get_register_define_definition(self, item: Item, _prefix: str,

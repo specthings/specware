@@ -152,6 +152,22 @@ registers:
       name: 'BUSY'
       start: 0
       width: 1
+    - properties: [r, w]
+      brief: null
+      count: 6
+      description: null
+      first-index: 1
+      name: 'CH'
+      start: 4
+      width: 2
+    - properties: [r]
+      brief: null
+      count: 3
+      description: null
+      name: 'P'
+      start: 28
+      stride: -4
+      width: 4
     variants:
     - definition:
       - properties: [r]

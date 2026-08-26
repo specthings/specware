@@ -103,6 +103,20 @@ def _get_stderr(err: subprocess.CalledProcessError) -> str:
     return stderr.strip()
 
 
+def get_register_bits_run(bit: dict[str, Any]) -> tuple[int, int, int]:
+    """
+    Get the count, the stride and the first index of a register bit field.
+    A field which has no count is a run of one.  The stride defaults to the
+    width of the field.  The first index defaults to zero.
+    """
+    count = bit.get("count", None)
+    stride = bit.get("stride", None)
+    first = bit.get("first-index", None)
+    return (1 if count is None else count,
+            bit["width"] if stride is None else stride,
+            0 if first is None else first)
+
+
 def get_register_member_name(definition: dict[str, Any]) -> tuple[str, str]:
     """
     Get the name and the alias of a member definition of a register block.

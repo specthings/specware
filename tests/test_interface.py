@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
+import re
 import pytest
 
 from specitems import EmptyItemCache
@@ -552,6 +553,102 @@ typedef struct irqamp_timestamp {
     IRQAMP_TSTAMP_RATE_MASK )
 
 #define IRQAMP_TSTAMP_FLAG 0x8000000000000000ULL
+
+/** @} */
+
+/**
+ * @defgroup IrqampRUNA Ascending run register (RUNA)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/* _i is 10 to 19 */
+#define IRQAMP_RUNA_S_SHIFT( _i ) ( 2 * ( ( _i ) - 10 ) )
+#define IRQAMP_RUNA_S_MASK( _i ) ( 0x3U << IRQAMP_RUNA_S_SHIFT( _i ) )
+#define IRQAMP_RUNA_S_GET( _reg, _i ) \\
+  ( ( ( _reg ) & IRQAMP_RUNA_S_MASK( _i ) ) >> \\
+    IRQAMP_RUNA_S_SHIFT( _i ) )
+#define IRQAMP_RUNA_S_SET( _reg, _val, _i ) \\
+  ( ( ( _reg ) & ~IRQAMP_RUNA_S_MASK( _i ) ) | \\
+    ( ( ( _val ) << IRQAMP_RUNA_S_SHIFT( _i ) ) & \\
+      IRQAMP_RUNA_S_MASK( _i ) ) )
+#define IRQAMP_RUNA_S( _val, _i ) \\
+  ( ( ( _val ) << IRQAMP_RUNA_S_SHIFT( _i ) ) & \\
+    IRQAMP_RUNA_S_MASK( _i ) )
+
+/* _i is 0 to 3 */
+#define IRQAMP_RUNA_F( _i ) ( 0x1U << ( 20 + 3 * ( _i ) ) )
+
+/** @} */
+
+/**
+ * @defgroup IrqampRUNB Descending run register (RUNB)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/* _i is 0 to 3 */
+#define IRQAMP_RUNB_E_SHIFT( _i ) ( 5 * ( _i ) )
+#define IRQAMP_RUNB_E_MASK( _i ) ( 0x1fU << IRQAMP_RUNB_E_SHIFT( _i ) )
+#define IRQAMP_RUNB_E_GET( _reg, _i ) \\
+  ( ( ( _reg ) & IRQAMP_RUNB_E_MASK( _i ) ) >> \\
+    IRQAMP_RUNB_E_SHIFT( _i ) )
+#define IRQAMP_RUNB_E_SET( _reg, _val, _i ) \\
+  ( ( ( _reg ) & ~IRQAMP_RUNB_E_MASK( _i ) ) | \\
+    ( ( ( _val ) << IRQAMP_RUNB_E_SHIFT( _i ) ) & \\
+      IRQAMP_RUNB_E_MASK( _i ) ) )
+#define IRQAMP_RUNB_E( _val, _i ) \\
+  ( ( ( _val ) << IRQAMP_RUNB_E_SHIFT( _i ) ) & \\
+    IRQAMP_RUNB_E_MASK( _i ) )
+#define IRQAMP_RUNB_E_A 0U
+#define IRQAMP_RUNB_E_B 1U
+
+/* _i is 0 to 2 */
+#define IRQAMP_RUNB_D_SHIFT( _i ) ( 28 - 4 * ( _i ) )
+#define IRQAMP_RUNB_D_MASK( _i ) ( 0xfU << IRQAMP_RUNB_D_SHIFT( _i ) )
+#define IRQAMP_RUNB_D_GET( _reg, _i ) \\
+  ( ( (int32_t) ( ( ( ( _reg ) & IRQAMP_RUNB_D_MASK( _i ) ) >> \\
+    IRQAMP_RUNB_D_SHIFT( _i ) ) ^ 0x8U ) ) - \\
+    0x8 )
+#define IRQAMP_RUNB_D_SET( _reg, _val, _i ) \\
+  ( ( ( _reg ) & ~IRQAMP_RUNB_D_MASK( _i ) ) | \\
+    ( ( ( (uint32_t) ( _val ) ) << IRQAMP_RUNB_D_SHIFT( _i ) ) & \\
+      IRQAMP_RUNB_D_MASK( _i ) ) )
+#define IRQAMP_RUNB_D( _val, _i ) \\
+  ( ( ( (uint32_t) ( _val ) ) << IRQAMP_RUNB_D_SHIFT( _i ) ) & \\
+    IRQAMP_RUNB_D_MASK( _i ) )
+
+/** @} */
+
+/**
+ * @defgroup IrqampRUNC Wide run register (RUNC)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/* _i is 0 to 2 */
+#define IRQAMP_RUNC_W_SHIFT( _i ) ( 24 + 12 * ( _i ) )
+#define IRQAMP_RUNC_W_MASK( _i ) ( 0xfffULL << IRQAMP_RUNC_W_SHIFT( _i ) )
+#define IRQAMP_RUNC_W_GET( _reg, _i ) \\
+  ( ( (int32_t) ( ( ( ( _reg ) & IRQAMP_RUNC_W_MASK( _i ) ) >> \\
+    IRQAMP_RUNC_W_SHIFT( _i ) ) ^ 0x800U ) ) - \\
+    0x800 )
+#define IRQAMP_RUNC_W_SET( _reg, _val, _i ) \\
+  ( ( ( _reg ) & ~IRQAMP_RUNC_W_MASK( _i ) ) | \\
+    ( ( ( (uint64_t) ( _val ) ) << IRQAMP_RUNC_W_SHIFT( _i ) ) & \\
+      IRQAMP_RUNC_W_MASK( _i ) ) )
+#define IRQAMP_RUNC_W( _val, _i ) \\
+  ( ( ( (uint64_t) ( _val ) ) << IRQAMP_RUNC_W_SHIFT( _i ) ) & \\
+    IRQAMP_RUNC_W_MASK( _i ) )
+
+/* _i is 0 to 3 */
+#define IRQAMP_RUNC_V( _i ) ( 0x1ULL << ( 60 + ( _i ) ) )
 
 /** @} */
 
@@ -1176,6 +1273,29 @@ void Function6( int Param0 );
 #define IRQAMP_TSTAMP_RATE GENMASK64(51, 40)
 #define IRQAMP_TSTAMP_FLAG BIT64(63)
 
+/* RUNA bits */
+/* _i is 10 to 19 */
+#define IRQAMP_RUNA_S( _i ) \\
+  GENMASK( ( 2 * ( ( _i ) - 10 ) ) + 1, ( 2 * ( ( _i ) - 10 ) ) )
+/* _i is 0 to 3 */
+#define IRQAMP_RUNA_F( _i ) BIT( 20 + 3 * ( _i ) )
+
+/* RUNB bits */
+/* _i is 0 to 3 */
+#define IRQAMP_RUNB_E( _i ) GENMASK( ( 5 * ( _i ) ) + 4, ( 5 * ( _i ) ) )
+#define IRQAMP_RUNB_E_A 0
+#define IRQAMP_RUNB_E_B 1
+/* _i is 0 to 2 */
+#define IRQAMP_RUNB_D( _i ) \\
+  GENMASK( ( 28 - 4 * ( _i ) ) + 3, ( 28 - 4 * ( _i ) ) )
+
+/* RUNC bits */
+/* _i is 0 to 2 */
+#define IRQAMP_RUNC_W( _i ) \\
+  GENMASK64( ( 24 + 12 * ( _i ) ) + 11, ( 24 + 12 * ( _i ) ) )
+/* _i is 0 to 3 */
+#define IRQAMP_RUNC_V( _i ) BIT64( 60 + ( _i ) )
+
 /* IRQ(A)MP address offsets */
 #define IRQAMP_FOOBAR 0x0U
 #if defined(RTEMS_SMP)
@@ -1427,8 +1547,8 @@ __attribute__((__const__)) static inline int VeryLongFunction(
         assert content == src.read()
 
 
-def _generate_header_file_with(tmpdir, style, spec_dir):
-    """ Generate the header file /h using an additional specification. """
+def _generate_header_file_with(tmpdir, style, spec_dir, uid="/h"):
+    """ Generate a header file using an additional specification. """
     item_cache = create_item_cache(tmpdir, ["spec-interface", spec_dir])
     header_file_config = {
         "item-level-interfaces": ["/command-line"],
@@ -1436,7 +1556,7 @@ def _generate_header_file_with(tmpdir, style, spec_dir):
         "enabled": [],
         "style": style
     }
-    generate_header_file(header_file_config, item_cache["/h"],
+    generate_header_file(header_file_config, item_cache[uid],
                          os.path.join(tmpdir, "header.h"))
 
 
@@ -1456,6 +1576,27 @@ def test_interface_memory_register_block_without_size(tmpdir, style):
                        "register domain and has no register block size"):
         _generate_header_file_with(tmpdir, style,
                                    "spec-interface-memory-no-size")
+
+
+_INVALID_RUNS = [
+    ("count", "has an invalid count of 0, expected at least 1"),
+    ("stride-zero", "has a stride of zero"),
+    ("stride-narrow", "has a stride of 3 and a width of 4, expected an "
+     "absolute stride of at least the width"),
+    ("first-index", "has an invalid first index of -1, expected at least 0"),
+    ("outside", "occupies the bits 28 to 35 outside of the register of "
+     "32 bits"),
+]
+
+
+@pytest.mark.parametrize("style", ["default", "zephyr"])
+@pytest.mark.parametrize("case, message", _INVALID_RUNS)
+def test_interface_invalid_register_bits_run(tmpdir, style, case, message):
+    where = (f"bit field 'R' of register 'X' of register block "
+             f"'/run-{case}' ")
+    with pytest.raises(ValueError, match=re.escape(where + message)):
+        _generate_header_file_with(tmpdir, style, "spec-interface-invalid-run",
+                                   f"/h-run-{case}")
 
 
 def test_get_affected_header_files(tmpdir):

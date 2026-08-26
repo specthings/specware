@@ -1,0 +1,16 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This header file provides nothing.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: header-file
+links:
+- role: interface-placement
+  uid: domain-abc
+- role: interface-ingroup
+  uid: ga
+path: h-run-stride-zero.h
+prefix: include
+type: interface

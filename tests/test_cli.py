@@ -235,6 +235,7 @@ def test_clifind(tmpdir):
 REGISTERS = """# <offset|-> NAME <width> [xN @stride] [locator]
 # <offset> [+N @stride] -> <uid>
 # <bits> NAME props kind =reset [lo,hi] unit ~scale NAME=v,NAME=lo..hi,NAME=v|v
+# a run gives the bits of its first index, NAME[<first>..<last>] and @<stride>
 inner size 16
 0x0 CNT 32
   31:0 VALUE r uint =undefined
@@ -252,6 +253,8 @@ main size 256 Vendor Manual DS123
 0x4 CTRL1 32 table 66, p. 123
 0x8 STAT 32 x4 @0x4
   0 BUSY r bool
+  5:4 CH[1..6] @2 rw
+  31:28 P[0..2] @-4 r
   1 SMP r bool
 0x40 -> /reg/inner
 0x80 +4 @0x10 -> /reg/inner
@@ -262,7 +265,7 @@ nosize
 0x0 ONLY 32
   3:0 ANY rw
 ---
-14 fields, 7 without kind
+16 fields, 9 without kind
 """
 
 
