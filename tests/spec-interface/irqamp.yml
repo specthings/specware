@@ -224,6 +224,21 @@ registers:
   description: null
   name: RUNC
   width: 64
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      description: null
+      kind: uint
+      name: 'U'
+      start: 24
+      width: 12
+    variants: []
+  brief: |
+    Register with a field which crosses bit 32
+  description: null
+  name: CROSS
+  width: 64
 name: irqamp
 notes: null
 type: interface

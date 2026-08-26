@@ -653,6 +653,29 @@ typedef struct irqamp_timestamp {
 /** @} */
 
 /**
+ * @defgroup IrqampCROSS Register with a field which crosses bit 32 (CROSS)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define IRQAMP_CROSS_U_SHIFT 24
+#define IRQAMP_CROSS_U_MASK 0xfff000000ULL
+#define IRQAMP_CROSS_U_GET( _reg ) \\
+  ( ( ( _reg ) & IRQAMP_CROSS_U_MASK ) >> \\
+    IRQAMP_CROSS_U_SHIFT )
+#define IRQAMP_CROSS_U_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~IRQAMP_CROSS_U_MASK ) | \\
+    ( ( ( (uint64_t) ( _val ) ) << IRQAMP_CROSS_U_SHIFT ) & \\
+      IRQAMP_CROSS_U_MASK ) )
+#define IRQAMP_CROSS_U( _val ) \\
+  ( ( ( (uint64_t) ( _val ) ) << IRQAMP_CROSS_U_SHIFT ) & \\
+    IRQAMP_CROSS_U_MASK )
+
+/** @} */
+
+/**
  * @brief This structure defines the IRQ(A)MP register block memory map.
  */
 typedef struct irqamp {
@@ -1295,6 +1318,9 @@ void Function6( int Param0 );
   GENMASK64( ( 24 + 12 * ( _i ) ) + 11, ( 24 + 12 * ( _i ) ) )
 /* _i is 0 to 3 */
 #define IRQAMP_RUNC_V( _i ) BIT64( 60 + ( _i ) )
+
+/* CROSS bits */
+#define IRQAMP_CROSS_U GENMASK64(35, 24)
 
 /* IRQ(A)MP address offsets */
 #define IRQAMP_FOOBAR 0x0U

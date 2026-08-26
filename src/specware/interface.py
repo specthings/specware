@@ -351,7 +351,7 @@ def _get_register_bits_accessors(base: str, start: int, width: int,
         val = f"( ({'uint64_t' if end > 32 else 'uint32_t'}) ( _val ) )"
         lines.extend(_get_register_bits_signed_get(base, width, idx, arg))
     else:
-        val = "( (uint64_t) ( _val ) )" if start >= 32 else "( _val )"
+        val = "( (uint64_t) ( _val ) )" if end > 32 else "( _val )"
         lines.extend([
             f"#define {base}_GET( _reg{arg} ) \\",
             f"  ( ( ( _reg ) & {base}_MASK{idx} ) >> \\",
