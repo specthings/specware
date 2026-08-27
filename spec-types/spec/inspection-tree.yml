@@ -1,0 +1,37 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: inspection-tree
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      directory:
+        description: |
+          It shall be the directory of the inspected source tree.
+        spec-type: str
+      name:
+        description: |
+          It shall be the human readable name of the inspected source tree.
+        spec-type: str
+    description: |
+      This set of attributes specifies an inspected source tree.  The file
+      scopes of an ${inspection:/spec-name} item name their files relative to
+      the directory of the link target.
+
+      A project which builds its package with a build tool links its
+      inspections to the source item of that tool instead, since any item with
+      a directory attribute serves.  This item type exists so that a tree can
+      be declared, and the inspections checked, without a package build.
+    mandatory-attributes: all
+spec-name: Inspection Source Tree
+spec-type: inspection-tree
+type: spec

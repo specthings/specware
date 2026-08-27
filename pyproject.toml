@@ -48,6 +48,7 @@ classifiers = [
 specwareexport = "specware.cliexport:cliexport"
 specwareexportheader = "specware.cliexportheader:cliexportheader"
 specwarefind = "specware.clifind:clifind"
+specwareinspect = "specware.cliinspect:cliinspect"
 specwareview = "specware.cliview:cliview"
 
 [project.entry-points."specitems_type_provider.plugins"]

@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+date: '2026-08-06'
+findings: null
+inspectors:
+- first-name: Frank
+  last-name: Kuehndel
+  organization: embedded brains GmbH & Co. KG
+links:
+- role: supersedes
+  uid: finding-old
+- role: inspected
+  uid: analysis
+  scopes:
+  - scope: finding
+    tool: coverity
+    checker: CHECKED_RETURN
+    file: signalsend.c
+    function: _Signal_Action_handler
+    hash: null
+- role: inspection-member
+  uid: group
+method: |
+  Inspection of the artefact.
+type: inspection
+verdict: not-applicable

@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: scope
+  spec-value: item
+  uid: inspection-scope
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies an inspected specification item.  The
+      inspected item is the link target.  The digest covers the canonical
+      serialization of the item without its SPDX-License-Identifier and
+      copyrights attributes.
+    mandatory-attributes: all
+spec-name: Inspection Item Scope
+spec-type: inspection-scope-item
+type: spec

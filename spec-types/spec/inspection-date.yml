@@ -1,0 +1,18 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+    - re: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+    description: |
+      It shall be a date in the YYYY-MM-DD format.
+spec-name: Inspection Date
+spec-type: inspection-date
+type: spec

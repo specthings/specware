@@ -1,0 +1,40 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: scope
+  spec-value: finding
+  uid: inspection-scope
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      checker:
+        description: |
+          It shall be the checker which reported the finding.
+        spec-type: str
+      file:
+        description: |
+          It shall be the file of the finding.
+        spec-type: str
+      function:
+        description: |
+          It shall be the function of the finding.
+        spec-type: str
+      tool:
+        description: |
+          It shall be the static analyser which reported the finding.
+        spec-type: str
+    description: |
+      This set of attributes specifies an inspected finding of a static
+      analyser.  The line of the finding is part of neither the identity nor
+      the digest, since it moves when unrelated code moves.
+    mandatory-attributes: all
+spec-name: Inspection Finding Scope
+spec-type: inspection-scope-finding
+type: spec

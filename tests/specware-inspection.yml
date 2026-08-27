@@ -1,0 +1,6 @@
+spec:
+  cache-directory: cache-inspection
+  paths:
+  - spec-inspection
+  - spec-types
+  resolve-proxies: true

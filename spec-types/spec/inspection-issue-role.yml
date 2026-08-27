@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: inspection-issue
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the inspection issue role of links.  The link target shall be
+      the issue which the inspection raised or resolved.
+
+      This is not the issue role of the build tool, which states the status of
+      an issue with respect to the package.  An inspection makes no statement
+      about the package status.
+    mandatory-attributes: all
+spec-name: Inspection Issue Link Role
+spec-type: inspection-issue-role
+type: spec

@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  none: null
+  str:
+    assert:
+    - re: ^[A-Za-z0-9+_=-]{44}$
+    - re: ^[A-Za-z0-9+_=-]{88}$
+    description: |
+      If the value is present, then it shall be the digest of the inspected
+      content encoded in base64url, otherwise the scope is not baselined.  A
+      file scope uses a SHA512 digest of the inspected bytes.  An item scope
+      uses the SHA256 digest of the item data computed by the specitems
+      data_digest() function, which is the digest behind the item digest
+      attribute.
+spec-name: Inspection Optional Hash
+spec-type: inspection-optional-hash
+type: spec

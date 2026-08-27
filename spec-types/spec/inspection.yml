@@ -1,0 +1,46 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: inspection
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      date:
+        description: |
+          It shall be the date of the inspection.
+        spec-type: inspection-date
+      findings:
+        description: |
+          If the value is present, then it shall state what the inspectors
+          found.
+        spec-type: inspection-optional-myst
+      inspectors:
+        description: |
+          It shall be the list of persons which carried out the inspection.
+        spec-type: inspection-person-list
+      method:
+        description: |
+          It shall state what the inspectors did.
+        spec-type: myst
+      verdict:
+        description: |
+          It shall be the verdict of the inspection.
+        spec-type: inspection-verdict
+    description: |
+      This set of attributes specifies one inspection of one or more
+      artefacts.  An inspection item is one inspection round and is immutable
+      once it is complete.  A repeated inspection is a new item which
+      supersedes this one.
+    mandatory-attributes: all
+spec-name: Inspection
+spec-type: inspection
+type: spec

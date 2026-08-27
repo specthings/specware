@@ -30,6 +30,7 @@ from .contentc import *  # noqa: F401, F403
 from .interface import *  # noqa: F401, F403
 from .interfacedoc import *  # noqa: F401, F403
 from .interfacemapper import *  # noqa: F401, F403
+from .inspection import *  # noqa: F401, F403
 from .rtems import *  # noqa: F401, F403
 from .transitionmap import *  # noqa: F401, F403
 from .util import *  # noqa: F401, F403

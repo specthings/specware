@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+date: '2020-01-01'
+findings: null
+inspectors:
+- first-name: Frank
+  last-name: Kuehndel
+  organization: embedded brains GmbH & Co. KG
+links:
+- role: inspected
+  uid: analysis
+  scopes:
+  - scope: finding
+    tool: coverity
+    checker: FORWARD_NULL
+    file: hash.c
+    function: _Hash_Finalize
+    hash: PqCr9nBAKzYFwqxsCw5nAyGCGxDT4-DiFAxfydp3EA0=
+- role: inspection-member
+  uid: group
+method: |
+  Inspection of the artefact.
+type: inspection
+verdict: not-applicable

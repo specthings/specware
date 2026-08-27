@@ -1,0 +1,15 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+findings-list:
+- checker: CHECKED_RETURN
+  file: signalsend.c
+  function: _Signal_Action_handler
+  line: 91
+- checker: FORWARD_NULL
+  file: hash.c
+  function: _Hash_Finalize
+  line: 67
+links: []
+type: other

@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  list:
+    description: |
+      It shall be a line range of a file.  The first element is the begin line
+      and the second element is the last line.  Both lines are included in the
+      range.  The line numbering starts with one.
+    spec-type: int
+spec-name: Inspection Line Range
+spec-type: inspection-line-range
+type: spec

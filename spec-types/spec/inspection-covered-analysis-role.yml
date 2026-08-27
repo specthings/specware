@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: covered-analysis
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the covered analysis role of links.  The link target shall be
+      the analysis item whose findings shall all be inspected by a member of
+      this ${inspection-group:/spec-name} item.
+    mandatory-attributes: all
+spec-name: Inspection Covered Analysis Link Role
+spec-type: inspection-covered-analysis-role
+type: spec

@@ -1,0 +1,11 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: covered-analysis
+  uid: analysis
+name: Coverity
+text: |
+  The findings of the analysis.
+type: inspection-group

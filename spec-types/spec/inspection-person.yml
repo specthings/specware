@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      first-name:
+        description: |
+          It shall be the first name of the person.
+        spec-type: str
+      last-name:
+        description: |
+          It shall be the last name of the person.
+        spec-type: str
+      organization:
+        description: |
+          It shall be the organization of the person.
+        spec-type: str
+    description: |
+      This set of attributes specifies a person which carried out an
+      inspection.
+    mandatory-attributes: all
+spec-name: Inspection Person
+spec-type: inspection-person
+type: spec

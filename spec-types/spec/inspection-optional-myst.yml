@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  none: null
+  str:
+    format:
+      type: myst
+    description: |
+      If the value is present, then it shall be a text in MyST format.
+spec-name: Optional Text in MyST Format
+spec-type: inspection-optional-myst
+type: spec
