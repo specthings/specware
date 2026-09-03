@@ -44,10 +44,21 @@ class Transition(NamedTuple):
     enabled_by: Any
     skip: int
 
+    # If non-zero, then a lower transition map index runs this variant
+    duplicate: int
+
     # If non-zero, then the pre-condition is N/A
     pre_cond_na: tuple[int, ...]
 
     post_cond: tuple[Any, ...]
+
+
+_DUPLICATE_KEY = "duplicate"
+
+
+def _can_skip_at_runtime(condition: dict[str, Any]) -> bool:
+    return any(state["test-code"] and "${.:skip}" in state["test-code"]
+               for state in condition["states"])
 
 
 def _variant_to_key(variant: Transition) -> str:
@@ -60,6 +71,7 @@ class _TransitionEntry:
 
     def __init__(self) -> None:
         self.key = ""
+        self.duplicate = False
         self.variants: list[Transition] = []
 
     def __bool__(self):
@@ -81,6 +93,15 @@ class _TransitionEntry:
         self.key = self.key.replace(_variant_to_key(self.variants[index]),
                                     _variant_to_key(variant))
         self.variants[index] = variant
+
+    def mark_duplicate(self) -> None:
+        """ Mark the entry and every variant of it as a duplicate. """
+        self.duplicate = True
+        self.variants = [
+            Transition(variant.desc_idx, variant.enabled_by, variant.skip, 1,
+                       variant.pre_cond_na, variant.post_cond)
+            for variant in self.variants
+        ]
 
 
 _TransitionMap = list[_TransitionEntry]
@@ -295,6 +316,7 @@ class TransitionMap:
             (key, skip_idx + 1)
             for skip_idx, key in enumerate(item["skip-reasons"].keys()))
         self._entries: dict[str, list[Any]] = {}
+        self._duplicate = False
         self._map = self._build_map()
         self._post_process()
 
@@ -350,6 +372,53 @@ class TransitionMap:
             pre_conds = _compact_more(_compact(pre_conds))
             yield post_cond, pre_conds
 
+    def _mark_duplicates(self) -> None:
+        # The runtime skip of a pre-condition state omits the remaining
+        # combinations of this state in the loop of the test case.  Where the
+        # pre-condition is N/A, such a combination can be the lower index of a
+        # duplicate.  The duplicate then runs nowhere.
+        for condition, not_applicable in zip(self._item["pre-conditions"],
+                                             self.pre_co_summary[1:]):
+            if not_applicable and _can_skip_at_runtime(condition):
+                return
+        groups: dict[Any, int] = {}
+        for map_idx, transitions in enumerate(self._map):
+            key = (
+                transitions.key,
+                tuple(
+                    self.map_idx_to_pre_co_states(map_idx, variant.pre_cond_na)
+                    for variant in transitions.variants))
+            if groups.setdefault(key, map_idx) == map_idx:
+                continue
+            if all(variant.skip != 0 for variant in transitions.variants):
+                # Every configuration skips this combination, so it runs
+                # nowhere.
+                continue
+            transitions.mark_duplicate()
+            self._duplicate = True
+
+    def _get_duplicate_entry(self) -> _TransitionEntry:
+        # The loop of the test case leaves the iteration before it reads the
+        # states of the entry.  The entry states the N/A post-condition
+        # states like the entry of a skipped combination.
+        duplicate = Transition(
+            0, True, 0, 1, (0, ) * self.pre_co_count,
+            tuple(
+                len(st_idx_to_st_name) - 1
+                for st_idx_to_st_name in self._post_co_idx_st_idx_to_st_name))
+        states = (duplicate.pre_cond_na, duplicate.post_cond)
+        for transitions in self._map:
+            if transitions.duplicate or len(transitions) != 1:
+                continue
+            variant = transitions[0]
+            if variant.skip != 0 and (variant.pre_cond_na,
+                                      variant.post_cond) == states:
+                return transitions
+        transitions = _TransitionEntry()
+        transitions.add(duplicate)
+        transitions.key = _DUPLICATE_KEY
+        return transitions
+
     def _post_process(self) -> None:
         for map_idx, transitions in enumerate(self):
             if not transitions or not isinstance(
@@ -359,6 +428,14 @@ class TransitionMap:
                     f"transition map of {self._item.spec} contains no default "
                     "entry for pre-condition set "
                     f"{{{self._map_index_to_pre_conditions(map_idx)}}}")
+        self._mark_duplicates()
+        duplicate: _TransitionEntry | None = None
+        for map_idx, transitions in enumerate(self):
+            if transitions.duplicate:
+                if duplicate is None:
+                    duplicate = self._get_duplicate_entry()
+                transitions.key = duplicate.key
+                transitions = duplicate
             entry = self._entries.setdefault(transitions.key,
                                              [0, 0, transitions, []])
             entry[0] += 1
@@ -399,6 +476,13 @@ class TransitionMap:
         Return true, if there are N/A pre-conditions, otherwise false.
         """
         return sum(self.pre_co_summary[1:]) > 0
+
+    def has_duplicate(self) -> bool:
+        """
+        Return true, if a transition map index is a duplicate, otherwise
+        false.
+        """
+        return self._duplicate
 
     def pre_co_name_to_co_idx(self, co_name: str) -> int:
         """
@@ -470,8 +554,9 @@ class TransitionMap:
             if idx is not None:
                 return Transition(
                     variant.desc_idx, variant.enabled_by, variant.skip,
-                    variant.pre_cond_na, variant.post_cond[0:co_idx] +
-                    (idx, ) + variant.post_cond[co_idx + 1:])
+                    variant.duplicate, variant.pre_cond_na,
+                    variant.post_cond[0:co_idx] + (idx, ) +
+                    variant.post_cond[co_idx + 1:])
         raise ValueError(
             "cannot determine state for post-condition "
             f"'{self._post_co_idx_to_co_name[co_idx]}' of transition map "
@@ -515,7 +600,7 @@ class TransitionMap:
         for co_idx, the_pre_cond_na in enumerate(pre_cond_na):
             resolved_pre_cond_na[co_idx] = self._make_pre_cond_na(
                 map_idx, the_pre_cond_na, skip, tuple(resolved_pre_cond_na))
-        variant = Transition(desc_idx, enabled_by, skip[0],
+        variant = Transition(desc_idx, enabled_by, skip[0], 0,
                              tuple(resolved_pre_cond_na), skip_post_cond[1:])
         for co_idx in range(len(variant.post_cond)):
             variant = self._map_post_cond(map_idx, co_idx, variant)
@@ -663,7 +748,8 @@ class TransitionMap:
     def _get_entry(self, ident: str, variant: Transition) -> str:
         text = "{ " + ", ".join(
             itertools.chain(
-                map(str, (int(variant.skip != 0), ) + variant.pre_cond_na),
+                map(str, (int(variant.skip != 0 or variant.duplicate != 0), ) +
+                    variant.pre_cond_na),
                 ((f"{ident}_Post_{self._post_co_idx_to_co_name[co_idx]}"
                   f"_{self._post_co_idx_st_idx_to_st_name[co_idx][st_idx]}")
                  for co_idx, st_idx in enumerate(variant.post_cond))))

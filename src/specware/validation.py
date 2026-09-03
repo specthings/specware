@@ -909,7 +909,7 @@ class _ActionRequirementTestItem(_TestItem):
                        transition_map: TransitionMap) -> None:
         entry = "ctx->Map.entry"
         content.call_function(f"{entry} =", f"{self.ident}_PopEntry", ["ctx"])
-        if transition_map.pre_co_summary[0]:
+        if transition_map.pre_co_summary[0] or transition_map.has_duplicate():
             with content.condition(f"{entry}.Skip"):
                 content.append("continue;")
             content.add_blank_line()

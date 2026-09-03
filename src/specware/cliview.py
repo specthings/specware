@@ -267,6 +267,8 @@ def _design(item_cache: ItemCache) -> None:
 def _skip(transition_map: TransitionMap, variant: Transition) -> str:
     if variant.skip:
         return transition_map.skip_idx_to_name(variant.skip)
+    if variant.duplicate:
+        return "Duplicate"
     return " "
 
 
@@ -387,15 +389,27 @@ def _action_list(item: Item) -> None:
 
 
 def _action_stats(item_cache: ItemCache) -> None:
-    stats: list[tuple[int, int, str]] = []
+    stats: list[tuple[int, int, int, int, int, str]] = []
     for item in sorted(item_cache.values()):
         if item.type == "requirement/functional/action":
             transition_map = TransitionMap(item, "N/A")
+            skip = 0
+            dup = 0
+            for _, variant in transition_map.get_variants(
+                    item.cache.enabled_set):
+                if variant.skip:
+                    skip += 1
+                elif variant.duplicate:
+                    dup += 1
+            combos = len(transition_map)
             stats.append(
                 (transition_map.pre_co_count + transition_map.post_co_count,
-                 len(transition_map), item.uid))
-    for conditions, variants, uid in sorted(stats):
-        print(f"{conditions} {variants} {uid}")
+                 combos, combos - skip - dup, dup, skip, item.uid))
+    print(f"{'conds':>5} {'combos':>6} {'runs':>6} {'dup':>6} {'skip':>6} "
+          "item")
+    for conditions, combos, runs, dup, skip, uid in sorted(stats):
+        print(f"{conditions:>5} {combos:>6} {runs:>6} {dup:>6} {skip:>6} "
+              f"{uid}")
 
 
 def _list_api(item_cache: ItemCache) -> None:

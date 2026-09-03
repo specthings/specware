@@ -29,9 +29,10 @@ import pytest
 
 from specitems import EmptyItemCache, Item, ItemCache, item_is_enabled
 
-from specware import (augment_with_test_case_links, generate_validation,
-                      get_affected_targets, SpecWareTypeProvider,
-                      TransitionMap)
+from specware import (augment_with_test_case_links, CContent,
+                      generate_validation, get_affected_targets,
+                      SpecWareTypeProvider, TransitionMap)
+from specware.contentc import OptionExpressions
 
 from .conftest import code_context, OPTION_EXPRESSIONS
 from .util import create_item_cache, get_and_clear_log
@@ -108,8 +109,10 @@ def test_validation(tmpdir):
     transition_map = TransitionMap(item_cache["/action2"])
     assert transition_map.skip_idx_to_name(2) == "SkipReason"
     assert len(list(transition_map.get_post_conditions(["BOOM"]))) == 6
+    assert not transition_map.has_duplicate()
     transition_map = TransitionMap(item_cache["/action3"])
     assert len(list(transition_map.get_post_conditions(["RTEMS_SMP"]))) == 9
+    assert not transition_map.has_duplicate()
 
     generate_validation(validation_config, item_cache, code_context())
     generate_validation(validation_config, item_cache, code_context(),
@@ -537,6 +540,12 @@ typedef struct {
 
   struct {
     /**
+     * @brief This member defines the pre-condition indices for the next
+     *   action.
+     */
+    size_t pci[ 3 ];
+
+    /**
      * @brief This member defines the pre-condition states for the next action.
      */
     size_t pcs[ 3 ];
@@ -902,9 +911,10 @@ static void Directive_Action( Directive_Context *ctx )
 
 static const Directive_Entry
 Directive_Entries[] = {
-  { 0, 0, 0, 0, Directive_Post_Status_InvAddr, Directive_Post_Id_NullPtr },
+  { 1, 0, 0, 0, Directive_Post_Status_NA, Directive_Post_Id_NA },
   { 0, 0, 0, 0, Directive_Post_Status_InvName, Directive_Post_Id_Nop },
   { 0, 0, 0, 0, Directive_Post_Status_Ok, Directive_Post_Id_Self },
+  { 0, 0, 1, 0, Directive_Post_Status_InvAddr, Directive_Post_Id_NullPtr },
   { 0, 0, 0, 0, Directive_Post_Status_Ok, Directive_Post_Id_LocalTask },
 #if defined(RTEMS_MULTIPROCESSING)
   { 0, 0, 0, 0, Directive_Post_Status_Ok, Directive_Post_Id_RemoteTask }
@@ -915,8 +925,8 @@ Directive_Entries[] = {
 
 static const uint8_t
 Directive_Map[] = {
-  0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3,
-  0, 4, 0, 1, 0, 3, 0, 4, 0, 3
+  3, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 3, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 3, 4,
+  0, 5, 0, 1, 0, 4, 0, 5, 0, 4
 };
 
 /* clang-format on */
@@ -953,6 +963,19 @@ static inline Directive_Entry Directive_PopEntry( Directive_Context *ctx )
   ];
 }
 
+static void Directive_SetPreConditionStates( Directive_Context *ctx )
+{
+  ctx->Map.pcs[ 0 ] = ctx->Map.pci[ 0 ];
+
+  if ( ctx->Map.entry.Pre_Node_NA ) {
+    ctx->Map.pcs[ 1 ] = Directive_Pre_Node_NA;
+  } else {
+    ctx->Map.pcs[ 1 ] = ctx->Map.pci[ 1 ];
+  }
+
+  ctx->Map.pcs[ 2 ] = ctx->Map.pci[ 2 ];
+}
+
 static void Directive_TestVariant( Directive_Context *ctx )
 {
   Directive_Pre_Name_Prepare( ctx, ctx->Map.pcs[ 0 ] );
@@ -975,21 +998,27 @@ T_TEST_CASE_FIXTURE( Directive, &Directive_Fixture )
   ctx->Map.index = 0;
 
   for (
-    ctx->Map.pcs[ 0 ] = Directive_Pre_Name_Invalid;
-    ctx->Map.pcs[ 0 ] < Directive_Pre_Name_NA;
-    ++ctx->Map.pcs[ 0 ]
+    ctx->Map.pci[ 0 ] = Directive_Pre_Name_Invalid;
+    ctx->Map.pci[ 0 ] < Directive_Pre_Name_NA;
+    ++ctx->Map.pci[ 0 ]
   ) {
     for (
-      ctx->Map.pcs[ 1 ] = Directive_Pre_Node_Local;
-      ctx->Map.pcs[ 1 ] < Directive_Pre_Node_NA;
-      ++ctx->Map.pcs[ 1 ]
+      ctx->Map.pci[ 1 ] = Directive_Pre_Node_Local;
+      ctx->Map.pci[ 1 ] < Directive_Pre_Node_NA;
+      ++ctx->Map.pci[ 1 ]
     ) {
       for (
-        ctx->Map.pcs[ 2 ] = Directive_Pre_Id_NullPtr;
-        ctx->Map.pcs[ 2 ] < Directive_Pre_Id_NA;
-        ++ctx->Map.pcs[ 2 ]
+        ctx->Map.pci[ 2 ] = Directive_Pre_Id_NullPtr;
+        ctx->Map.pci[ 2 ] < Directive_Pre_Id_NA;
+        ++ctx->Map.pci[ 2 ]
       ) {
         ctx->Map.entry = Directive_PopEntry( ctx );
+
+        if ( ctx->Map.entry.Skip ) {
+          continue;
+        }
+
+        Directive_SetPreConditionStates( ctx );
         Directive_TestVariant( ctx );
       }
     }
@@ -2841,6 +2870,418 @@ def test_transition_map_pre_cond_not_applicable_propagates_transitively():
     assert seen_a_empty
     assert seen_a_non_empty_b_found
     assert seen_a_non_empty_b_not_found
+
+
+_B_APPLICABLE = {
+    "applicable": {
+        "pre-conditions": {
+            "A": "NonEmpty",
+        },
+    },
+}
+
+_SKIP_REASONS = {"SkipMe": "The reason to skip."}
+
+
+def _duplicate_item(uid, pre_conditions, transition_map, skip_reasons=None):
+    item_cache = EmptyItemCache(SpecWareTypeProvider({}))
+    return _add_item(
+        item_cache, uid, {
+            "post-conditions":
+            [{
+                "name": "R",
+                "states": [_condition_state("R0"),
+                           _condition_state("R1")],
+                "test-epilogue": None,
+                "test-prologue": None,
+            }],
+            "pre-conditions":
+            pre_conditions,
+            "skip-reasons":
+            skip_reasons if skip_reasons else {},
+            "transition-map":
+            transition_map,
+        }, "requirement/functional/action")
+
+
+def _map_text(transition_map):
+    content = CContent(code_context())
+    transition_map.add_map(content, "Item",
+                           OptionExpressions(OPTION_EXPRESSIONS))
+    text = str(content)
+    prefix = "/* clang-format off */\n\n"
+    suffix = "\n/* clang-format on */\n"
+    assert text.startswith(prefix)
+    assert text.endswith(suffix)
+    return text[len(prefix):-len(suffix)]
+
+
+def _entry_by_map_idx(transition_map):
+    return {
+        map_idx: entry
+        for entry in transition_map.entries()
+        for map_idx in entry[3]
+    }
+
+
+def test_transition_map_duplicate_runs_once():
+    # B is not applicable where A is "Empty" or "Other", so the two states of
+    # B arrange the same input.  The lower transition map index runs.  The two
+    # duplicates use one transition map entry.  The variant which "BOOM"
+    # enables covers the states of B for A = "Empty", so the duplicate holds
+    # for every enabled set.
+    item = _duplicate_item("/duplicate", [
+        _condition("A", ["Empty", "Other", "NonEmpty"]),
+        _condition("B", ["Found", "NotFound"]),
+    ], [{
+        "enabled-by": True,
+        "post-conditions": {
+            "R": "R0",
+        },
+        "pre-conditions": {
+            "A": "all",
+            "B": _B_APPLICABLE,
+        },
+    }, {
+        "enabled-by": "BOOM",
+        "post-conditions": {
+            "R": "R1",
+        },
+        "pre-conditions": {
+            "A": ["Empty"],
+            "B": _B_APPLICABLE,
+        },
+    }])
+
+    transition_map = TransitionMap(item)
+    assert transition_map.has_duplicate()
+    b_idx = transition_map.pre_co_name_to_co_idx("B")
+    for enabled_set in ([], ["BOOM"]):
+        variants = dict(transition_map.get_variants(enabled_set))
+        assert len(variants) == 6
+        for map_idx, variant in variants.items():
+            assert variant.duplicate == int(map_idx in (1, 3))
+            assert variant.pre_cond_na[b_idx] == int(map_idx < 4)
+        # A duplicate keeps the outcome of the index which runs.
+        assert variants[1].post_cond == variants[0].post_cond
+        assert variants[3].post_cond == variants[2].post_cond
+    assert variants[0].post_cond == (1, )
+    assert variants[2].post_cond == (0, )
+
+    entry_by_map_idx = _entry_by_map_idx(transition_map)
+    # The two duplicates share one entry.  It states the N/A post-condition
+    # state, because the loop of the test case leaves the iteration before it
+    # reads the entry.
+    assert entry_by_map_idx[1] is entry_by_map_idx[3]
+    assert entry_by_map_idx[1][2][0].duplicate == 1
+    assert entry_by_map_idx[1][2][0].post_cond == (2, )
+    assert entry_by_map_idx[0][2][0].duplicate == 0
+    assert entry_by_map_idx[0] is not entry_by_map_idx[2]
+    assert _map_text(transition_map) == """static const Item_Entry
+Item_Entries[] = {
+  { 1, 0, 0, Item_Post_R_NA },
+  { 0, 0, 0, Item_Post_R_R0 },
+#if defined(BOOM)
+  { 0, 0, 1, Item_Post_R_R1 },
+#else
+  { 0, 0, 1, Item_Post_R_R0 },
+#endif
+  { 0, 0, 1, Item_Post_R_R0 }
+};
+
+static const uint8_t
+Item_Map[] = {
+  2, 0, 3, 0, 1, 1
+};
+"""
+
+
+def test_transition_map_duplicate_of_the_first_pre_condition():
+    # A is applicable for its own state "A0" alone.  The states "A1" and "A2"
+    # arrange the same input, so the map indices of "A1" run and the map
+    # indices of "A2" are duplicates.  The index which runs does not hold the
+    # first state of A.
+    item = _duplicate_item("/duplicate-first", [
+        _condition("A", ["A0", "A1", "A2"]),
+        _condition("B", ["B0", "B1"]),
+    ], [{
+        "enabled-by": True,
+        "post-conditions": {
+            "R": "R0",
+        },
+        "pre-conditions": {
+            "A": {
+                "applicable": {
+                    "pre-conditions": {
+                        "A": "A0",
+                    },
+                },
+            },
+            "B": "all",
+        },
+    }])
+
+    transition_map = TransitionMap(item)
+    a_idx = transition_map.pre_co_name_to_co_idx("A")
+    variants = dict(transition_map.get_variants([]))
+    for map_idx, variant in variants.items():
+        assert variant.duplicate == int(map_idx in (4, 5))
+        assert variant.pre_cond_na[a_idx] == int(map_idx >= 2)
+    entry_by_map_idx = _entry_by_map_idx(transition_map)
+    assert entry_by_map_idx[4] is entry_by_map_idx[5]
+    assert entry_by_map_idx[2] is entry_by_map_idx[3]
+    assert entry_by_map_idx[2] is not entry_by_map_idx[4]
+    assert _map_text(transition_map) == """static const Item_Entry
+Item_Entries[] = {
+  { 0, 0, 0, Item_Post_R_R0 },
+  { 0, 1, 0, Item_Post_R_R0 },
+  { 1, 0, 0, Item_Post_R_NA }
+};
+
+static const uint8_t
+Item_Map[] = {
+  0, 0, 1, 1, 2, 2
+};
+"""
+
+
+def test_transition_map_duplicate_shares_a_skip_entry():
+    # The entry of the skipped combinations states the Skip bit, no N/A
+    # pre-condition and the N/A post-condition states.  A duplicate needs
+    # exactly this entry, so the item keeps its entry count.
+    item = _duplicate_item("/duplicate-skip", [
+        _condition("A", ["Empty", "Other", "NonEmpty"]),
+        _condition("B", ["Found", "NotFound"]),
+    ], [{
+        "enabled-by": True,
+        "post-conditions": {
+            "R": "R0",
+        },
+        "pre-conditions": {
+            "A": ["Empty", "Other"],
+            "B": _B_APPLICABLE,
+        },
+    }, {
+        "enabled-by": True,
+        "post-conditions": "SkipMe",
+        "pre-conditions": {
+            "A": ["NonEmpty"],
+            "B": "all",
+        },
+    }], _SKIP_REASONS)
+
+    transition_map = TransitionMap(item)
+    variants = dict(transition_map.get_variants([]))
+    for map_idx, variant in variants.items():
+        assert variant.duplicate == int(map_idx in (1, 3))
+        assert variant.skip == int(map_idx in (4, 5))
+    entry_by_map_idx = _entry_by_map_idx(transition_map)
+    assert entry_by_map_idx[1] is entry_by_map_idx[3]
+    assert entry_by_map_idx[1] is entry_by_map_idx[4]
+    assert entry_by_map_idx[1][2][0].skip == 1
+    assert len(list(transition_map.entries())) == 2
+    assert _map_text(transition_map) == """static const Item_Entry
+Item_Entries[] = {
+  { 1, 0, 0, Item_Post_R_NA },
+  { 0, 0, 1, Item_Post_R_R0 }
+};
+
+static const uint8_t
+Item_Map[] = {
+  1, 0, 1, 0, 0, 0
+};
+"""
+
+
+def test_transition_map_duplicate_keeps_a_conditional_skip_entry():
+    # "BOOM" enables a variant of the skipped combinations, so their entry
+    # states the Skip bit for one configuration alone.  A duplicate needs an
+    # entry which states the Skip bit for every configuration.
+    item = _duplicate_item("/duplicate-skip-variant", [
+        _condition("A", ["Empty", "Other", "NonEmpty"]),
+        _condition("B", ["Found", "NotFound"]),
+    ], [{
+        "enabled-by": True,
+        "post-conditions": {
+            "R": "R0",
+        },
+        "pre-conditions": {
+            "A": ["Empty", "Other"],
+            "B": _B_APPLICABLE,
+        },
+    }, {
+        "enabled-by": True,
+        "post-conditions": "SkipMe",
+        "pre-conditions": {
+            "A": ["NonEmpty"],
+            "B": "all",
+        },
+    }, {
+        "enabled-by": "BOOM",
+        "post-conditions": {
+            "R": "R1",
+        },
+        "pre-conditions": {
+            "A": ["NonEmpty"],
+            "B": "all",
+        },
+    }], _SKIP_REASONS)
+
+    transition_map = TransitionMap(item)
+    entry_by_map_idx = _entry_by_map_idx(transition_map)
+    assert entry_by_map_idx[1] is entry_by_map_idx[3]
+    assert entry_by_map_idx[1] is not entry_by_map_idx[4]
+    assert len(list(transition_map.entries())) == 3
+    assert _map_text(transition_map) == """static const Item_Entry
+Item_Entries[] = {
+  { 0, 0, 1, Item_Post_R_R0 },
+  { 1, 0, 0, Item_Post_R_NA },
+#if defined(BOOM)
+  { 0, 0, 0, Item_Post_R_R1 }
+#else
+  { 1, 0, 0, Item_Post_R_NA }
+#endif
+};
+
+static const uint8_t
+Item_Map[] = {
+  0, 1, 0, 1, 2, 2
+};
+"""
+
+
+def test_transition_map_duplicate_of_one_pre_condition():
+    # The one pre-condition of the item is never applicable, so every state
+    # of it arranges the same input.  The item runs once.
+    item = _duplicate_item("/duplicate-one", [
+        _condition("A", ["A0", "A1", "A2"]),
+    ], [{
+        "enabled-by": True,
+        "post-conditions": {
+            "R": "R0",
+        },
+        "pre-conditions": {
+            "A": {
+                "not-applicable": True,
+            },
+        },
+    }])
+
+    transition_map = TransitionMap(item)
+    variants = dict(transition_map.get_variants([]))
+    assert [variant.duplicate
+            for _, variant in sorted(variants.items())] == [0, 1, 1]
+    assert _map_text(transition_map) == """static const Item_Entry
+Item_Entries[] = {
+  { 1, 0, Item_Post_R_NA },
+  { 0, 1, Item_Post_R_R0 }
+};
+
+static const uint8_t
+Item_Map[] = {
+  1, 0, 0
+};
+"""
+
+
+def test_transition_map_duplicate_which_every_configuration_skips():
+    # A skip reason documents the two combinations which A = "Empty" holds.
+    # They run nowhere, so they keep the entry of the skipped combinations and
+    # the item holds no duplicate.
+    item = _duplicate_item("/duplicate-skipped", [
+        _condition("A", ["Empty", "NonEmpty"]),
+        _condition("B", ["Found", "NotFound"]),
+    ], [{
+        "enabled-by": True,
+        "post-conditions": "SkipMe",
+        "pre-conditions": {
+            "A": ["Empty"],
+            "B": _B_APPLICABLE,
+        },
+    }, {
+        "enabled-by": True,
+        "post-conditions": {
+            "R": "R0",
+        },
+        "pre-conditions": {
+            "A": ["NonEmpty"],
+            "B": "all",
+        },
+    }], _SKIP_REASONS)
+
+    transition_map = TransitionMap(item)
+    assert not transition_map.has_duplicate()
+    variants = dict(transition_map.get_variants([]))
+    for map_idx, variant in variants.items():
+        assert variant.duplicate == 0
+        assert variant.skip == int(map_idx < 2)
+    entry_by_map_idx = _entry_by_map_idx(transition_map)
+    assert entry_by_map_idx[0] is entry_by_map_idx[1]
+    assert _map_text(transition_map) == """static const Item_Entry
+Item_Entries[] = {
+  { 1, 0, 1, Item_Post_R_NA },
+  { 0, 0, 0, Item_Post_R_R0 }
+};
+
+static const uint8_t
+Item_Map[] = {
+  0, 0, 1, 1
+};
+"""
+
+
+def _runtime_skip_item(uid, b_applicable):
+    # The state "Empty" of A skips at runtime.
+    pre_conditions = [
+        _condition("A", ["Empty", "NonEmpty"]),
+        _condition("B", ["Found", "NotFound"]),
+    ]
+    pre_conditions[0]["states"][0]["test-code"] = "${.:skip}"
+    return _duplicate_item(uid, pre_conditions, [{
+        "enabled-by": True,
+        "post-conditions": {
+            "R": "R0",
+        },
+        "pre-conditions": {
+            "A": {
+                "applicable": {
+                    "pre-conditions": {
+                        "B": "Found",
+                    },
+                },
+            },
+            "B": b_applicable,
+        },
+    }])
+
+
+def test_transition_map_duplicate_with_runtime_skip_of_a_na_condition():
+    # A is not applicable where B = "NotFound", so map index 3 repeats the run
+    # of map index 1.  The runtime skip of A = "Empty" at map index 0 leaves
+    # map index 1 in the loop of the test case.  Map index 3 runs.
+    item = _runtime_skip_item("/duplicate-runtime-skip-na", "all")
+    transition_map = TransitionMap(item)
+    assert not transition_map.has_duplicate()
+    variants = dict(transition_map.get_variants([]))
+    assert variants[1].pre_cond_na == variants[3].pre_cond_na == (1, 0)
+    for variant in variants.values():
+        assert variant.duplicate == 0
+
+
+def test_transition_map_duplicate_with_runtime_skip_of_another_condition():
+    # The state "Empty" of A skips at runtime.  A is always applicable, so a
+    # combination with this state skips itself.  B is not applicable where A
+    # = "Empty" or A = "NonEmpty", so map index 1 repeats the run of map index
+    # 0 and map index 3 repeats the run of map index 2.
+    item = _runtime_skip_item("/duplicate-runtime-skip", {
+        "not-applicable": True,
+    })
+    item["transition-map"][0]["pre-conditions"]["A"] = "all"
+    transition_map = TransitionMap(item)
+    assert transition_map.has_duplicate()
+    variants = dict(transition_map.get_variants([]))
+    assert [variant.duplicate
+            for _, variant in sorted(variants.items())] == [0, 1, 0, 1]
 
 
 def test_validation_invalid_actions(caplog, tmpdir):

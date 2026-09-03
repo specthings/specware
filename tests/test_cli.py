@@ -489,6 +489,24 @@ def test_cliview_register_block_host(tmpdir, capsys):
     assert capsys.readouterr().out == legend + REGISTERS_DERIVED
 
 
+ACTION_STATS = """conds combos   runs    dup   skip item
+    5     10     10      0      0 /req/clock-gettime
+   11    192     92     84     16 /req/clock-nanosleep
+"""
+
+
+def test_cliview_action_stats(tmpdir, capsys):
+    config_file = _create_specview_yml(tmpdir)
+    cliview(["command", "--config-file", config_file, "--filter=action-stats"])
+    assert capsys.readouterr().out == ACTION_STATS
+    cliview([
+        "command", "--config-file", config_file,
+        "--filter=action-table-show-skip", "/req/clock-nanosleep"
+    ])
+    # The table names every combination which a lower map index runs.
+    assert capsys.readouterr().out.count("Duplicate") == 84
+
+
 def test_cliview(tmpdir):
     config_file = _create_specview_yml(tmpdir)
     cliview(["command", "--config-file", config_file])
