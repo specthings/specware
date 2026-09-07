@@ -29,7 +29,7 @@ import os
 from typing import Any, Callable, Optional
 
 from specitems import (EnabledSet, Item, ItemCache, ItemGetValueContext,
-                       ItemMapper, make_label, TextContent)
+                       ItemMapper, Link, make_label, TextContent)
 
 from .contentc import (CContent, get_value_compound,
                        get_value_forward_declaration,
@@ -145,8 +145,8 @@ def _add_params(content: TextContent, mapper: ItemMapper, item: Item,
                     mapper.substitute(f"This parameter {description}", item))
 
 
-def _add_return(content: TextContent, mapper: ItemMapper, item: Item,
-                ret: dict) -> None:
+def _add_return_values(content: TextContent, mapper: ItemMapper, item: Item,
+                       ret: dict) -> None:
     if ret:
         content.add_rubric("RETURN VALUES:")
         for retval in ret["return-values"]:
@@ -157,7 +157,10 @@ def _add_return(content: TextContent, mapper: ItemMapper, item: Item,
             content.add_definition_item(
                 value, mapper.substitute(retval["description"], item))
         content.wrap(mapper.substitute(ret["return"], item))
-    errnos = list(item.links_to_parents("errno"))
+
+
+def _add_errors(content: TextContent, mapper: ItemMapper, item: Item,
+                errnos: list[Link]) -> None:
     if errnos:
         content.add_rubric("ERRORS:")
         for link in errnos:
@@ -166,19 +169,118 @@ def _add_return(content: TextContent, mapper: ItemMapper, item: Item,
                 mapper.substitute(link["description"], item))
 
 
+class DirectiveLayout:
+    """ Adds the directive sections which have more than one layout. """
+
+    def add_brief(self, content: TextContent, mapper: ItemMapper,
+                  item: Item) -> None:
+        """ Add the brief description of the directive. """
+        content.wrap(mapper.substitute(item["brief"], item))
+
+    def add_params(self, content: TextContent, mapper: ItemMapper, item: Item,
+                   params: dict) -> None:
+        """ Add the parameters of the directive. """
+        _add_params(content, mapper, item, params)
+
+    def add_return_values(self, content: TextContent, mapper: ItemMapper,
+                          item: Item, ret: dict) -> None:
+        """ Add the return values of the directive. """
+        _add_return_values(content, mapper, item, ret)
+
+    def add_errors(self, content: TextContent, mapper: ItemMapper, item: Item,
+                   errnos: list[Link]) -> None:
+        """ Add the errors of the directive. """
+        _add_errors(content, mapper, item, errnos)
+
+
+def _normalize_cell(text: str) -> str:
+    """ Collapse the whitespace of a cell written directly to a grid table. """
+    return " ".join(text.split())
+
+
+class CompactDirectiveLayout(DirectiveLayout):
+    """ Adds the directive sections in the layout of a compact document.
+
+    The parameters, the return values, and the errors are grid tables.  The
+    caller adds the brief description at the top of the section of the item.
+    """
+
+    def add_brief(self, content: TextContent, mapper: ItemMapper,
+                  item: Item) -> None:
+        """ Add nothing.  The caller adds the brief description. """
+
+    def add_params(self, content: TextContent, mapper: ItemMapper, item: Item,
+                   params: dict) -> None:
+        """ Add the parameters of the directive as a grid table. """
+        rows = [("Parameter", "Description")]
+        for param in params:
+            description = param["description"]
+            if description:
+                rows.append(
+                    (content.code(sanitize_name(param["name"])),
+                     _normalize_cell(
+                         mapper.substitute(f"This parameter {description}",
+                                           item))))
+        if len(rows) > 1:
+            content.add_rubric("PARAMETERS:")
+            content.add_grid_table(rows, [20, 80])
+
+    def add_return_values(self, content: TextContent, mapper: ItemMapper,
+                          item: Item, ret: dict) -> None:
+        """ Add the return values of the directive as a grid table. """
+        if not ret:
+            return
+        content.add_rubric("RETURN VALUES:")
+        rows = [("Value", "Description")]
+        for retval in ret["return-values"]:
+            if isinstance(retval["value"], str):
+                value = mapper.substitute(retval["value"], item)
+            else:
+                value = content.code(str(retval["value"]))
+            rows.append(
+                (value,
+                 _normalize_cell(mapper.substitute(retval["description"],
+                                                   item))))
+        if len(rows) > 1:
+            content.add_grid_table(rows, [20, 80])
+        content.wrap(mapper.substitute(ret["return"], item))
+
+    def add_errors(self, content: TextContent, mapper: ItemMapper, item: Item,
+                   errnos: list[Link]) -> None:
+        """ Add the errors of the directive as a grid table. """
+        if not errnos:
+            return
+        content.add_rubric("ERRORS:")
+        rows = [("Error", "Description")]
+        for link in errnos:
+            rows.append(
+                (mapper.substitute(f"${{{link.item.uid}:/name}}", item),
+                 _normalize_cell(mapper.substitute(link["description"],
+                                                   item))))
+        content.add_grid_table(rows, [20, 80])
+
+
+_DEFAULT_LAYOUT = DirectiveLayout()
+
+
 def _document_directive(content: TextContent, mapper: ItemMapper,
                         code_mapper: CodeMapper, item: Item,
-                        enable_set: EnabledSet) -> None:
-    content.wrap(mapper.substitute(item["brief"], item))
+                        enable_set: EnabledSet,
+                        layout: DirectiveLayout) -> None:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    layout.add_brief(content, mapper, item)
     content.add_rubric("CALLING SEQUENCE:")
     with content.directive("code-block", "c"):
         code = CContent()
         _add_definition(code, code_mapper, item, "definition",
                         item["definition"])
         content.add(code)
-    _add_params(content, mapper, item, item["params"])
+    layout.add_params(content, mapper, item, item["params"])
     _add_text(content, mapper, item, "description")
-    _add_return(content, mapper, item, item["return"])
+    layout.add_return_values(content, mapper, item, item["return"])
+    layout.add_errors(content, mapper, item,
+                      list(item.links_to_parents("errno")))
     _add_text(content, mapper, item, "notes")
     constraints = [
         mapper.substitute(parent["text"], parent)
@@ -191,13 +293,20 @@ def _document_directive(content: TextContent, mapper: ItemMapper,
                          "The following constraints apply to this directive:")
 
 
-def document_directive(content: TextContent, mapper: ItemMapper, item: Item,
-                       enable_set: EnabledSet) -> None:
+def document_directive(content: TextContent,
+                       mapper: ItemMapper,
+                       item: Item,
+                       enable_set: EnabledSet,
+                       layout: DirectiveLayout = _DEFAULT_LAYOUT) -> None:
     """
     Document the directive specified by the item using the item mapper and
     enabled set.
+
+    The layout adds the brief description, the parameters, the return values,
+    and the errors.  It defaults to the layout of the interface documentation.
     """
-    _document_directive(content, mapper, CodeMapper(item), item, enable_set)
+    _document_directive(content, mapper, CodeMapper(item), item, enable_set,
+                        layout)
 
 
 def _generate_directives(content: TextContent, mapper: ItemMapper, target: str,
@@ -229,7 +338,7 @@ def _generate_directives(content: TextContent, mapper: ItemMapper, target: str,
             with content.section(directive,
                                  label=make_label(f"Interface {directive}")):
                 _document_directive(content, mapper, code_mapper, item,
-                                    enable_set)
+                                    enable_set, _DEFAULT_LAYOUT)
     content.add_licence_and_copyrights()
     content.write(target, beautify=True)
 
@@ -270,7 +379,8 @@ def _type_typedef(content: TextContent, mapper: ItemMapper,
                   item: Item) -> None:
     _add_params(content, mapper, item, item["params"])
     _add_text(content, mapper, item, "description")
-    _add_return(content, mapper, item, item["return"])
+    _add_return_values(content, mapper, item, item["return"])
+    _add_errors(content, mapper, item, list(item.links_to_parents("errno")))
 
 
 _TYPE_GENERATORS = {

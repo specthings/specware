@@ -27,10 +27,11 @@
 import os
 import pytest
 
-from specitems import (augment_glossary_terms, EmptyItem, ItemMapper,
+from specitems import (augment_glossary_terms, EmptyItem, Item, ItemMapper,
                        MarkdownContent, SphinxContent)
 
-from specware import (document_directive, generate_interface_documentation,
+from specware import (CompactDirectiveLayout, document_directive,
+                      generate_interface_documentation,
                       MarkdownInterfaceMapper, SphinxInterfaceMapper)
 
 from .util import create_item_cache
@@ -1293,3 +1294,122 @@ m_1
 : Brief member 1 description.
 """
         assert content == src.read()
+
+
+def _compact_sections(mapper: ItemMapper, item: Item) -> str:
+    layout = CompactDirectiveLayout()
+    content = SphinxContent()
+    layout.add_brief(content, mapper, item)
+    layout.add_params(content, mapper, item, item["params"])
+    layout.add_return_values(content, mapper, item, item["return"])
+    layout.add_errors(content, mapper, item,
+                      list(item.links_to_parents("errno")))
+    return str(content)
+
+
+def test_compact_directive_layout(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    augment_glossary_terms(item_cache["/glossary"], [])
+    mapper = SphinxInterfaceMapper(item_cache["/func"], ["/ga", "/gb"])
+
+    # /macro3 has a brief description.  The compact layout adds none.
+    directive_content = SphinxContent()
+    document_directive(directive_content, mapper, item_cache["/macro3"], [],
+                       CompactDirectiveLayout())
+    assert str(directive_content) == """.. rubric:: CALLING SEQUENCE:
+
+.. code-block:: c
+
+    MACRO( void );
+"""
+
+    content = _compact_sections(mapper, item_cache["/func"])
+    assert content == """.. rubric:: PARAMETERS:
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +------------+--------------------------------+
+    | Parameter  | Description                    |
+    +============+================================+
+    | ``Param0`` | This parameter is parameter 0. |
+    +------------+--------------------------------+
+    | ``Param1`` | This parameter is parameter 1. |
+    +------------+--------------------------------+
+    | ``Param2`` | This parameter is parameter 2. |
+    +------------+--------------------------------+
+    | ``Param3`` | This parameter is parameter 3. |
+    +------------+--------------------------------+
+
+.. rubric:: ERRORS:
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +-------------------+------------------------+
+    | Error             | Description            |
+    +===================+========================+
+    | :c:macro:`DEFINE` | The errno description. |
+    +-------------------+------------------------+
+"""
+
+    content = _compact_sections(mapper, item_cache["/func2"])
+    assert content == """.. rubric:: PARAMETERS:
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +--------------------+-------------------------------------------------------------------------------------------------------------------------------+
+    | Parameter          | Description                                                                                                                   |
+    +====================+===============================================================================================================================+
+    | ``VeryLongParam0`` | This parameter is very long parameter 0 with some super important and extra very long description which makes a lot of sense. |
+    +--------------------+-------------------------------------------------------------------------------------------------------------------------------+
+    | ``VeryLongParam1`` | This parameter is very long parameter 1.                                                                                      |
+    +--------------------+-------------------------------------------------------------------------------------------------------------------------------+
+    | ``VeryLongParam2`` | This parameter is very long parameter 2.                                                                                      |
+    +--------------------+-------------------------------------------------------------------------------------------------------------------------------+
+    | ``VeryLongParam3`` | This parameter is very long parameter 3.                                                                                      |
+    +--------------------+-------------------------------------------------------------------------------------------------------------------------------+
+
+.. rubric:: RETURN VALUES:
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +----------------------+-------------------------+
+    | Value                | Description             |
+    +======================+=========================+
+    | ``1``                | is returned, in case A. |
+    +----------------------+-------------------------+
+    | ``2``                | is returned, in case B. |
+    +----------------------+-------------------------+
+    | :ref:`InterfaceEnum` | is returned, in case C. |
+    +----------------------+-------------------------+
+
+Sometimes some value.  See :ref:`InterfaceFunction`.
+"""
+
+    content = _compact_sections(mapper, item_cache["/macro2"])
+    assert content == """.. rubric:: PARAMETERS:
+
+.. table::
+    :class: longtable
+    :widths: 20,80
+
+    +------------+--------------------------------+
+    | Parameter  | Description                    |
+    +============+================================+
+    | ``Param0`` | This parameter is parameter 0. |
+    +------------+--------------------------------+
+
+.. rubric:: RETURN VALUES:
+
+Sometimes some value.
+"""
+
+    content = _compact_sections(mapper, item_cache["/func3"])
+    assert content == ""
