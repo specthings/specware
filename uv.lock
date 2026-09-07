@@ -1141,7 +1141,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/30/8e/8eb1702a55560a2ab
 
 [[package]]
 name = "specware"
-version = "1.2.23.dev1"
+version = "1.2.23"
 source = { editable = "." }
 dependencies = [
     { name = "specitems" },
