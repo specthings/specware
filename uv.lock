@@ -1126,7 +1126,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.6.16"
+version = "1.6.17"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mdformat" },
@@ -1137,10 +1137,7 @@ dependencies = [
     { name = "mdformat-tables" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/12/e2/597739e668f73e08bf46ef727c9d4e387732e875296c1a356672f4cc2238/specitems-1.6.16.tar.gz", hash = "sha256:a0616bd509ca1098f65425e23eef7628ae557b78daeb6d5248d72d3972d025f2", size = 69342, upload-time = "2026-09-07T01:53:08.405Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8b/22/150ee193b6d34fba43c90a465a4fa950b9f0674073a274bf888324bf2c6d/specitems-1.6.16-py3-none-any.whl", hash = "sha256:fbd0c86bfe4c802f3519baccad8ed5a5ba0a80b289edf8c3ac6a1cf3281098ca", size = 96979, upload-time = "2026-09-07T01:53:07.184Z" },
-]
+sdist = { url = "https://files.pythonhosted.org/packages/30/8e/8eb1702a55560a2ab8fea6ea00d387b6d264ceb5080019e37e314cb39970/specitems-1.6.17.tar.gz", hash = "sha256:74ef74b7ab6267b2c1019937aee5a353ffd39ea45792add415bfd46665d7d9f8", size = 69843, upload-time = "2026-09-07T04:20:33.531Z" }
 
 [[package]]
 name = "specware"
@@ -1169,7 +1166,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "specitems", specifier = ">=1.6.16" }]
+requires-dist = [{ name = "specitems", specifier = ">=1.6.17" }]
 
 [package.metadata.requires-dev]
 dev = [
