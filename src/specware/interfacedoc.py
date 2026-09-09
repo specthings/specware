@@ -129,53 +129,55 @@ def _add_text(content: TextContent, mapper: ItemMapper, item: Item,
               key: str) -> None:
     text = item[key]
     if text:
-        content.add_rubric(f"{key.upper()}:")
-        content.wrap(mapper.substitute(text, item))
+        with content.topic(key.capitalize()):
+            content.wrap(mapper.substitute(text, item))
 
 
 def _add_params(content: TextContent, mapper: ItemMapper, item: Item,
                 params: dict) -> None:
     if params:
-        content.add_rubric("PARAMETERS:")
-        for param in params:
-            description = param["description"]
-            if description:
-                content.add_definition_item(
-                    content.code(sanitize_name(param["name"])),
-                    mapper.substitute(f"This parameter {description}", item))
+        with content.topic("Parameters"):
+            for param in params:
+                description = param["description"]
+                if description:
+                    content.add_definition_item(
+                        content.code(sanitize_name(param["name"])),
+                        mapper.substitute(f"This parameter {description}",
+                                          item))
 
 
 def _add_return(content: TextContent, mapper: ItemMapper, item: Item,
                 ret: dict) -> None:
     if ret:
-        content.add_rubric("RETURN VALUES:")
-        for retval in ret["return-values"]:
-            if isinstance(retval["value"], str):
-                value = mapper.substitute(retval["value"], item)
-            else:
-                value = content.code(str(retval["value"]))
-            content.add_definition_item(
-                value, mapper.substitute(retval["description"], item))
-        content.wrap(mapper.substitute(ret["return"], item))
+        with content.topic("Return values"):
+            for retval in ret["return-values"]:
+                if isinstance(retval["value"], str):
+                    value = mapper.substitute(retval["value"], item)
+                else:
+                    value = content.code(str(retval["value"]))
+                content.add_definition_item(
+                    value, mapper.substitute(retval["description"], item))
+            content.wrap(mapper.substitute(ret["return"], item))
     errnos = list(item.links_to_parents("errno"))
     if errnos:
-        content.add_rubric("ERRORS:")
-        for link in errnos:
-            content.add_definition_item(
-                mapper.substitute(f"${{{link.item.uid}:/name}}", item),
-                mapper.substitute(link["description"], item))
+        with content.topic("Errors"):
+            for link in errnos:
+                content.add_definition_item(
+                    mapper.substitute(f"${{{link.item.uid}:/name}}", item),
+                    mapper.substitute(link["description"], item))
 
 
 def _document_directive(content: TextContent, mapper: ItemMapper,
                         code_mapper: CodeMapper, item: Item,
                         enable_set: EnabledSet) -> None:
-    content.wrap(mapper.substitute(item["brief"], item))
-    content.add_rubric("CALLING SEQUENCE:")
-    with content.directive("code-block", "c"):
-        code = CContent()
-        _add_definition(code, code_mapper, item, "definition",
-                        item["definition"])
-        content.add(code)
+    if not content.topic_as_definition:
+        content.wrap(mapper.substitute(item["brief"], item))
+    with content.topic("Calling sequence"):
+        with content.directive("code-block", "c"):
+            code = CContent()
+            _add_definition(code, code_mapper, item, "definition",
+                            item["definition"])
+            content.add(code)
     _add_params(content, mapper, item, item["params"])
     _add_text(content, mapper, item, "description")
     _add_return(content, mapper, item, item["return"])
@@ -186,9 +188,10 @@ def _document_directive(content: TextContent, mapper: ItemMapper,
         if parent.is_enabled(enable_set)
     ]
     if constraints:
-        content.add_rubric("CONSTRAINTS:")
-        content.add_list(constraints,
-                         "The following constraints apply to this directive:")
+        with content.topic("Constraints"):
+            content.add_list(
+                constraints,
+                "The following constraints apply to this directive:")
 
 
 def document_directive(content: TextContent, mapper: ItemMapper, item: Item,
@@ -253,16 +256,16 @@ def _add_type_definition(content: TextContent, mapper: ItemMapper, item: Item,
 
 def _type_compound(content: TextContent, mapper: ItemMapper,
                    item: Item) -> None:
-    content.add_rubric("MEMBERS:")
-    for member in item["definition"]:
-        _add_type_definition(content, mapper, item, member["default"])
+    with content.topic("Members"):
+        for member in item["definition"]:
+            _add_type_definition(content, mapper, item, member["default"])
     _add_text(content, mapper, item, "description")
 
 
 def _type_enum(content: TextContent, mapper: ItemMapper, item: Item) -> None:
-    content.add_rubric("ENUMERATORS:")
-    for enumerator in item.parents("interface-enumerator"):
-        _add_type_definition(content, mapper, item, enumerator)
+    with content.topic("Enumerators"):
+        for enumerator in item.parents("interface-enumerator"):
+            _add_type_definition(content, mapper, item, enumerator)
     _add_text(content, mapper, item, "description")
 
 
@@ -326,9 +329,9 @@ for more information about the usage of the various data types.""")
                     if constraint is None:
                         _TYPE_GENERATORS[item.type](content, mapper, item)
                     else:
-                        content.add_rubric("MEMBERS:")
-                        content.wrap(
-                            mapper.substitute(constraint["text"], item))
+                        with content.topic("Members"):
+                            content.wrap(
+                                mapper.substitute(constraint["text"], item))
                         _add_text(content, mapper, item, "description")
                     _add_text(content, mapper, item, "notes")
     content.add_licence_and_copyrights()
