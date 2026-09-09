@@ -84,17 +84,17 @@ class _ContentAdaptor:
         self.content.add_header(name, level=self.content.section_level)
         self.content.add(description)
 
-    def _add_rubric(self,
-                    name: str,
-                    text: GenericContent,
-                    wrap: bool = False) -> None:
+    def _add_topic(self,
+                   name: str,
+                   text: GenericContent,
+                   wrap: bool = False) -> None:
         if not text:
             return
-        self.content.add_rubric(f"{name}:")
-        if wrap:
-            self.content.wrap(text)
-        else:
-            self.content.add(text)
+        with self.content.topic(name):
+            if wrap:
+                self.content.wrap(text)
+            else:
+                self.content.add(text)
 
     def add_option(self, uid: str, name: str,
                    index_entries: list[str]) -> None:
@@ -107,31 +107,31 @@ class _ContentAdaptor:
         self.content.add_header(name,
                                 level=self.content.section_level + 1,
                                 label=name)
-        self._add_rubric("CONSTANT", self.content.code(name))
+        self._add_topic("Constant", self.content.code(name))
 
     def add_option_type(self, option_type: str) -> None:
         """ Add the option type. """
-        self._add_rubric("OPTION TYPE", option_type)
+        self._add_topic("Option type", option_type)
 
     def add_option_default_value(self, value: str) -> None:
         """ Add the option default value. """
-        self._add_rubric("DEFAULT VALUE", value)
+        self._add_topic("Default value", value)
 
     def add_option_default_config(self, config: str) -> None:
         """ Add the option default configuration. """
-        self._add_rubric("DEFAULT CONFIGURATION", config)
+        self._add_topic("Default configuration", config)
 
     def add_option_description(self, description: str) -> None:
         """ Add the option description. """
-        self._add_rubric("DESCRIPTION", description)
+        self._add_topic("Description", description)
 
     def add_option_notes(self, notes: str) -> None:
         """ Add the option notes. """
-        self._add_rubric("NOTES", notes)
+        self._add_topic("Notes", notes)
 
     def add_option_constraints(self, constraints: GenericContent) -> None:
         """ Add the option value constraints. """
-        self._add_rubric("CONSTRAINTS", constraints, wrap=True)
+        self._add_topic("Constraints", constraints, wrap=True)
 
     def add_licence_and_copyrights(self) -> None:
         """ Add the license and copyrights. """
