@@ -26,7 +26,7 @@
 
 import functools
 import os
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 from specitems import (EnabledSet, Item, ItemCache, ItemGetValueContext,
                        ItemMapper, make_label, TextContent)
@@ -125,6 +125,13 @@ def _add_definition(content: CContent, mapper: ItemMapper, item: Item,
                    definition)
 
 
+def _add_pair_table(content: TextContent, pairs: list[tuple[str,
+                                                            str]]) -> None:
+    """ Add the name and text pairs as a table without a header row. """
+    rows: list[Iterable[str | int]] = list(pairs)
+    content.add_grid_table(rows, [30, 70], header_rows=0)
+
+
 def _add_text(content: TextContent, mapper: ItemMapper, item: Item,
               key: str) -> None:
     text = item[key]
@@ -136,35 +143,53 @@ def _add_text(content: TextContent, mapper: ItemMapper, item: Item,
 def _add_params(content: TextContent, mapper: ItemMapper, item: Item,
                 params: dict) -> None:
     if params:
+        pairs: list[tuple[str, str]] = []
         with content.topic("Parameters"):
             for param in params:
                 description = param["description"]
-                if description:
+                if not description:
+                    continue
+                name = content.code(sanitize_name(param["name"]))
+                if content.topic_as_definition:
+                    pairs.append((name, mapper.substitute(description,
+                                                          item).strip()))
+                else:
                     content.add_definition_item(
-                        content.code(sanitize_name(param["name"])),
+                        name,
                         mapper.substitute(f"This parameter {description}",
                                           item))
+            _add_pair_table(content, pairs)
 
 
 def _add_return(content: TextContent, mapper: ItemMapper, item: Item,
                 ret: dict) -> None:
     if ret:
+        pairs: list[tuple[str, str]] = []
         with content.topic("Return values"):
             for retval in ret["return-values"]:
                 if isinstance(retval["value"], str):
                     value = mapper.substitute(retval["value"], item)
                 else:
                     value = content.code(str(retval["value"]))
-                content.add_definition_item(
-                    value, mapper.substitute(retval["description"], item))
+                description = mapper.substitute(retval["description"], item)
+                if content.topic_as_definition:
+                    pairs.append((value, description.strip()))
+                else:
+                    content.add_definition_item(value, description)
+            _add_pair_table(content, pairs)
             content.wrap(mapper.substitute(ret["return"], item))
     errnos = list(item.links_to_parents("errno"))
     if errnos:
+        pairs = []
         with content.topic("Errors"):
             for link in errnos:
-                content.add_definition_item(
-                    mapper.substitute(f"${{{link.item.uid}:/name}}", item),
-                    mapper.substitute(link["description"], item))
+                name = mapper.substitute(f"${{{link.item.uid}:/name}}", item)
+                description = mapper.substitute(link["description"], item)
+                if content.topic_as_definition:
+                    pairs.append((name, description.strip()))
+                else:
+                    content.add_definition_item(name, description)
+            _add_pair_table(content, pairs)
 
 
 def _document_directive(content: TextContent, mapper: ItemMapper,

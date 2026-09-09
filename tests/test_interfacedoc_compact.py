@@ -50,17 +50,19 @@ def test_interfacedoc_compact(tmpdir):
         );
 
 Parameters
-    ``Param0``
-        This parameter is parameter 0.
+    .. table::
+        :class: longtable
+        :widths: 30,70
 
-    ``Param1``
-        This parameter is parameter 1.
-
-    ``Param2``
-        This parameter is parameter 2.
-
-    ``Param3``
-        This parameter is parameter 3.
+        +------------+-----------------+
+        | ``Param0`` | is parameter 0. |
+        +------------+-----------------+
+        | ``Param1`` | is parameter 1. |
+        +------------+-----------------+
+        | ``Param2`` | is parameter 2. |
+        +------------+-----------------+
+        | ``Param3`` | is parameter 3. |
+        +------------+-----------------+
 
 Description
     Function description.  References to :term:`xs <x>`,
@@ -76,8 +78,13 @@ Description
         are not wrapped
 
 Errors
-    :c:macro:`DEFINE`
-        The errno description.
+    .. table::
+        :class: longtable
+        :widths: 30,70
+
+        +-------------------+------------------------+
+        | :c:macro:`DEFINE` | The errno description. |
+        +-------------------+------------------------+
 
 Constraints
     The following constraints apply to this directive:
@@ -99,31 +106,36 @@ Constraints
         );
 
 Parameters
-    ``VeryLongParam0``
-        This parameter is very long parameter 0 with some super important and
-        extra very long description which makes a lot of sense.
+    .. table::
+        :class: longtable
+        :widths: 30,70
 
-    ``VeryLongParam1``
-        This parameter is very long parameter 1.
-
-    ``VeryLongParam2``
-        This parameter is very long parameter 2.
-
-    ``VeryLongParam3``
-        This parameter is very long parameter 3.
+        +--------------------+------------------------------------------------------------------------+
+        | ``VeryLongParam0`` | is very long parameter 0 with some super important and extra very long |
+        |                    | description which makes a lot of sense.                                |
+        +--------------------+------------------------------------------------------------------------+
+        | ``VeryLongParam1`` | is very long parameter 1.                                              |
+        +--------------------+------------------------------------------------------------------------+
+        | ``VeryLongParam2`` | is very long parameter 2.                                              |
+        +--------------------+------------------------------------------------------------------------+
+        | ``VeryLongParam3`` | is very long parameter 3.                                              |
+        +--------------------+------------------------------------------------------------------------+
 
 Description
     VeryLongFunction description.
 
 Return values
-    ``1``
-        is returned, in case A.
+    .. table::
+        :class: longtable
+        :widths: 30,70
 
-    ``2``
-        is returned, in case B.
-
-    :c:type:`Enum`
-        is returned, in case C.
+        +----------------+-------------------------+
+        | ``1``          | is returned, in case A. |
+        +----------------+-------------------------+
+        | ``2``          | is returned, in case B. |
+        +----------------+-------------------------+
+        | :c:type:`Enum` | is returned, in case C. |
+        +----------------+-------------------------+
 
     Sometimes some value.  See :c:func:`Function`.
 
