@@ -1,0 +1,22 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    format:
+      scope: declaration
+      type: clang
+      style: default
+    description: |
+      The text shall be a C language declaration on a single line.  A
+      parameter declaration, a compound member declaration and a bare macro
+      parameter name are such a declaration.
+spec-name: C Language Declaration Format
+spec-type: clang-declaration-scope
+type: spec

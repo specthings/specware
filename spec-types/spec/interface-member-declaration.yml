@@ -19,7 +19,7 @@ spec-info:
           It shall be the interface compound member declaration.  On the
           declaration a context-sensitive substitution of item variables is
           performed.
-        spec-type: str
+        spec-type: clang-declaration-scope
     description: |
       This set of attributes specifies an interface compound member
       declaration.

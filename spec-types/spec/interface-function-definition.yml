@@ -19,18 +19,14 @@ spec-info:
           that the function does not return to the caller.
         spec-type: optional-str
       body:
-        description: |
-          If the value is present, then it shall be the definition of a static
-          inline function.  On the function definition a context-sensitive
-          substitution of item variables is performed.  If no value is present,
-          then the function is declared as an external function.
-        spec-type: optional-str
+        description: null
+        spec-type: interface-function-body
       params:
         description: |
           It shall be the list of parameter declarations of the function.  On
           the function parameter declarations a context-sensitive substitution
-          of item variables is performed.
-        spec-type: list-str
+          of item variables is performed.  A macro parameter is a bare name.
+        spec-type: list-clang-declaration-scope
       return:
         description: |
           If the value is present, then it shall be the function return type.

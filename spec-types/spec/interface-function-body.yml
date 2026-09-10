@@ -1,0 +1,30 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    format:
+      scope: function
+      type: clang
+      style: default
+      skip:
+        path: /interface-type
+        values:
+        - macro
+    description: |
+      If the value is present, then it shall be the definition of a static
+      inline function.  On the function definition a context-sensitive
+      substitution of item variables is performed.  If no value is present,
+      then the function is declared as an external function.  The formatter
+      skips the body of a macro.  A macro body has no fixed grammar, so the
+      clang-format tool has no valid interpretation of it.
+  none: null
+spec-name: Interface Function Body
+spec-type: interface-function-body
+type: spec
