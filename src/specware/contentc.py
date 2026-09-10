@@ -125,7 +125,12 @@ def _get_align_pos(param: str) -> tuple[int, int]:
 def align_declarations(decls: list[str]) -> list[str]:
     """ Align the list of C/C++ declarations. """
     positions = list(map(_get_align_pos, decls))
-    max_pos = max(positions)[1]
+    # The position of the variadic parameter carries sys.maxsize, so that it
+    # gets no padding.  A max() over the positions compares the first member
+    # first, so a list in which every parameter starts at column zero makes
+    # that sentinel the maximum.  Take the maximum of the other parameters.
+    aligned = [pos for pos in positions if pos[1] != sys.maxsize]
+    max_pos = max(aligned)[1] if aligned else 0
     return [
         param[:pos[0]] + (max_pos - pos[1]) * " " + param[pos[0]:]
         for param, pos in zip(decls, positions)

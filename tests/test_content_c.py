@@ -366,6 +366,19 @@ def test_function():
     assert str(content) == """a b( ... );
 """
     content = CContent()
+    content.declare_function("void", "b", [
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+        "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "..."
+    ])
+    assert str(content) == """void b(
+  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,
+  yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy,
+  zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz,
+  ...
+);
+"""
+    content = CContent()
     content.declare_function("a *", "b", [
         "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x",
         "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy y",
