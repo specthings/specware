@@ -105,7 +105,7 @@ def _split_includes(
     return includes_unconditional, includes_enabled_by
 
 
-_FUNCTION_POINTER = re.compile(r"^[^(]+\(\s\*([^)]+)\)\s*\(")
+_FUNCTION_POINTER = re.compile(r"^[^(]+\(\s*\*\s*([^)]+?)\s*\)\s*\(")
 _DESIGNATOR = re.compile(r"([a-zA-Z0-9_]+)(\[[^\]]+])?$")
 
 
@@ -115,7 +115,9 @@ def _get_align_pos(param: str) -> tuple[int, int]:
     match = _DESIGNATOR.search(param)
     if not match:
         match = _FUNCTION_POINTER.search(param)
-        assert match
+        if not match:
+            raise ValueError(
+                f"cannot find the designator of the declaration: {param}")
     star = param.find("*")
     if star >= 0:
         return star, match.start(1)

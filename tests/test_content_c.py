@@ -26,8 +26,20 @@
 
 import pytest
 
-from specware import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
+from specware import (align_declarations, CContent, CInclude,
+                      enabled_by_to_exp, ExpressionMapper,
                       PythonExpressionMapper)
+
+
+def test_align_declarations():
+    assert align_declarations(["int(* x) (const struct y *z)"
+                               ]) == ["int(* x) (const struct y *z)"]
+    assert align_declarations(["void ( *x )( void *y )", "int z"
+                               ]) == ["void ( *x )( void *y )", "int     z"]
+    with pytest.raises(ValueError,
+                       match="cannot find the designator of the "
+                       "declaration: ent!"):
+        align_declarations(["ent!"])
 
 
 def test_doxyfy():
