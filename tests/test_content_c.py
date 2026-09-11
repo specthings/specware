@@ -38,6 +38,9 @@ def test_align_declarations():
                                ]) == ["void ( *x )( void *y )", "int     z"]
     assert align_declarations(["uint x", "int **y"]) == ["uint  x", "int **y"]
     assert align_declarations(["..."]) == ["..."]
+    assert align_declarations(
+        ["unsigned long long qq",
+         "char x[]"]) == ["unsigned long long qq", "char               x[]"]
     with pytest.raises(ValueError,
                        match="cannot find the designator of the "
                        "declaration: ent!"):
