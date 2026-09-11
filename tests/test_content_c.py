@@ -36,6 +36,8 @@ def test_align_declarations():
                                ]) == ["int(* x) (const struct y *z)"]
     assert align_declarations(["void ( *x )( void *y )", "int z"
                                ]) == ["void ( *x )( void *y )", "int     z"]
+    assert align_declarations(["uint x", "int **y"]) == ["uint  x", "int **y"]
+    assert align_declarations(["..."]) == ["..."]
     with pytest.raises(ValueError,
                        match="cannot find the designator of the "
                        "declaration: ent!"):
