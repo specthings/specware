@@ -106,7 +106,7 @@ def _split_includes(
 
 
 _FUNCTION_POINTER = re.compile(r"^[^(]+\(\s*\*\s*([^)]+?)\s*\)\s*\(")
-_DESIGNATOR = re.compile(r"([a-zA-Z0-9_]+)(\[[^\]]+])?$")
+_DESIGNATOR = re.compile(r"([a-zA-Z0-9_]+)(\[[^\]]*])?$")
 
 
 def _get_align_pos(param: str) -> tuple[int, int]:
