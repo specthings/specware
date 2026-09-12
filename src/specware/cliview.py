@@ -97,14 +97,23 @@ def _substitute(item: Item, mapper: ItemMapper, prefix: str,
             _substitute(item, mapper, f"{prefix}[{index}]", element)
 
 
+def _link_info(link: Optional[Link]) -> str:
+    if link is None:
+        return ""
+    info = f", role={link.role}"
+    for key in sorted(key for key in link.data if key not in ("role", "uid")):
+        info += f", {key}={link[key]}"
+    return info
+
+
 def _visit_item(item: Item, mapper: ItemMapper, level: int,
-                role: Optional[str], validated_filter: str) -> bool:
+                link: Optional[Link], validated_filter: str) -> bool:
     validated = item.view.get("validated", True)
     if validated_filter == "yes" and not validated:
         return False
     if validated_filter == "no" and validated:
         return False
-    role_info = "" if role is None else f", role={role}"
+    role_info = _link_info(link)
     print(
         f"{'  ' * level}{item.uid} (type={item.type}{role_info}{_info(item)})")
     _substitute(item, mapper, "", item.data)
@@ -114,29 +123,30 @@ def _visit_item(item: Item, mapper: ItemMapper, level: int,
 def _view_interface_placment(item: Item, mapper: ItemMapper, level: int,
                              validated_filter: str) -> None:
     for link in item.links_to_children("interface-placement"):
-        if _visit_item(link.item, mapper, level, link.role, validated_filter):
+        if _visit_item(link.item, mapper, level, link, validated_filter):
             _view_interface_placment(link.item, mapper, level + 1,
                                      validated_filter)
 
 
-def _view(item: Item, mapper: ItemMapper, level: int, role: Optional[str],
+def _view(item: Item, mapper: ItemMapper, level: int, link: Optional[Link],
           validated_filter: str) -> None:
-    if not _visit_item(item, mapper, level, role, validated_filter):
+    if not _visit_item(item, mapper, level, link, validated_filter):
         return
-    for child in item.children("validation"):
-        _visit_item(child, mapper, level + 1, "validation", validated_filter)
-        for child_2 in child.children("runtime-measurement-request"):
-            _visit_item(child_2, mapper, level + 2,
-                        "runtime-measurement-request", validated_filter)
+    for link_2 in item.links_to_children("validation"):
+        _visit_item(link_2.item, mapper, level + 1, link_2, validated_filter)
+        for link_3 in link_2.item.links_to_children(
+                "runtime-measurement-request"):
+            _visit_item(link_3.item, mapper, level + 2, link_3,
+                        validated_filter)
     # The cited work appears under the requirement which references it.  A
     # refinement of the requirement places it in the tree.
-    for link in item.links_to_parents("reference"):
-        _visit_item(link.item, mapper, level + 1, link.role, validated_filter)
+    for link_2 in item.links_to_parents("reference"):
+        _visit_item(link_2.item, mapper, level + 1, link_2, validated_filter)
     _view_interface_placment(item, mapper, level + 1, validated_filter)
-    for link in item.links_to_children(_CHILD_ROLES):
-        _view(link.item, mapper, level + 1, link.role, validated_filter)
-    for link in item.links_to_parents(_PARENT_ROLES):
-        _view(link.item, mapper, level + 1, link.role, validated_filter)
+    for link_2 in item.links_to_children(_CHILD_ROLES):
+        _view(link_2.item, mapper, level + 1, link_2, validated_filter)
+    for link_2 in item.links_to_parents(_PARENT_ROLES):
+        _view(link_2.item, mapper, level + 1, link_2, validated_filter)
 
 
 def _validation_count(item: Item) -> int:
