@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: requirement-disposition
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the requirement disposition role of links.  The link target
+      shall be the requirement which the disposition answers.
+
+      The role differs from the requirement validation role because the two
+      claims differ.  A validation states that the software product satisfies
+      the requirement.  A disposition states that it does not, and gives the
+      reason.  A report of the unsatisfied requirements is therefore a query
+      over one role.
+    mandatory-attributes: all
+spec-name: Requirement Disposition Link Role
+spec-type: requirement-disposition-role
+type: spec

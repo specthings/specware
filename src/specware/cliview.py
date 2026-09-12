@@ -138,6 +138,8 @@ def _view(item: Item, mapper: ItemMapper, level: int, link: Optional[Link],
                 "runtime-measurement-request"):
             _visit_item(link_3.item, mapper, level + 2, link_3,
                         validated_filter)
+    for link_2 in item.links_to_children("requirement-disposition"):
+        _visit_item(link_2.item, mapper, level + 1, link_2, validated_filter)
     # The cited work appears under the requirement which references it.  A
     # refinement of the requirement places it in the tree.
     for link_2 in item.links_to_parents("reference"):
@@ -150,7 +152,11 @@ def _view(item: Item, mapper: ItemMapper, level: int, link: Optional[Link],
 
 
 def _validation_count(item: Item) -> int:
-    return len(list(child for child in item.children("validation")))
+    """ Count the evidence items of an item. """
+    return len(
+        list(
+            itertools.chain(item.children("validation"),
+                            item.children("requirement-disposition"))))
 
 
 def _no_enforcement(item_cache: ItemCache) -> None:

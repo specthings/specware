@@ -351,6 +351,29 @@ def test_cliview(tmpdir):
     cliview(["command", "--config-file", config_file, "--filter=build"])
 
 
+def test_cliview_no_validation(tmpdir, capsys):
+    config_file = _create_specview_yml(tmpdir)
+    cliview(
+        ["command", "--config-file", config_file, "--filter=no-validation"])
+    assert capsys.readouterr().out == """/req/root
+  /constraint/terminate
+  /glossary-empty
+  /if/domain
+  /req/api
+    /if/group
+      /if/errno
+      /if/errno-header
+  /req/group
+    /req/group-2
+      /req/group-3
+        /req/mem-catch-snd
+      /req/signal-count
+        /req/signal-number
+    /req/mem-catch-snd
+    /req/unpushed-data
+"""
+
+
 def test_cliview_no_enforcement(tmpdir, capsys):
     config_file = _create_specview_yml(tmpdir)
     cliview(

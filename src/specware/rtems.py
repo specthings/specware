@@ -109,12 +109,16 @@ _CONTAINER_TYPE = ("interface/domain", "interface/header-file",
 # placements would lead to an infinite recursion in _validate_tree().  In the
 # second pass using _validate_containers() the interface domain and header file
 # validations are fixed.
+#
+# A disposition states the evidence of its requirement and needs none of its
+# own.
 _VALIDATION_LEAF = tuple(
-    itertools.chain(_VALIDATION_METHOD.keys(), _CONTAINER_TYPE))
+    itertools.chain(_VALIDATION_METHOD.keys(), _CONTAINER_TYPE,
+                    ("requirement-disposition", )))
 
 _CHILD_ROLES = ("requirement-refinement", "interface-ingroup",
                 "interface-ingroup-hidden", "interface-function", "test-case",
-                "validation")
+                "validation", "requirement-disposition")
 
 _PARENT_ROLES = ("function-implementation", "interface-enumerator",
                  "performance-runtime-limits")
@@ -151,7 +155,8 @@ def gather_related_items(root: Item) -> list[Item]:
 # file which contains a member of that group.  The application configuration
 # aggregates the members of its groups, it descends on its own.
 _EXPORT_CHILD_ROLES = ("interface-function", "interface-placement",
-                       "requirement-refinement", "test-case", "validation")
+                       "requirement-disposition", "requirement-refinement",
+                       "test-case", "validation")
 
 _EXPORT_PARENT_ROLES = _PARENT_ROLES + ("constraint", "errno",
                                         "register-block-include")

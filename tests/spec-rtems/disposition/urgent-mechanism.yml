@@ -1,0 +1,12 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+disposition: not-met
+enabled-by: true
+links:
+- role: requirement-disposition
+  uid: ../req/urgent-mechanism
+text: |
+  The connection writes a zero urgent pointer and does not process the urgent
+  flag of a received segment.
+type: requirement-disposition

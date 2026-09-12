@@ -1,0 +1,18 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+functional-type: function
+links:
+- location: MAY-16
+  role: reference
+  uid: ../ref/rfc9293
+- role: requirement-refinement
+  uid: group
+rationale: null
+references: []
+requirement-type: functional
+text: |
+  The connection shall aggregate the data of send operations which do not set the
+  push flag.
+type: requirement

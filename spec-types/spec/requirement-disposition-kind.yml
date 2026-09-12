@@ -1,0 +1,51 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - not-applicable
+      - not-met
+      - tailored-out
+    description: |
+      It specifies the disposition of a requirement which the software product
+      does not satisfy.
+
+      The value `not-applicable` states that the condition which the
+      requirement governs cannot arise in the specified configuration.  For
+      example, a hardware erratum concerns a device which the software product
+      does not drive.  The condition of that requirement never arises.
+
+      The value `tailored-out` states that the tailoring of the
+      specification excluded the requirement from the specified scope.  For
+      example, a standard recommends a behaviour and the specified scope leaves
+      it out.  ECSS-Q-ST-80C Rev.2 clause 3.4 expects this value for a
+      recommendation which the tailoring turns into no requirement.
+
+      The value `not-met` states that the requirement applies and the
+      software product does not satisfy it.  For example, a standard requires a
+      behaviour and the software product does not implement it.
+      ECSS-S-ST-00-01C Rev.1 clause 2.3.160 calls the non-fulfilment of a
+      requirement a nonconformance.  A project which follows ECSS handles it
+      through the nonconformance control system of ECSS-Q-ST-10-09C Rev.1,
+      which ECSS-Q-ST-80C Rev.2 clause 5.2.6.1 makes applicable to software.
+      The disposition records the claim.  It replaces neither the
+      nonconformance report nor the waiver which that system asks for.
+
+      ECSS-S-ST-00-01C Rev.1 gives each claim a term of its own.  Clause
+      2.3.236 names the first two values a result of tailoring.  An auditor
+      answers each of the three differently, so the attribute records the claim
+      and the text does not.
+
+      The three dispositions carry the same attributes, so the value is an
+      attribute of the item and not a refinement of the item type.
+spec-name: Requirement Disposition Kind
+spec-type: requirement-disposition-kind
+type: spec

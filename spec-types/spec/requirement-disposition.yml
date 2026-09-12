@@ -1,0 +1,67 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: requirement-disposition
+  uid: root
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  copyrights:
+  - Copyright (C) 2026 embedded brains GmbH & Co. KG
+  disposition: not-met
+  enabled-by: true
+  links:
+  - role: requirement-disposition
+    uid: ../req/urgent-mechanism
+  text: |
+    The connection writes a zero urgent pointer and does not process the
+    urgent flag of a received segment.  RFC 9293 advises new applications
+    against the use of the urgent mechanism.
+  type: requirement-disposition
+spec-info:
+  dict:
+    attributes:
+      disposition:
+        description: |
+          It shall be the disposition of the requirement.
+        spec-type: requirement-disposition-kind
+      text:
+        description: |
+          It shall state the reason for the disposition.
+        spec-type: myst
+    description: |
+      This set of attributes provides the disposition of a requirement which
+      the software product does not satisfy.  The item shall have exactly one
+      link to the requirement with the
+      ${requirement-disposition-role:/spec-name}.
+
+      A specification states a requirement which the software product does
+      not satisfy.  A rule of an external standard is the common case, and a
+      hardware erratum is another.  A reviewer finds an omission by a scan of
+      the requirements.  An omission which nobody wrote down stays invisible.
+      Such a requirement needs evidence like any other.
+
+      A ${requirement-validation:/spec-name} item and a ${test-case:/spec-name}
+      item both state that the software product satisfies the requirement.
+      Neither states the disposition of a requirement which it does not
+      satisfy.  A disposition is the third kind of evidence, and it closes the
+      branch of the specification tree as the other two do.  A requirement is
+      therefore validated or dispositioned.
+
+      The requirement names the rule it comes from.  It links the work which
+      states the rule with the reference role, and the location of that link
+      gives the rule within the work.
+
+      A requirement may carry a validation for one configuration and a
+      disposition for another.  Each item states its configuration through the
+      `enabled-by` attribute.
+    mandatory-attributes: all
+spec-name: Requirement Disposition Item Type
+spec-type: requirement-disposition
+type: spec
