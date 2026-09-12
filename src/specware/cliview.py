@@ -128,6 +128,10 @@ def _view(item: Item, mapper: ItemMapper, level: int, role: Optional[str],
         for child_2 in child.children("runtime-measurement-request"):
             _visit_item(child_2, mapper, level + 2,
                         "runtime-measurement-request", validated_filter)
+    # The cited work appears under the requirement which references it.  A
+    # refinement of the requirement places it in the tree.
+    for link in item.links_to_parents("reference"):
+        _visit_item(link.item, mapper, level + 1, link.role, validated_filter)
     _view_interface_placment(item, mapper, level + 1, validated_filter)
     for link in item.links_to_children(_CHILD_ROLES):
         _view(link.item, mapper, level + 1, link.role, validated_filter)

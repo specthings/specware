@@ -187,10 +187,12 @@ def test_validate(tmpdir):
         "/req/signal-number",
         "/req/target",
         "/req/usage-constraints",
+        "/req/window-unsigned",
         "/val/disable-newlib-reentrancy",
         "/val/perf",
         "/val/tc",
         "/val/ts",
+        "/val/window-unsigned",
     ]
     test_suites = []
     gather_benchmarks_and_test_suites(root, test_suites)
@@ -263,6 +265,7 @@ def test_validate(tmpdir):
         "/req/signal-number",
         "/req/target",
         "/req/usage-constraints",
+        "/req/window-unsigned",
     ]
     assert _uids(get_interface_and_requirement_items(items_by_type)) == [
         "/glossary-empty",
@@ -293,6 +296,7 @@ def test_validate(tmpdir):
         "/req/signal-number",
         "/req/target",
         "/req/usage-constraints",
+        "/req/window-unsigned",
     ]
     assert _uids(get_validation_items(items_by_type)) == [
         "/req/clock-gettime",
@@ -301,6 +305,7 @@ def test_validate(tmpdir):
         "/val/disable-newlib-reentrancy",
         "/val/perf",
         "/val/tc",
+        "/val/window-unsigned",
     ]
     assert _uids(get_benchmark_and_test_suite_items(items_by_type)) == [
         "/val/ts",

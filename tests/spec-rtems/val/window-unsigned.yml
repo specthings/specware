@@ -1,0 +1,13 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: validation
+  uid: ../req/window-unsigned
+method: by-inspection
+references: []
+text: |
+  Inspection of the referenced source code files showed that the window size
+  uses an unsigned type in every computation.
+type: validation
