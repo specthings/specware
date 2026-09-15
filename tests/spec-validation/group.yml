@@ -6,7 +6,6 @@ identifier: RTEMSTestSuites
 links: []
 non-functional-type: design-group
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   The tests shall be a contained in test suites.

@@ -127,7 +127,6 @@ spec-example: |
       Data: Valid
       Option: Green
   rationale: null
-  references: []
   text: |
     ${.:/text-template}
   type: requirement

@@ -7,7 +7,6 @@ links:
 - role: requirement-refinement
   uid: signal-count
 rationale: null
-references: []
 requirement-type: functional
 text: |
   Let :math:`J\in\{0, 1, ..., 31\}`.  The signal :math:`J` shall be represented

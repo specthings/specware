@@ -10,7 +10,6 @@ links:
 - role: requirement-refinement
   uid: group
 rationale: null
-references: []
 requirement-type: functional
 text: |
   The connection shall treat the window size as an unsigned number.

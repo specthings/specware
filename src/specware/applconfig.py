@@ -308,7 +308,7 @@ def _get_value_doxygen_url(
     ctx: ItemGetValueContext,
     get_value: Callable[[ItemGetValueContext],
                         str] = _get_value) -> Optional[str]:
-    for ref in ctx.item["references"]:
+    for ref in ctx.item.get("references", []):
         if ref["type"] == "url":
             return f"<a href=\"{ref['identifier']}\">{get_value(ctx)}</a>"
     return None

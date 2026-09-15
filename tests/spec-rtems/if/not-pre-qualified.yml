@@ -12,5 +12,4 @@ links:
 - role: constraint
   uid: ../constraint/constant-not-pre-qualified
 name: NOT_PRE_QUALIFIED
-references: []
 type: interface

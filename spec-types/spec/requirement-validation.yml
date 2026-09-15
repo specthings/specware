@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2020, 2021 embedded brains GmbH & Co. KG
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -42,7 +42,9 @@ spec-info:
       This set of attributes provides a requirement validation evidence.  The
       item shall have exactly one link to the validated requirement with the
       ${requirement-validation-role:/spec-name}.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - method
+    - text
 spec-name: Requirement Validation Item Type
 spec-type: requirement-validation
 type: spec

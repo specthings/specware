@@ -331,7 +331,6 @@ def test_validate(tmpdir):
                 "uid": "/if/header-empty"
             }],
             "name": "ORPHAN",
-            "references": [],
             "type": "interface"
         })
     with pytest.raises(ValueError,

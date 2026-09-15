@@ -6,7 +6,6 @@ identifier: null
 links: []
 non-functional-type: design-group
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   The API shall provide interfaces specified by Zephyr.

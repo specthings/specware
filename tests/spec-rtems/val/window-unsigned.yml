@@ -6,7 +6,6 @@ links:
 - role: validation
   uid: ../req/window-unsigned
 method: by-inspection
-references: []
 text: |
   Inspection of the referenced source code files showed that the window size
   uses an unsigned type in every computation.

@@ -9,7 +9,6 @@ links:
   uid: group-3
 non-functional-type: quality
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   The system shall provide a benchmark program.

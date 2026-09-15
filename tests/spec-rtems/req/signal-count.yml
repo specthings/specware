@@ -7,7 +7,6 @@ links:
 - role: requirement-refinement
   uid: group-2
 rationale: null
-references: []
 requirement-type: functional
 text: |
   The ${../if/group:/name} shall support exactly 32 signals.

@@ -10,7 +10,6 @@ links:
 non-functional-type: performance-runtime
 params: {}
 rationale: null
-references: []
 requirement-type: non-functional
 test-body:
   brief: |

@@ -7,7 +7,6 @@ links:
   uid: root
 non-functional-type: interface-requirement
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   The software product shall provide an API.

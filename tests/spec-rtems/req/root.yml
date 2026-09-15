@@ -5,7 +5,6 @@ enabled-by: true
 links: []
 non-functional-type: design
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   The software product shall be a real-time operating system.

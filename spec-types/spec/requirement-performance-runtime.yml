@@ -55,7 +55,6 @@ spec-example: |
     uid: ../val/perf
   params: {}
   rationale: null
-  references: []
   test-body:
     brief: |
       Get a buffer.

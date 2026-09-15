@@ -9,7 +9,6 @@ links:
 - role: requirement-refinement
   uid: group
 rationale: null
-references: []
 requirement-type: functional
 text: |
   The application configuration option shall disable the thread-specific Newlib

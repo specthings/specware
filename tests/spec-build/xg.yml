@@ -6,7 +6,6 @@ identifier: Ident
 links: []
 non-functional-type: design-group
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   Text.

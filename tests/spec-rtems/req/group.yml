@@ -8,7 +8,6 @@ links:
   uid: root
 non-functional-type: design-group
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   The implementation software architecture component have a component

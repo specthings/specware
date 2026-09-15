@@ -5,5 +5,4 @@ enabled-by: true
 interface-type: unspecified-function
 links: []
 name: unspec_func_no_ref
-references: []
 type: interface

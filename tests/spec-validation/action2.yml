@@ -113,7 +113,6 @@ pre-conditions:
   test-prologue: |
     /* Pre C prologue. */
 rationale: null
-references: []
 requirement-type: functional
 skip-reasons:
   Overwritten: |

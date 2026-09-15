@@ -2830,7 +2830,6 @@ def test_validation_invalid_actions(caplog, tmpdir):
         }],
         "rationale":
         None,
-        "references": [],
         "requirement-type":
         "functional",
         "skip-reasons": {},

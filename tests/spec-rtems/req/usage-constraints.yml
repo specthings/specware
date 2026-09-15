@@ -7,7 +7,6 @@ links:
   uid: root
 non-functional-type: design
 rationale: null
-references: []
 requirement-type: non-functional
 text: |
   The system shall document usage constraints of interfaces.

@@ -65,7 +65,7 @@ def _get_value_sphinx_ref(ctx: ItemGetValueContext,
                           get_value: ItemGetValue,
                           postfix: str = "",
                           prefix: str = "") -> str:
-    for ref in ctx.item["references"]:
+    for ref in ctx.item.get("references", []):
         ref_type = ref["type"]
         identifier = ref["identifier"]
         name_ref = f"`{prefix}{ctx.value[ctx.key]}{postfix} <{identifier}>`"
@@ -85,7 +85,7 @@ def _get_value_sphinx_unspecified_function(ctx: ItemGetValueContext) -> str:
 
 
 def _get_value_sphinx_unspecified_group(ctx: ItemGetValueContext) -> str:
-    for ref in ctx.item["references"]:
+    for ref in ctx.item.get("references", []):
         ref_type = ref["type"]
         identifier = ref["identifier"]
         if ref_type == "document" and ref["name"] == "c-user":
@@ -213,7 +213,7 @@ def _get_value_markdown_ref(ctx: ItemGetValueContext,
                             get_value: ItemGetValue,
                             postfix: str = "",
                             prefix: str = "") -> str:
-    for ref in ctx.item["references"]:
+    for ref in ctx.item.get("references", []):
         ref_type = ref["type"]
         identifier = ref["identifier"]
         name = f"{prefix}{ctx.value[ctx.key]}{postfix}"
@@ -233,7 +233,7 @@ def _get_value_markdown_unspecified_function(ctx: ItemGetValueContext) -> str:
 
 
 def _get_value_markdown_unspecified_group(ctx: ItemGetValueContext) -> str:
-    for ref in ctx.item["references"]:
+    for ref in ctx.item.get("references", []):
         ref_type = ref["type"]
         identifier = ref["identifier"]
         if ref_type == "document" and ref["name"] == "c-user":
