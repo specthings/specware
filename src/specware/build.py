@@ -119,13 +119,27 @@ def _gather_source_files(item: Item, enabled_set: list[str],
                                              source_files)
 
 
+_TEST_TYPES = ["test-case", "requirement/functional/action"]
+
+
+def _map_test_target_to_item(item_cache: ItemCache) -> dict[str, Item]:
+    return {
+        item["test-target"]: item
+        for test_type in _TEST_TYPES
+        for item in item_cache.items_by_type.get(test_type, [])
+        if item["test-header"]
+    }
+
+
 def _gather_test_header(item_cache: ItemCache, enabled_set: list[str],
                         source_files: list[str]) -> None:
-    for item in item_cache.values():
-        tests = ["test-case", "requirement/functional/action"]
-        if item.type in tests and item["test-header"] and item.is_enabled(
-                enabled_set):
-            source_files.append(item["test-header"]["target"])
+    item_by_test_target = _map_test_target_to_item(item_cache)
+    test_headers: list[str] = []
+    for source_file in source_files:
+        item = item_by_test_target.pop(source_file, None)
+        if item is not None and item.is_enabled(enabled_set):
+            test_headers.append(item["test-header"]["target"])
+    source_files.extend(test_headers)
 
 
 def gather_build_files(config: dict,

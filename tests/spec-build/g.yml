@@ -6,5 +6,7 @@ extra-files:
 install:
 - source:
   - ghi
-links: []
+links:
+- role: build-dependency
+  uid: tp
 type: build
