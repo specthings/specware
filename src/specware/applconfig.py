@@ -29,9 +29,9 @@ Provides methods to generate the application configuration documentation.
 import itertools
 from typing import Any, Callable, Optional
 
-from specitems import (ClangFormatter, Content, EnabledSet, GenericContent,
-                       get_value_plural, Item, ItemCache, ItemGetValueContext,
-                       ItemMapper, TextContent)
+from specitems import (ClangFormatter, ContentContext, EnabledSet,
+                       GenericContent, get_value_plural, Item, ItemCache,
+                       ItemGetValueContext, ItemMapper, TextContent)
 
 from .contentc import (CContent, get_value_double_colon,
                        get_value_doxygen_function, get_value_doxygen_group,
@@ -157,8 +157,9 @@ class _DoxygenContentAdaptor(_ContentAdaptor):
 
     def __init__(self,
                  mapper: ItemMapper,
+                 context: ContentContext,
                  formatter: Optional[ClangFormatter] = None) -> None:
-        super().__init__(mapper, CContent())
+        super().__init__(mapper, CContent(context))
         self._formatter = formatter
         self._reset()
 
@@ -243,7 +244,7 @@ def _generate_constraints(content: _ContentAdaptor, item: Item,
                           enabled_set: EnabledSet) -> None:
     constraint_list = _get_constraints(content, item, enabled_set)
     if len(constraint_list) > 1:
-        constraints = Content("BSD-2-Clause")
+        constraints = content.content.fragment()
         prologue = ("The following constraints apply "
                     "to this configuration option:")
         constraints.add_list(constraint_list, prologue)
@@ -368,7 +369,7 @@ def is_application_configuration_affected(config: dict, item_cache: ItemCache,
     items specified by the UIDs, otherwise false.
 
     Args:
-        config: The application configuration generation configuration.
+        config: The application configuration task.
         item_cache: The item cache containing the application configuration
             groups and options.
         uids: The UIDs of the items which changed.
@@ -388,8 +389,18 @@ def is_application_configuration_affected(config: dict, item_cache: ItemCache,
 def _generate_documentation(config: dict, group_config: dict, group: Item,
                             options: dict[str, Item],
                             text_content: _TextContentAdaptor) -> None:
-    _generate(group, options, config["enabled-documentation"], text_content)
+    with text_content.mapper.work(text_content.content.context):
+        _generate(group, options, config["enabled-documentation"],
+                  text_content)
     text_content.write(group_config["target"])
+
+
+def _get_options(group: Item) -> dict[str, Item]:
+    return {
+        child.uid: child
+        for child in group.children("interface-ingroup")
+        if child.type.startswith("interface/appl-config-option")
+    }
 
 
 def generate_application_configuration(
@@ -398,6 +409,7 @@ def generate_application_configuration(
         item_cache: ItemCache,
         create_mapper: Callable[[Item, list[str]], ItemMapper],
         create_content: Callable[[], TextContent],
+        doxygen_context: ContentContext,
         formatter: Optional[ClangFormatter] = None,
         write_documentation: bool = True) -> None:
     # pylint: disable=too-many-arguments
@@ -413,6 +425,7 @@ def generate_application_configuration(
         create_mapper: The item mapper constructor to create mappers used for
             content substitutions.
         create_content: The content builder constructor.
+        doxygen_context: The content context of the Doxygen source.
         formatter: The optional formatter used to format the Doxygen header
             file.
         write_documentation: Write the documentation target of each group.
@@ -423,7 +436,8 @@ def generate_application_configuration(
     text_mapper = create_mapper(some_item, group_uids)
     doxygen_mapper = ItemMapper(some_item)
     _add_doxygen_get_values(doxygen_mapper)
-    doxygen_content = _DoxygenContentAdaptor(doxygen_mapper, formatter)
+    doxygen_content = _DoxygenContentAdaptor(doxygen_mapper, doxygen_context,
+                                             formatter)
     doxygen_content.content.add_automatically_generated_warning()
     with doxygen_content.content.defgroup_block(
             "RTEMSApplConfig", "Application Configuration Options"):
@@ -431,10 +445,7 @@ def generate_application_configuration(
     for group_config in config["groups"]:
         group = item_cache[group_config["uid"]]
         assert group.type == "interface/appl-config-group"
-        options: dict[str, Item] = {}
-        for child in group.children("interface-ingroup"):
-            if child.type.startswith("interface/appl-config-option"):
-                options[child.uid] = child
+        options = _get_options(group)
         if write_documentation:
             _generate_documentation(
                 config, group_config, group, options,

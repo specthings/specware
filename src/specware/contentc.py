@@ -31,49 +31,8 @@ import sys
 from typing import (Any, Callable, Iterable, Iterator, Match, NamedTuple,
                     Optional)
 
-from specitems import (ClangFormatter, Content, GenericContent, Item,
-                       ItemGetValueContext, MARKDOWN_ROLES)
-
-BSD_2_CLAUSE_LICENSE = """Redistribution and use in source and binary \
-forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in the
-   documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE."""
-
-MIT_LICENSE = """Permission is hereby granted, free of charge, to any person \
-obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE."""
+from specitems import (ClangFormatter, Content, ContentContext, GenericContent,
+                       Item, ItemGetValueContext, MARKDOWN_ROLES)
 
 _PARAM = {
     None: "@param ",
@@ -152,8 +111,16 @@ class CContent(Content):
     """ Builds C language content. """
 
     # pylint: disable=too-many-public-methods
-    def __init__(self):
-        super().__init__("BSD-2-Clause")
+
+    def __init__(self, context: str | ContentContext):
+        """
+        Initialize the content.
+
+        Args:
+            context: What every content of the work shares.  A string is the
+                primary license of a work of its own.
+        """
+        super().__init__(context)
         self.set_pop_indent_gap(False)
 
     def convert(self, text: str) -> str:
@@ -184,29 +151,29 @@ class CContent(Content):
         self.add("@endcode")
 
     def prepend_spdx_license_identifier(self):
-        """
-        Add an SPDX License Identifier according to the registered licenses.
-        """
-        self.prepend([f"/* SPDX-License-Identifier: {self.licenses} */", ""])
+        """ Add an SPDX License Identifier according to the license. """
+        self.prepend([f"/* SPDX-License-Identifier: {self.license} */", ""])
 
     def add_copyrights_and_licenses(self):
         """
-        Add the copyrights and licenses according to the registered copyrights
-        and licenses.
+        Add the copyrights and the license text of the work.
+
+        The text comes from the license item of the primary license.  A
+        license which reproduces no text contributes the copyrights alone.
         """
         with self.comment_block():
-            self.add(self.copyrights.get_statements())
-            self.add(BSD_2_CLAUSE_LICENSE)
+            self.add(self.context.licenses.copyrights().get_statements())
+            self.add(self.context.license_text())
 
     def prepend_copyrights_and_licenses(self):
         """
         Prepend the copyrights and licenses according to the registered
         copyrights and licenses.
         """
-        content = CContent()
+        content = CContent(self.context)
         with content.comment_block():
-            content.add(self.copyrights.get_statements())
-            content.add(BSD_2_CLAUSE_LICENSE)
+            content.add(self.context.licenses.copyrights().get_statements())
+            content.add(self.context.license_text())
         content.append("")
         self.prepend(content)
 

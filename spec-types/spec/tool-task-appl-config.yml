@@ -1,0 +1,66 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: task-type
+  spec-value: appl-config
+  uid: tool-task
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      automatically-generated-warning:
+        description: |
+          It shall be the warning which every produced file carries.
+          An empty warning adds no comment block to a file.
+        spec-type: str
+      documentation-accepted-licenses:
+        description: |
+          It shall be the licenses which a produced documentation source
+          accepts for a part whose license expression permits not the license
+          of that source.
+        spec-type: list-str
+      documentation-license:
+        description: |
+          It shall be the license of a produced documentation source.
+        spec-type: spdx-license-identifier
+      doxygen-accepted-licenses:
+        description: |
+          It shall be the licenses which the Doxygen source accepts for a part
+          whose license expression permits not the license of that source.
+        spec-type: list-str
+      doxygen-license:
+        description: |
+          It shall be the license of the Doxygen source.
+        spec-type: spdx-license-identifier
+      doxygen-target:
+        description: |
+          It shall be the target file of the Doxygen documentation.
+        spec-type: str
+      enabled-documentation:
+        description: |
+          It shall be the enabled set of the documentation.
+        spec-type: list-str
+      enabled-source:
+        description: |
+          It shall be the enabled set of the source code.
+        spec-type: list-str
+      groups:
+        description: |
+          It shall be the documented application configuration groups.
+        spec-type: tool-appl-config-doc-group-list
+    description: |
+      This set of attributes specifies an application configuration task.  The
+      task produces a Doxygen source and documentation sources.  Each kind
+      states its own license.
+    mandatory-attributes:
+    - documentation-license
+    - doxygen-license
+spec-name: Tool Application Configuration Task
+spec-type: tool-task-appl-config
+type: spec

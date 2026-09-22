@@ -33,8 +33,9 @@ import logging
 import re
 from typing import Any, Iterable, Optional
 
-from specitems import (ClangFormatter, create_unique_link, Item, ItemCache,
-                       ItemGetValueContext, ItemMapper, get_value_plural)
+from specitems import (ClangFormatter, ContentContext, Item, ItemCache,
+                       ItemGetValueContext, ItemMapper, create_unique_link,
+                       get_value_plural)
 
 from .build import get_build_base_directory
 from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
@@ -238,10 +239,10 @@ class _TestItem:
 
     def _add_test_case_actions(self,
                                content: CContent) -> tuple[CContent, bool]:
-        actions = CContent()
+        actions = content.fragment()
         ctx_overall_unused = True
         for index, action in enumerate(self["test-actions"]):
-            body = CContent()
+            body = content.fragment()
             body.text_width -= len(body.tab)
             code = self.substitute_text(action["action-code"])
             body.add(code)
@@ -356,7 +357,7 @@ class _TestItem:
                     args.append(arg)
             with content.function(f"static {ret}", method, params):
                 content.append(code)
-        body = CContent()
+        body = content.fragment()
         body.append(mandatory_code)
         body.append(optional_code)
         ctx_unused = ctx_unused and _CTX.search(str(body)) is None
@@ -411,7 +412,7 @@ class _TestItem:
     def add_context(self, content: CContent) -> str:
         """ Add the context to the content. """
         content.add(self.substitute_code(self["test-context-support"]))
-        default_members = CContent()
+        default_members = content.fragment()
         with default_members.indent():
             self.add_default_context_members(default_members)
         if not self["test-context"] and not default_members:
@@ -436,10 +437,10 @@ class _TestItem:
         ])
         return f"&{self.ident}_Instance"
 
-    def generate_header(self, base_directory: str, header: dict[str,
-                                                                Any]) -> None:
+    def generate_header(self, base_directory: str, header: dict[str, Any],
+                        context: ContentContext) -> None:
         """ Generate the test header. """
-        content = CContent()
+        content = CContent(context.for_work(self.item.uid))
         content.register_license_and_copyrights_of_item(self.item)
         content.prepend_spdx_license_identifier()
         with content.file_block():
@@ -523,10 +524,10 @@ class _TestItem:
         self._mapper.reset()
         actions, ctx_unused = self._add_test_case_actions(content)
         header = self["test-header"]
-        prologue = CContent()
-        epilogue = CContent()
+        prologue = content.fragment()
+        epilogue = content.fragment()
         if header:
-            self.generate_header(base_directory, header)
+            self.generate_header(base_directory, header, content.context)
             ret = "void"
             name = f"{self.ident}_Run"
             params = self._get_run_params(header)
@@ -990,8 +991,8 @@ class _ActionRequirementTestItem(_TestItem):
                               [f"{self.context} *ctx"]):
             self._add_test_variant(content, transition_map)
         fixture = f"{self.ident}_Fixture"
-        prologue = CContent()
-        epilogue = CContent()
+        prologue = content.fragment()
+        epilogue = content.fragment()
         map_members_initialization = [
             "ctx->Map.in_action_loop = true;", "ctx->Map.index = 0;"
         ]
@@ -1032,7 +1033,7 @@ class _ActionRequirementTestItem(_TestItem):
         # pylint: disable=too-many-locals
         for co_idx, condition in enumerate(self[conditions]):
             enum = co_idx_to_enum[co_idx]
-            body = CContent()
+            body = content.fragment()
             body.text_width -= len(body.tab)
             code = self.substitute_code(condition["test-prologue"])
             ctx_unused = _CTX.search(code) is None
@@ -1083,7 +1084,7 @@ class _ActionRequirementTestItem(_TestItem):
         self.add_test_case_description(content, test_case_to_suites)
         header = self["test-header"]
         if header:
-            self.generate_header(base_directory, header)
+            self.generate_header(base_directory, header, content.context)
         else:
             _add_condition_enum(content, self._pre_co_idx_to_enum)
             _add_condition_enum(content, self._post_co_idx_to_enum)
@@ -1163,7 +1164,7 @@ class _RuntimeMeasurementTestItem(_TestItem):
         content.add("T_ticks end;")
 
     def _add_requests(self, content: CContent) -> CContent:
-        requests = CContent()
+        requests = content.fragment()
         prepare = self.add_support_method(content, "test-prepare", "Prepare")
         cleanup = self.add_support_method(content, "test-cleanup", "Cleanup")
         for item in self.item.children("runtime-measurement-request"):
@@ -1313,7 +1314,8 @@ class _SourceFile:
         self._test_cases.append(
             _RuntimeMeasurementTestItem(item, self._formatter))
 
-    def generate(self, test_case_to_suites: _CaseToSuite) -> None:
+    def generate(self, test_case_to_suites: _CaseToSuite,
+                 context: ContentContext) -> None:
         """
         Generate the source file and the corresponding build specification.
         """
@@ -1323,7 +1325,7 @@ class _SourceFile:
                 "the source file '%s' is not a source file of "
                 "an item of type 'build/test-program'", self._file)
             return
-        content = CContent()
+        content = CContent(context.for_work(self._file))
         includes: list[CInclude] = []
         local_includes: list[CInclude] = []
         for item in itertools.chain(self._test_suites, self._test_cases):
@@ -1541,6 +1543,7 @@ def _gather(
 
 def generate_validation(config: dict,
                         item_cache: ItemCache,
+                        context: ContentContext,
                         targets: Optional[list[str]] = None,
                         formatter: Optional[ClangFormatter] = None) -> None:
     """
@@ -1548,9 +1551,10 @@ def generate_validation(config: dict,
     suites and test cases according to the configuration.
 
     Args:
-        config: The validation generation configuration.
+        config: The validation task.
         item_cache: The item cache containing the validation test suites and
             test cases.
+        context: The content context of the task.
         targets: The optional target files to generate.
         formatter: The optional formatter used to format the source files.
     """
@@ -1560,10 +1564,10 @@ def generate_validation(config: dict,
 
     if not targets:
         for src in source_files.values():
-            src.generate(test_case_to_suites)
+            src.generate(test_case_to_suites, context)
     else:
         for target in targets:
-            source_files[target].generate(test_case_to_suites)
+            source_files[target].generate(test_case_to_suites, context)
 
 
 def augment_with_test_case_links(item_cache: ItemCache) -> None:

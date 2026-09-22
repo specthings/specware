@@ -31,11 +31,12 @@ from contextlib import contextmanager
 import functools
 import itertools
 import os
+import re
 from typing import (Any, Callable, Iterator, NamedTuple, NoReturn, Optional)
 
-from specitems import (ClangFormatter, Item, ItemCache, ItemGetValueContext,
-                       ItemGetValueMap, ItemMapper, GenericContent,
-                       get_value_default, get_value_plural, Link,
+from specitems import (ClangFormatter, ContentContext, GenericContent, Item,
+                       ItemCache, ItemGetValueContext, ItemGetValueMap,
+                       ItemMapper, Link, get_value_default, get_value_plural,
                        to_camel_case)
 
 from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
@@ -240,7 +241,7 @@ class _HeaderExpressionMapper(ExpressionMapper):
 
 def _add_definition(node: "_Node", item: Item, prefix: str,
                     value: dict[str, Any], get_lines: _GetLines) -> CContent:
-    content = CContent()
+    content = node.content.fragment()
     default = value["default"]
     variants = value["variants"]
     if variants:
@@ -518,7 +519,7 @@ class _Node:
         self.ingroups = _get_ingroups(item)
         self.dependents: set[_Node] = set()
         self.depends_on: set[_Node] = set()
-        self.content = CContent()
+        self.content = header_file.content.fragment()
         self.mapper = _InterfaceMapper(self)
         try:
             group = item.child("placement-order")
@@ -785,7 +786,7 @@ class _Node:
 
     def _get_compound_definition(self, item: Item, prefix: str,
                                  definition: Any) -> GenericContent:
-        content = CContent()
+        content = self.content.fragment()
         content.add_description_block(
             self.substitute_text(definition["brief"], prefix=prefix),
             self.substitute_text(definition["description"], prefix=prefix))
@@ -826,7 +827,7 @@ class _Node:
 
     def _get_function_definition(self, item: Item, prefix: str,
                                  definition: Any) -> GenericContent:
-        content = CContent()
+        content = self.content.fragment()
         name = item["name"]
         attrs = self.substitute_code(definition["attributes"], prefix)
         attrs = f"{attrs} " if attrs else ""
@@ -887,7 +888,7 @@ class _Node:
         name, alias = get_register_member_name(definition)
         count = definition["count"]
         assert count == 1
-        content = CContent()
+        content = self.content.fragment()
         with content.doxygen_block():
             content.add(f"@brief See @ref {ctx.regs[name]['group']}.")
         content.append(
@@ -906,7 +907,7 @@ class _Node:
             idx = f"_{index}"
         else:
             idx = ""
-        content = CContent()
+        content = self.content.fragment()
         with content.doxygen_block():
             content.add(f"@brief See @ref {ctx.regs[name]['group']}.")
         content.append(
@@ -922,7 +923,7 @@ class _Node:
         return f"extern {self.substitute_code(definition, prefix)};"
 
     def _get_description(self, item: Item, ingroups: _ItemMap) -> CContent:
-        content = CContent()
+        content = self.content.fragment()
         with content.doxygen_block():
             content.add_ingroup(_get_group_identifiers(ingroups))
             content.add_brief_description(self.substitute_text(item["brief"]))
@@ -958,7 +959,7 @@ class _Node:
                 if parent.is_enabled(self.header_file.enabled)
             ]
             if constraints:
-                constraint_content = CContent()
+                constraint_content = self.content.fragment()
                 target = _CONSTRAINT_TARGET[item.type]
                 constraint_content.add_list(
                     constraints,
@@ -1084,7 +1085,7 @@ class _ZephyrNode(_Node):
 
     def _append_register_padding(self, new_offset: int, old_offset: int,
                                  default_padding: int) -> None:
-        padding = CContent()
+        padding = self.content.fragment()
         _add_register_padding(padding, new_offset, old_offset, default_padding)
         self.content.append(padding)
 
@@ -1186,10 +1187,12 @@ class _HeaderFile:
                  item: Item,
                  options: dict[str, str],
                  enabled: list[str],
+                 context: ContentContext,
                  formatter: Optional[ClangFormatter] = None):
+        # pylint: disable=too-many-positional-arguments
         self._item = item
-        self._content = CContent()
-        self._content.register_license_and_copyrights_of_item(item)
+        self.content = CContent(context)
+        self.content.register_license_and_copyrights_of_item(item)
         self._ingroups = _get_ingroups(item)
         self._includes: list[Item] = []
         self._nodes: dict[str, _Node] = {}
@@ -1224,7 +1227,7 @@ class _HeaderFile:
         """ Generate all nodes of this header file. """
         for child in self._item.children("interface-placement"):
             self.add_node(child)
-            self._content.register_license_and_copyrights_of_item(child)
+            self.content.register_license_and_copyrights_of_item(child)
         for node in self._nodes.values():
             node.generate()
 
@@ -1274,19 +1277,19 @@ class _HeaderFile:
 
     def add_prologue(self) -> None:
         """ Add the header file prologue to the content. """
-        self._content.prepend_spdx_license_identifier()
-        with self._content.file_block():
-            self._content.add_ingroup(_get_group_identifiers(self._ingroups))
-            self._content.add_brief_description(
+        self.content.prepend_spdx_license_identifier()
+        with self.content.file_block():
+            self.content.add_ingroup(_get_group_identifiers(self._ingroups))
+            self.content.add_brief_description(
                 _Node(self, self._item).substitute_text(self._item["brief"]))
-        self._content.add_copyrights_and_licenses()
-        self._content.add_automatically_generated_warning()
-        self._content.add(f"/* Generated from spec:{self._item.uid} */")
+        self.content.add_copyrights_and_licenses()
+        self.content.add_automatically_generated_warning()
+        self.content.add(f"/* Generated from spec:{self._item.uid} */")
 
     def finalize(self) -> None:
         """ Finalize the header file. """
         self.add_prologue()
-        with self._content.header_guard(self._item["path"]):
+        with self.content.header_guard(self._item["path"]):
             exp_mapper = _HeaderExpressionMapper(self._item, self.options)
             includes = [
                 CInclude(
@@ -1307,10 +1310,10 @@ class _HeaderFile:
                         exp_mapper))
                 for link in self._item.links_to_parents("interface-include")
             ])
-            self._content.add_includes(includes)
-            with self._content.extern_c():
+            self.content.add_includes(includes)
+            with self.content.extern_c():
                 for node in self._get_nodes_in_dependency_order():
-                    self._content.add(node.content)
+                    self.content.add(node.content)
 
     def write(self, domain_path: Optional[str],
               file_path: Optional[str]) -> None:
@@ -1320,15 +1323,17 @@ class _HeaderFile:
         else:
             file_path = os.path.join(domain_path, self._item["prefix"],
                                      self._item["path"])
-        self._content.write(file_path, formatter=self._formatter)
+        self.content.write(file_path, formatter=self._formatter)
 
 
 class _ZephyrHeaderFile(_HeaderFile):
 
     def add_prologue(self) -> None:
-        with self._content.comment_block():
-            self._content.add(self._content.copyrights.get_statements())
-            self._content.add("SPDX-License-Identifier: Apache-2.0")
+        with self.content.comment_block():
+            self.content.add(
+                self.content.context.licenses.copyrights().get_statements())
+            self.content.add(
+                f"SPDX-License-Identifier: {self.content.license}")
 
     def add_node(self, item: Item) -> None:
         self._nodes[item.uid] = _ZephyrNode(self, item)
@@ -1338,8 +1343,9 @@ _HEADER_FILE = {"default": _HeaderFile, "zephyr": _ZephyrHeaderFile}
 
 
 def _generate_header_file(item: Item, domains: dict[str, str],
-                          options: dict[str, str], enabled: list[str],
-                          style: str, file_path: Optional[str],
+                          options: dict[str,
+                                        str], enabled: list[str], style: str,
+                          file_path: Optional[str], context: ContentContext,
                           formatter: Optional[ClangFormatter]) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
@@ -1352,10 +1358,20 @@ def _generate_header_file(item: Item, domains: dict[str, str],
             return
     else:
         domain_path = None
-    header_file = _HEADER_FILE[style](item, options, enabled, formatter)
+    header_file = _HEADER_FILE[style](item, options, enabled, context,
+                                      formatter)
     header_file.generate_nodes()
     header_file.finalize()
     header_file.write(domain_path, file_path)
+
+
+def _create_header_context(config: dict, item: Item,
+                           context: ContentContext) -> ContentContext:
+    path = item["path"]
+    for rule in config.get("license-by-target", []):
+        if re.fullmatch(rule["pattern"], path):
+            return context.for_work(item.uid, rule["license"])
+    return context.for_work(item.uid)
 
 
 def _gather_options(item_level_interfaces: list[str],
@@ -1387,14 +1403,16 @@ def get_affected_header_files(item_cache: ItemCache,
 
 def generate_interfaces(config: dict,
                         item_cache: ItemCache,
+                        context: ContentContext,
                         formatter: Optional[ClangFormatter] = None,
                         header_file_uids: Optional[set[str]] = None) -> None:
     """
     Generate header files according to the configuration.
 
     Args:
-        config: A dictionary with configuration entries.
+        config: The interface task.
         item_cache: The specification item cache containing the interfaces.
+        context: The content context of the task.
         formatter: The optional formatter used to format the header files.
         header_file_uids: The optional UIDs of the header file items to
             generate.  All header files are generated if it is None.
@@ -1407,19 +1425,22 @@ def generate_interfaces(config: dict,
         if header_file_uids is not None and item.uid not in header_file_uids:
             continue
         _generate_header_file(item, domains, options, enabled, style, None,
+                              _create_header_context(config, item, context),
                               formatter)
 
 
 def generate_header_file(config: dict,
                          header_file: Item,
+                         context: ContentContext,
                          file_path: Optional[str] = None,
                          formatter: Optional[ClangFormatter] = None) -> None:
     """
     Generate the header file according to the configuration.
 
     Args:
-        config: A dictionary with configuration entries.
+        config: The interface task.
         header_file: The header file specification item.
+        context: The content context of the task.
         file_path: The optional file path of the header file.
         formatter: The optional formatter used to format the header file.
     """
@@ -1427,4 +1448,5 @@ def generate_header_file(config: dict,
                               header_file.cache)
     _generate_header_file(header_file, config["domains"], options,
                           config["enabled"], config["style"], file_path,
-                          formatter)
+                          _create_header_context(config, header_file,
+                                                 context), formatter)

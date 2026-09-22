@@ -24,6 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import functools
 import os
 
 from specitems import ItemMapper, MarkdownContent, SphinxContent
@@ -32,7 +33,15 @@ from specware import (document_option, generate_application_configuration,
                       is_application_configuration_affected,
                       MarkdownInterfaceMapper, SphinxInterfaceMapper)
 
+from .conftest import code_context, doc_context
 from .util import create_item_cache
+
+_MARKDOWN_CONTENT = functools.partial(MarkdownContent, context=doc_context())
+_MARKDOWN_MAPPER = functools.partial(MarkdownInterfaceMapper,
+                                     context=doc_context())
+_SPHINX_CONTENT = functools.partial(SphinxContent, context=doc_context())
+_SPHINX_MAPPER = functools.partial(SphinxInterfaceMapper,
+                                   context=doc_context())
 
 
 def test_applconfig(tmpdir):
@@ -47,18 +56,19 @@ def test_applconfig(tmpdir):
     g_rst = os.path.join(tmpdir, "g.rst")
     applconfig_config["groups"] = [{"uid": "/g", "target": g_rst}]
     generate_application_configuration(applconfig_config, [], item_cache,
-                                       SphinxInterfaceMapper, SphinxContent)
+                                       _SPHINX_MAPPER, _SPHINX_CONTENT,
+                                       code_context())
 
     g_md = os.path.join(tmpdir, "g.md")
     applconfig_config["groups"] = [{"uid": "/g", "target": g_md}]
     generate_application_configuration(applconfig_config, [], item_cache,
-                                       MarkdownInterfaceMapper,
-                                       MarkdownContent)
+                                       _MARKDOWN_MAPPER, _MARKDOWN_CONTENT,
+                                       code_context())
 
     with open(g_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. Copyright (C) 2020, 2021 embedded brains GmbH & Co. KG
+.. Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
 
 .. This file was automatically generated.  Do not edit it.
 
@@ -450,7 +460,7 @@ description m
     with open(g_md, "r") as src:
         content = """% SPDX-License-Identifier: CC-BY-SA-4.0
 
-% Copyright (C) 2020, 2021 embedded brains GmbH & Co. KG
+% Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
 
 % This file was automatically generated.  Do not edit it.
 
@@ -1211,7 +1221,7 @@ description m
 """
         assert content == src.read()
         option_item = item_cache["/k"]
-        option_content = SphinxContent()
+        option_content = SphinxContent(context=doc_context())
         document_option(option_content, ItemMapper(option_item), option_item,
                         [])
         assert str(option_content) == """.. rubric:: OPTION TYPE:
@@ -1264,8 +1274,9 @@ def test_generate_application_configuration_no_documentation(tmpdir):
     }
     generate_application_configuration(applconfig_config, [],
                                        item_cache,
-                                       SphinxInterfaceMapper,
-                                       SphinxContent,
+                                       _SPHINX_MAPPER,
+                                       _SPHINX_CONTENT,
+                                       code_context(),
                                        write_documentation=False)
 
     assert os.path.exists(doxygen_h)

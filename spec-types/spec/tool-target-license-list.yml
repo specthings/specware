@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  list:
+    description: |
+      It shall be the rules which state the license of some produced files.
+      The first rule whose pattern matches the path of a file provides its
+      license.  A file which no rule matches takes the license of the task.
+    spec-type: tool-target-license
+spec-name: Tool Target License List
+spec-type: tool-target-license-list
+type: spec

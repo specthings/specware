@@ -1,0 +1,31 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      directives-target:
+        description: |
+          It shall be the target file of the directive documentation.
+        spec-type: str
+      group:
+        description: |
+          It shall be the UID of the interface group item.
+        spec-type: uid
+      introduction-target:
+        description: |
+          It shall be the target file of the introduction.
+        spec-type: str
+    description: |
+      This set of attributes specifies the documentation of one interface
+      group.
+    mandatory-attributes: all
+spec-name: Tool Interface Documentation Group
+spec-type: tool-interface-doc-group
+type: spec

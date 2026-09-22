@@ -28,8 +28,10 @@ import contextlib
 import os
 from pathlib import Path
 
-from specware.cliexport import cliexport
+from specware.cliexport import _bind_context, cliexport
 from specware.cliexportheader import cliexportheader
+
+from .conftest import doc_context
 from specware.clifind import clifind
 from specware.cliview import cliview
 
@@ -41,79 +43,108 @@ _FAKE_CLANG_FORMAT_FAIL = _FILES / "clang-format-fail"
 _FAKE_CLANG_FORMAT_UNAVAILABLE = _FILES / "clang-format-unavailable"
 
 
-def _create_specview_yml(tmpdir):
+def _create_specview_yml(tmpdir, domains: str = "{}"):
     base = Path(__file__).parent.absolute()
     spec_build = base / "spec-build"
     spec_rtems = base / "spec-rtems"
-    config_file = Path(tmpdir) / "specware.yml"
+    config_file = Path(tmpdir) / "specitems.yml"
     with open(config_file, "w", encoding="utf-8") as out:
-        out.write(f"""spec:
+        out.write(f"""SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+item-cache:
   cache-directory: cache
   paths:
   - {spec_build}
   - {spec_rtems}
   resolve-proxies: true
-appl-config:
-  doxygen-target: appl-config.h
-  enabled-source: []
-  enabled-documentation: []
-  groups:
-  - uid: /if/group-general
-    target: acfg.rst
-build:
-  arch: foo
-  bsp: bar
-  enabled-set:
-  - A
-  build-uids:
-  - /g
-  base-directory-map:
-  - source: {spec_build}
-    target: {tmpdir}
-  - source: {spec_rtems}
-    target: {tmpdir}
-glossary:
-  project-groups:
-  - /glossary-general
-  project-header: Glossary
-  project-target: project-glossary.md
-  documents:
-  - header: Glossary
-    md-source-paths: []
-    rest-source-paths: []
-    target: glossary.md
-interface:
+links: []
+tasks:
+- accepted-licenses: []
+  domains: {domains}
   enabled: []
   item-level-interfaces: []
-  domains: {{}}
-interface-documentation:
+  license: BSD-2-Clause
+  task-name: interface
+  task-type: interface
+- accepted-licenses: []
   enabled: []
   groups:
   - directives-target: directives.rst
     group: /if/group
     introduction-target: introduction.rst
+  license: CC-BY-SA-4.0
+  task-name: interface-documentation
+  task-type: interface-documentation
   types:
     domains: []
     groups: []
     target: types.rst
-validation:
+- documentation-accepted-licenses: []
+  documentation-license: CC-BY-SA-4.0
+  doxygen-accepted-licenses: []
+  doxygen-license: BSD-2-Clause
+  doxygen-target: appl-config.h
+  enabled-documentation: []
+  enabled-source: []
+  groups:
+  - target: acfg.rst
+    uid: /if/group-general
+  task-name: appl-config
+  task-type: appl-config
+- accepted-licenses: []
   base-directory-map:
   - source: {spec_build}
     target: {tmpdir}
   - source: {spec_rtems}
     target: {tmpdir}
-spec-documentation:
-  target: items.rst
+  license: BSD-2-Clause
+  task-name: validation
+  task-type: validation
+- accepted-licenses: []
+  documents:
+  - header: Glossary
+    md-source-paths: []
+    rest-source-paths: []
+    target: glossary.md
+  license: CC-BY-SA-4.0
+  project-groups:
+  - /glossary-general
+  project-header: Glossary
+  project-target: project-glossary.md
+  task-name: glossary
+  task-type: glossary
+- accepted-licenses: []
   hierarchy-subsection-name: Specification Item Hierarchy
-  hierarchy-text: |
-    The specification item types have the following hierarchy:
-  ignore: '^$'
+  hierarchy-text: 'The specification item types have the following hierarchy:
+
+    '
+  ignore: ^$
   item-types-subsection-name: Specification Item Types
   label-prefix: SpecType
+  license: CC-BY-SA-4.0
   root-type-uid: /spec/root
   section-label-prefix: ReqEng
   section-name: Specification Items
+  target: items.rst
+  task-name: spec-documentation
+  task-type: spec-documentation
   value-types-subsection-name: Specification Attribute Sets and Value Types
+- arch: foo
+  base-directory-map:
+  - source: {spec_build}
+    target: {tmpdir}
+  - source: {spec_rtems}
+    target: {tmpdir}
+  bsp: bar
+  build-uids:
+  - /g
+  enabled-set:
+  - A
+  task-name: build
+  task-type: build
+type: tool-config
 """)
     return str(config_file)
 
@@ -189,16 +220,60 @@ def test_cliexport_format_code(tmpdir, caplog):
             "No such file or directory" in get_and_clear_log(caplog))
 
 
-def test_cliexportheader(tmpdir):
+def _add_two_interface_tasks(config_file: str) -> None:
+    with open(config_file, "r", encoding="utf-8") as src:
+        text = src.read()
+    task = text[text.index("- accepted-licenses: []\n  domains:"
+                           ):text.index("  task-type: interface\n") +
+                len("  task-type: interface\n")]
+    task = task.replace("domains: {}", "domains: {/if/domain: out}")
+    text = text.replace(
+        "tasks:\n", "tasks:\n" + task +
+        task.replace("task-name: interface", "task-name: interface-2"), 1)
+    with open(config_file, "w", encoding="utf-8") as dst:
+        dst.write(text)
+
+
+def test_cliexport_rejects_a_domain_of_two_tasks(tmpdir, caplog):
     config_file = _create_specview_yml(tmpdir)
-    exit_code = cliexportheader([
-        "command", "--config-file", config_file, "/if/header-empty", "header.h"
+    _add_two_interface_tasks(config_file)
+    exit_code = cliexport(["command", "--config-file", config_file])
+    assert exit_code == 1
+    assert ("the interface tasks interface, interface-2 map the domain "
+            "/if/domain") in get_and_clear_log(caplog)
+    assert not os.path.exists(os.path.join(tmpdir, "out"))
+    config_file = _create_specview_yml(tmpdir, "{/if/domain: out}")
+    exit_code = cliexport([
+        "command", "--config-file", config_file, "--no-code",
+        "--no-documentation"
     ])
     assert exit_code == 0
 
 
-def test_cliexportheader_format_code(tmpdir, caplog):
+def test_cliexportheader(tmpdir, caplog):
+    config_file = _create_specview_yml(tmpdir, "{/if/domain: out}")
+    exit_code = cliexportheader([
+        "command", "--config-file", config_file, "/if/header-empty", "header.h"
+    ])
+    assert exit_code == 0
     config_file = _create_specview_yml(tmpdir)
+    exit_code = cliexportheader([
+        "command", "--config-file", config_file, "/if/header-empty", "header.h"
+    ])
+    assert exit_code == 1
+    assert ("no interface task maps the domain /if/domain of "
+            "/if/header-empty") in get_and_clear_log(caplog)
+    _add_two_interface_tasks(config_file)
+    exit_code = cliexportheader([
+        "command", "--config-file", config_file, "/if/header-empty", "header.h"
+    ])
+    assert exit_code == 1
+    assert ("the interface tasks interface, interface-2 map the domain "
+            "/if/domain of /if/header-empty") in get_and_clear_log(caplog)
+
+
+def test_cliexportheader_format_code(tmpdir, caplog):
+    config_file = _create_specview_yml(tmpdir, "{/if/domain: out}")
     header = Path(tmpdir) / "header.h"
     exit_code = cliexportheader([
         "command", "--config-file", config_file, "--format-code",
@@ -273,13 +348,20 @@ def _create_registers_yml(tmpdir):
     base = Path(__file__).parent.absolute()
     config_file = Path(tmpdir) / "registers.yml"
     with open(config_file, "w", encoding="utf-8") as out:
-        out.write(f"""spec:
+        out.write(f"""SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+item-cache:
   cache-directory: cache
   paths:
   - {base / "spec-build"}
   - {base / "spec-rtems"}
   - {base / "spec-registers"}
   resolve-proxies: true
+links: []
+tasks: []
+type: tool-config
 """)
     return str(config_file)
 
@@ -483,3 +565,12 @@ def test_cliexport_item_via_two_paths(tmpdir):
          str(link)])
     assert exit_code == 0
     assert os.path.exists(os.path.join(tmpdir, "tc.c"))
+
+
+def test_bind_context_creates_a_work_per_content():
+    create_content, _, _ = _bind_context("rest", doc_context())
+    first = create_content()
+    second = create_content()
+    first.register_copyright("Copyright (C) 2020 John Doe")
+    assert first.context.licenses.copyrights().get_statements()
+    assert not second.context.licenses.copyrights().get_statements()

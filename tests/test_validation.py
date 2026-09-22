@@ -33,6 +33,7 @@ from specware import (augment_with_test_case_links, generate_validation,
                       get_affected_targets, SpecWareTypeProvider,
                       TransitionMap)
 
+from .conftest import code_context
 from .util import create_item_cache, get_and_clear_log
 
 
@@ -51,7 +52,7 @@ def test_validation(tmpdir):
         }]
     }
 
-    generate_validation(validation_config, EmptyItemCache())
+    generate_validation(validation_config, EmptyItemCache(), code_context())
 
     item_cache = create_item_cache(tmpdir, "spec-validation")
     augment_with_test_case_links(item_cache)
@@ -74,8 +75,9 @@ def test_validation(tmpdir):
     transition_map = TransitionMap(item_cache["/action3"])
     assert len(list(transition_map.get_post_conditions(["RTEMS_SMP"]))) == 9
 
-    generate_validation(validation_config, item_cache)
-    generate_validation(validation_config, item_cache, ["fet.c", "ts.c"])
+    generate_validation(validation_config, item_cache, code_context())
+    generate_validation(validation_config, item_cache, code_context(),
+                        ["fet.c", "ts.c"])
 
     with open(os.path.join(base_directory, "fet.c"), "r") as src:
         content = """/* SPDX-License-Identifier: BSD-2-Clause */
@@ -2877,7 +2879,7 @@ def test_validation_invalid_actions(caplog, tmpdir):
         "requirement",
     }
     _add_item(item_cache, "/a", action_data, "requirement/functional/action")
-    generate_validation(validation_config, item_cache)
+    generate_validation(validation_config, item_cache, code_context())
     assert ("the source file 'a.c' is not a source file of an "
             "item of type 'build/test-program'") in get_and_clear_log(caplog)
     test_program_data = {
@@ -2892,7 +2894,7 @@ def test_validation_invalid_actions(caplog, tmpdir):
     _add_item(item_cache, "/tp", test_program_data, "build/test-program")
     match = "pre-condition 'A' of spec:/a has no states"
     with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+        generate_validation(validation_config, item_cache, code_context())
     action_data["pre-conditions"][0]["states"] = [{
         "name": "A0",
         "test-code": None,
@@ -2901,7 +2903,7 @@ def test_validation_invalid_actions(caplog, tmpdir):
     match = ("transition map descriptor 0 of spec:/a refers to non-existent "
              "post-condition state 'X0'")
     with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+        generate_validation(validation_config, item_cache, code_context())
     action_data["post-conditions"][0]["states"] = [{
         "name": "X0",
         "test-code": None,
@@ -2911,7 +2913,7 @@ def test_validation_invalid_actions(caplog, tmpdir):
     match = ("transition map descriptor 0 of spec:/a refers to non-existent "
              "state 'a' of pre-condition 'A'")
     with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+        generate_validation(validation_config, item_cache, code_context())
     action_data["transition-map"][0]["pre-conditions"]["A"] = ["A0"]
     action_data["transition-map"].append({
         "enabled-by": True,
@@ -2925,7 +2927,7 @@ def test_validation_invalid_actions(caplog, tmpdir):
     match = ("transition map descriptor 1 of spec:/a duplicates pre-condition "
              "set {A=A0} defined by transition map descriptor 0")
     with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+        generate_validation(validation_config, item_cache, code_context())
     action_data["transition-map"][1]["pre-conditions"]["A"] = ["A1"]
     action_data["pre-conditions"][0]["states"].append({
         "name": "A1",
@@ -2940,18 +2942,18 @@ def test_validation_invalid_actions(caplog, tmpdir):
     match = ("transition map of spec:/a contains no default entry "
              "for pre-condition set {A=A2}")
     with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+        generate_validation(validation_config, item_cache, code_context())
     action_data["transition-map"][0]["enabled-by"] = False
     match = ("transition map descriptor 0 of spec:/a is the first "
              "variant for {A=A0} and it is not enabled by default")
     with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+        generate_validation(validation_config, item_cache, code_context())
     action_data["transition-map"][0]["enabled-by"] = True
     action_data["transition-map"][-1]["post-conditions"]["X"] = []
     match = ("cannot determine state for post-condition 'X' of transition map "
              "descriptor 1 of spec:/a for pre-condition set {A=A1}")
     with pytest.raises(ValueError, match=match):
-        generate_validation(validation_config, item_cache)
+        generate_validation(validation_config, item_cache, code_context())
 
 
 def test_get_affected_targets(tmpdir):

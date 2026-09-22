@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      license:
+        description: |
+          It shall be the license of a produced file whose path matches the
+          pattern.
+        spec-type: spdx-license-identifier
+      pattern:
+        description: |
+          It shall be a Python regular expression which matches the whole path
+          of a produced file.
+        spec-type: str
+    description: |
+      This set of attributes states the license of the produced files whose
+      path matches a pattern.
+    mandatory-attributes: all
+spec-name: Tool Target License
+spec-type: tool-target-license
+type: spec

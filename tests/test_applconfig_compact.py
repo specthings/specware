@@ -28,6 +28,7 @@ from specitems import ItemMapper, SphinxContent
 
 from specware import document_option
 
+from .conftest import doc_context
 from .util import create_item_cache
 
 
@@ -35,7 +36,7 @@ def test_applconfig_compact(tmpdir):
     item_cache = create_item_cache(tmpdir, "spec-applconfig")
 
     item = item_cache["/a"]
-    content = SphinxContent(topic_as_definition=True)
+    content = SphinxContent(context=doc_context(), topic_as_definition=True)
     document_option(content, ItemMapper(item), item, [])
     assert str(content) == """Option type
     This configuration option is a boolean feature define.

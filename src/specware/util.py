@@ -25,14 +25,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
+import contextlib
 import logging
 import os
 from pathlib import Path
 import subprocess
-from typing import Any, Optional, Union
+from typing import Any, Callable, Iterator, NamedTuple, Optional, Union
 
-from specitems import (ClangFormatter, ItemDataByUID, load_config,
-                       pickle_load_data_by_uid, SpecTypeProvider)
+from specitems import (ClangFormatter, IsEnabled, Item, ItemCache,
+                       ItemCacheConfig, ItemDataByUID, SpecTypeProvider,
+                       create_config, find_config_file, load_config_item,
+                       monitor_logging, pickle_load_data_by_uid)
 
 
 class ClangFormatError(Exception):
@@ -136,6 +139,30 @@ def log_clang_format_failure(err: subprocess.CalledProcessError) -> None:
                   err.returncode, _get_stderr(err))
 
 
+def run_with_clang_formatter(
+        args: argparse.Namespace, run: Callable[[Optional[ClangFormatter]],
+                                                None]) -> int:
+    """
+    Run a command with the clang-format tool which the arguments state.
+
+    Args:
+        args: The parsed arguments of :func:`add_clang_format_arguments`.
+        run: The command.  It gets the formatter, or None where the arguments
+            demand no formatting.
+
+    Returns:
+        The exit code of the command.
+    """
+    with monitor_logging() as monitor:
+        try:
+            run(create_clang_formatter(args))
+        except ClangFormatError as err:
+            logging.error("%s", err)
+        except subprocess.CalledProcessError as err:
+            log_clang_format_failure(err)
+        return monitor.get_status().exit_code()
+
+
 def load_specware_types() -> ItemDataByUID:
     """ Load the specware specification types. """
     return pickle_load_data_by_uid(
@@ -148,28 +175,6 @@ class SpecWareTypeProvider(SpecTypeProvider):
     def __init__(self, data_by_uid: ItemDataByUID) -> None:
         data_by_uid.update(load_specware_types())
         super().__init__(data_by_uid)
-
-
-def load_specware_config(config_file: str | None) -> tuple[dict, str]:
-    """
-    Load the specware configuration file and determines the working
-    directory.
-    """
-    if config_file is None:
-        base = Path(".").absolute()
-        while True:
-            path = base / "specware.yml"
-            if path.is_file():
-                break
-            next_base = base.parent
-            if next_base == base:
-                raise FileNotFoundError(
-                    "cannot find file specware.yml "
-                    "in the current directory or its parent directories")
-            base = next_base
-    else:
-        path = Path(config_file)
-    return load_config(str(path)), str(path.parent.absolute())
 
 
 def run_command(args: list[str],
@@ -207,3 +212,53 @@ def run_command(args: list[str],
                 f"in '{cwd}' command '{' '.join(args)}' returned "
                 f"unexpected status {actual_status} with output: {stdout}")
         return actual_status
+
+
+class Tree(NamedTuple):
+    """ Is the tree of a configuration file. """
+
+    #: The configuration item.
+    config: Item
+
+    #: The item cache of the tree.
+    item_cache: ItemCache
+
+    #: The directory of the configuration file.
+    directory: str
+
+
+@contextlib.contextmanager
+def open_tree(config_file: Optional[str],
+              is_item_enabled: Optional[IsEnabled] = None,
+              enabled_set: Optional[list[str]] = None) -> Iterator[Tree]:
+    """
+    Open the tree of the configuration file.
+
+    The paths of a configuration are relative to the directory of its file,
+    so the scope runs in that directory.
+
+    Args:
+        config_file: The path to the configuration file.  None searches the
+            current directory and its parent directories.
+        is_item_enabled: The optional enabled status of an item.
+        enabled_set: The optional enabled set of the item cache.
+
+    Yields:
+        The tree.
+    """
+    type_provider = SpecWareTypeProvider({})
+    config = load_config_item(config_file, type_provider)
+    directory = str(find_config_file(config_file).parent)
+    with contextlib.chdir(directory):
+        item_cache_config = create_config(config["item-cache"],
+                                          ItemCacheConfig)
+        if enabled_set is not None:
+            item_cache_config.enabled_set = enabled_set
+        if is_item_enabled is None:
+            item_cache = ItemCache(item_cache_config,
+                                   type_provider=type_provider)
+        else:
+            item_cache = ItemCache(item_cache_config,
+                                   is_item_enabled=is_item_enabled,
+                                   type_provider=type_provider)
+        yield Tree(config, item_cache, directory)

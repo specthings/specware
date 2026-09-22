@@ -28,12 +28,43 @@ import os
 import re
 import pytest
 
-from specitems import EmptyItemCache
+from specitems import EmptyItemCache, LicenseAggregate
 
 from specware import (generate_header_file, generate_interfaces,
                       get_affected_header_files)
 
+from .conftest import CODE_LICENSE, code_context, zephyr_context
 from .util import create_item_cache
+
+
+def test_interface_license_by_target(tmpdir):
+    base_directory = os.path.join(tmpdir, "base")
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    interface_config = {
+        "item-level-interfaces": ["/command-line"],
+        "domains": {
+            "/domain-abc": base_directory
+        },
+        "enabled": [],
+        "license-by-target": [{
+            "pattern": "h2?",
+            "license": "MIT"
+        }, {
+            "pattern": "h\\.h",
+            "license": "CC-BY-SA-4.0"
+        }]
+    }
+    context = code_context()
+    context.licenses = LicenseAggregate(CODE_LICENSE,
+                                        ["BSD-2-Clause", "CC-BY-SA-4.0"],
+                                        "code")
+    generate_interfaces(interface_config, item_cache, context)
+    with open(os.path.join(base_directory, "include", "h.h"), "r") as src:
+        assert src.read().startswith(
+            "/* SPDX-License-Identifier: CC-BY-SA-4.0 */\n")
+    with open(os.path.join(base_directory, "include", "h2.h"), "r") as src:
+        assert src.read().startswith(
+            "/* SPDX-License-Identifier: BSD-2-Clause */\n")
 
 
 def test_interface(tmpdir):
@@ -46,11 +77,11 @@ def test_interface(tmpdir):
         },
         "enabled": []
     }
-    generate_interfaces(interface_config, EmptyItemCache())
+    generate_interfaces(interface_config, EmptyItemCache(), code_context())
 
     item_cache = create_item_cache(tmpdir, "spec-interface")
     interface_config["item-level-interfaces"] = ["/command-line"]
-    generate_interfaces(interface_config, item_cache)
+    generate_interfaces(interface_config, item_cache, code_context())
 
     with open(os.path.join(base_directory, "include", "h.h"), "r") as src:
         content = """/* SPDX-License-Identifier: BSD-2-Clause */
@@ -1097,7 +1128,8 @@ __attribute__((__const__)) static inline int VeryLongFunction(
         "style": "zephyr"
     }
     file_path = os.path.join(base_directory, "header.h")
-    generate_header_file(header_file_config, item_cache["/h"], file_path)
+    generate_header_file(header_file_config, item_cache["/h"],
+                         zephyr_context(), file_path)
 
     with open(file_path, "r") as src:
         content = """/*
@@ -1582,7 +1614,7 @@ def _generate_header_file_with(tmpdir, style, spec_dir, uid="/h"):
         "enabled": [],
         "style": style
     }
-    generate_header_file(header_file_config, item_cache[uid],
+    generate_header_file(header_file_config, item_cache[uid], code_context(),
                          os.path.join(tmpdir, "header.h"))
 
 
@@ -1651,11 +1683,13 @@ def test_generate_interfaces_selection(tmpdir):
         "enabled": []
     }
     item_cache = create_item_cache(tmpdir, "spec-interface")
-    generate_interfaces(interface_config, item_cache, None, {"/h2"})
+    generate_interfaces(interface_config, item_cache, code_context(), None,
+                        {"/h2"})
 
     assert os.path.exists(os.path.join(base_directory, "include", "h2.h"))
     assert not os.path.exists(os.path.join(base_directory, "include", "h.h"))
 
-    generate_interfaces(interface_config, item_cache, None, set())
+    generate_interfaces(interface_config, item_cache, code_context(), None,
+                        set())
 
     assert not os.path.exists(os.path.join(base_directory, "include", "h.h"))

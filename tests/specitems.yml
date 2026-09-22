@@ -1,0 +1,91 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+item-cache:
+  cache-directory: cache
+  paths:
+  - spec-build
+  - spec-rtems
+  resolve-proxies: true
+links: []
+tasks:
+- accepted-licenses: []
+  domains: {}
+  enabled: []
+  item-level-interfaces: []
+  license: BSD-2-Clause
+  task-name: interface
+  task-type: interface
+- accepted-licenses: []
+  enabled: []
+  groups:
+  - directives-target: directives.rst
+    group: /if/group
+    introduction-target: introduction.rst
+  license: CC-BY-SA-4.0
+  task-name: interface-documentation
+  task-type: interface-documentation
+  types:
+    domains: []
+    groups: []
+    target: types.rst
+- documentation-accepted-licenses: []
+  documentation-license: CC-BY-SA-4.0
+  doxygen-accepted-licenses: []
+  doxygen-license: BSD-2-Clause
+  doxygen-target: appl-config.h
+  enabled-documentation: []
+  enabled-source: []
+  groups:
+  - target: acfg.rst
+    uid: /if/group-general
+  task-name: appl-config
+  task-type: appl-config
+- accepted-licenses: []
+  base-directory-map:
+  - source: spec-build
+    target: .
+  license: BSD-2-Clause
+  task-name: validation
+  task-type: validation
+- accepted-licenses: []
+  documents:
+  - header: Glossary
+    rest-source-paths: []
+    target: glossary.rst
+  license: CC-BY-SA-4.0
+  project-groups:
+  - /glossary-general
+  project-header: Glossary
+  project-target: project-glossary.rst
+  task-name: glossary
+  task-type: glossary
+- accepted-licenses: []
+  hierarchy-subsection-name: Specification Item Hierarchy
+  hierarchy-text: 'The specification item types have the following hierarchy:
+
+    '
+  ignore: ^$
+  item-types-subsection-name: Specification Item Types
+  label-prefix: SpecType
+  license: CC-BY-SA-4.0
+  root-type-uid: /spec/root
+  section-label-prefix: ReqEng
+  section-name: Specification Items
+  target: items.rst
+  task-name: spec-documentation
+  task-type: spec-documentation
+  value-types-subsection-name: Specification Attribute Sets and Value Types
+- arch: foo
+  base-directory-map:
+  - source: spec-build
+    target: .
+  bsp: bar
+  build-uids:
+  - /g
+  enabled-set:
+  - A
+  task-name: build
+  task-type: build
+type: tool-config

@@ -28,19 +28,16 @@ file.
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
-import contextlib
-import logging
-import subprocess
 import sys
+import logging
 from typing import Optional
 
-from specitems import (ClangFormatter, ItemCache, ItemCacheConfig,
-                       create_config, item_is_enabled, monitor_logging)
+from specitems import (ClangFormatter, Item, LicenseProvider,
+                       check_license_items, create_content_context,
+                       item_is_enabled, yield_tasks)
 
-from specware import (ClangFormatError, SpecWareTypeProvider,
-                      add_clang_format_arguments, create_clang_formatter,
-                      generate_header_file, load_specware_config,
-                      log_clang_format_failure)
+from specware import (add_clang_format_arguments, generate_header_file,
+                      open_tree, run_with_clang_formatter)
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -65,27 +62,43 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv[1:])
 
 
+def _get_interface_task(config: Item, header_file: Item) -> Optional[dict]:
+    domain = header_file.parent("interface-placement")
+    tasks = [
+        task for task in yield_tasks(config, "interface")
+        if domain.uid in task["domains"]
+    ]
+    if len(tasks) == 1:
+        return tasks[0]
+    if tasks:
+        names = ", ".join(task["task-name"] for task in tasks)
+        logging.error("the interface tasks %s map the domain %s of %s", names,
+                      domain.uid, header_file.uid)
+    else:
+        logging.error("no interface task maps the domain %s of %s", domain.uid,
+                      header_file.uid)
+    return None
+
+
 def _export_header(args: argparse.Namespace,
                    formatter: Optional[ClangFormatter]) -> None:
-    config, working_directory = load_specware_config(args.config_file)
-    with contextlib.chdir(working_directory):
-        config["enabled"] = []
-        config["interface"]["style"] = args.style
-        item_cache = ItemCache(create_config(config["spec"], ItemCacheConfig),
-                               type_provider=SpecWareTypeProvider({}),
-                               is_item_enabled=item_is_enabled)
-        generate_header_file(config["interface"], item_cache[args.uid[0]],
+    with open_tree(args.config_file,
+                   item_is_enabled) as (config, item_cache, _):
+        provider = LicenseProvider(item_cache.values())
+        check_license_items(config, provider)
+        header_file = item_cache[args.uid[0]]
+        task = _get_interface_task(config, header_file)
+        if task is None:
+            return
+        task["enabled"] = []
+        task["style"] = args.style
+        generate_header_file(task, header_file,
+                             create_content_context(task, provider),
                              args.file[0], formatter)
 
 
 def cliexportheader(argv: list[str] = sys.argv):
     """ Export the specified header to its target file. """
     args = _parse_args(argv)
-    with monitor_logging() as monitor:
-        try:
-            _export_header(args, create_clang_formatter(args))
-        except ClangFormatError as err:
-            logging.error("%s", err)
-        except subprocess.CalledProcessError as err:
-            log_clang_format_failure(err)
-        return monitor.get_status().exit_code()
+    return run_with_clang_formatter(
+        args, lambda formatter: _export_header(args, formatter))

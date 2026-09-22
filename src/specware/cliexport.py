@@ -28,34 +28,96 @@ documentation files.
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
-import contextlib
+import functools
 import logging
 import os
-import subprocess
 import sys
-from typing import Optional
+from typing import Any, Optional
 
-from specitems import (ClangFormatter, Content, DocumentGlossaryConfig,
-                       GlossaryConfig, ItemCache, ItemCacheConfig,
+from specitems import (ClangFormatter, ContentContext, DocumentGlossaryConfig,
+                       GlossaryConfig, Item, ItemCache, LicenseProvider,
                        MarkdownContent, MarkdownMapper, SpecDocumentConfig,
                        SphinxContent, SphinxMapper, augment_glossary_terms,
-                       create_config, generate_glossary,
+                       check_license_items, create_config,
+                       create_content_context, generate_glossary,
                        generate_specification_documentation, item_is_enabled,
-                       monitor_logging)
+                       yield_tasks)
 
 from specware import (
-    ClangFormatError, MarkdownInterfaceMapper, SpecWareTypeProvider,
-    SphinxInterfaceMapper, add_clang_format_arguments, create_clang_formatter,
+    run_with_clang_formatter, open_tree, MarkdownInterfaceMapper,
+    SphinxInterfaceMapper, add_clang_format_arguments,
     generate_application_configuration, generate_interface_documentation,
     gather_referencing_items, generate_interfaces, generate_validation,
     get_affected_header_files, get_affected_targets,
-    is_application_configuration_affected, load_specware_config,
-    log_clang_format_failure)
+    is_application_configuration_affected)
 
 _DOC_FORMAT = {
     "myst": (MarkdownContent, MarkdownMapper, MarkdownInterfaceMapper),
     "rest": (SphinxContent, SphinxMapper, SphinxInterfaceMapper)
 }
+
+
+def _bind_context(fmt: str, context: ContentContext) -> tuple[Any, Any, Any]:
+    """
+    Bind the context to the content and mapper constructors of the format.
+
+    Args:
+        fmt: The documentation format.
+        context: The content context of a task.
+
+    Returns:
+        The content constructor, the mapper constructor and the interface
+        mapper constructor.  Every content which the content constructor
+        creates is a work of its own.
+    """
+    create_content, create_mapper, create_interface_mapper = _DOC_FORMAT[fmt]
+
+    def _create_content(*args: Any, **kwargs: Any) -> Any:
+        return create_content(*args,
+                              context=context.for_work(context.licenses.name),
+                              **kwargs)
+
+    return (_create_content, functools.partial(create_mapper, context=context),
+            functools.partial(create_interface_mapper, context=context))
+
+
+#: The keys of a task which its configuration object takes not.
+_TASK_KEYS = ("task-name", "task-type", "params", "license",
+              "accepted-licenses", "automatically-generated-warning")
+
+
+def _task_config(task: dict) -> dict:
+    """ Get the settings of the task without the keys of every task. """
+    return {key: value for key, value in task.items() if key not in _TASK_KEYS}
+
+
+def _generate_appl_config(task: dict, group_uids: list[str],
+                          item_cache: ItemCache, args: argparse.Namespace,
+                          provider: LicenseProvider,
+                          formatter: Optional[ClangFormatter],
+                          write_documentation: bool) -> None:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    # The task produces a Doxygen source and documentation sources, and each
+    # kind states its own license.
+    create_content, _, create_interface_mapper = _bind_context(
+        args.format, create_content_context(task, provider, "documentation-"))
+    generate_application_configuration(task,
+                                       group_uids,
+                                       item_cache,
+                                       create_interface_mapper,
+                                       create_content,
+                                       create_content_context(
+                                           task, provider, "doxygen-"),
+                                       formatter,
+                                       write_documentation=write_documentation)
+
+
+def _get_group_uids(config: Item) -> list[str]:
+    return [
+        doc["group"] for task in yield_tasks(config, "interface-documentation")
+        for doc in task["groups"]
+    ]
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -157,111 +219,153 @@ def _resolve_item_files(item_cache: ItemCache,
     return uids if resolved else None
 
 
-def _generate_selected(item_cache: ItemCache, config: dict,
-                       args: argparse.Namespace,
+def _generate_selected(item_cache: ItemCache, config: Item,
+                       args: argparse.Namespace, provider: LicenseProvider,
                        formatter: Optional[ClangFormatter],
                        uids: set[str]) -> None:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     if args.no_code:
         return
-    create_content, _, create_interface_mapper = _DOC_FORMAT[args.format]
-    group_uids = [
-        doc["group"] for doc in config["interface-documentation"]["groups"]
-    ]
+    group_uids = _get_group_uids(config)
     if not args.no_interface_code:
         header_file_uids = get_affected_header_files(item_cache, uids)
         if header_file_uids:
-            generate_interfaces(config["interface"], item_cache, formatter,
-                                header_file_uids)
+            for task in yield_tasks(config, "interface"):
+                generate_interfaces(task, item_cache,
+                                    create_content_context(task, provider),
+                                    formatter, header_file_uids)
     if not args.no_application_configuration_code:
-        if is_application_configuration_affected(config["appl-config"],
-                                                 item_cache, uids):
-            generate_application_configuration(config["appl-config"],
-                                               group_uids,
-                                               item_cache,
-                                               create_interface_mapper,
-                                               create_content,
-                                               formatter,
-                                               write_documentation=False)
+        for task in yield_tasks(config, "appl-config"):
+            if not is_application_configuration_affected(
+                    task, item_cache, uids):
+                continue
+            _generate_appl_config(task, group_uids, item_cache, args, provider,
+                                  formatter, False)
 
 
-def _generate_validation(item_cache: ItemCache, config: dict,
-                         args: argparse.Namespace,
+def _generate_validation(item_cache: ItemCache, config: Item,
+                         args: argparse.Namespace, provider: LicenseProvider,
                          formatter: Optional[ClangFormatter],
                          working_directory: str, target_files: list[str],
                          uids: set[str]) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
-    config_validation = config["validation"]
-    for mapping in config_validation["base-directory-map"]:
-        for key, value in mapping.items():
-            mapping[key] = os.path.normpath(
-                os.path.join(working_directory, value))
-    if not args.targets:
-        generate_validation(config_validation, item_cache, None, formatter)
-        return
-    targets = list(target_files)
-    if uids:
-        targets.extend(sorted(get_affected_targets(item_cache, uids)))
-    # An empty target list makes generate_validation() generate all test
-    # source files.  Generate nothing if a selection was made which is
-    # associated with no test source file at all.
-    if targets:
-        generate_validation(config_validation, item_cache, targets, formatter)
+    for task in yield_tasks(config, "validation"):
+        for mapping in task["base-directory-map"]:
+            for key, value in mapping.items():
+                mapping[key] = os.path.normpath(
+                    os.path.join(working_directory, value))
+        context = create_content_context(task, provider)
+        if not args.targets:
+            generate_validation(task, item_cache, context, None, formatter)
+            continue
+        targets = list(target_files)
+        if uids:
+            targets.extend(sorted(get_affected_targets(item_cache, uids)))
+        # An empty target list makes generate_validation() generate all test
+        # source files.  Generate nothing if a selection was made which is
+        # associated with no test source file at all.
+        if targets:
+            generate_validation(task, item_cache, context, targets, formatter)
 
 
-def _generate_more(item_cache: ItemCache, config: dict,
-                   args: argparse.Namespace,
+def _generate_code(item_cache: ItemCache, config: Item,
+                   args: argparse.Namespace, provider: LicenseProvider,
                    formatter: Optional[ClangFormatter]) -> None:
-    create_content, create_mapper, create_interface_mapper = _DOC_FORMAT[
-        args.format]
-    group_uids = [
-        doc["group"] for doc in config["interface-documentation"]["groups"]
-    ]
-    if not args.no_code:
-        if not args.no_interface_code:
-            generate_interfaces(config["interface"], item_cache, formatter)
-        if not args.no_application_configuration_code:
-            generate_application_configuration(config["appl-config"],
-                                               group_uids, item_cache,
-                                               create_interface_mapper,
-                                               create_content, formatter)
-    if not args.no_documentation:
-        some_item = next(iter(item_cache.values()))
+    group_uids = _get_group_uids(config)
+    if not args.no_interface_code:
+        for task in yield_tasks(config, "interface"):
+            generate_interfaces(task, item_cache,
+                                create_content_context(task, provider),
+                                formatter)
+    if args.no_application_configuration_code:
+        return
+    for task in yield_tasks(config, "appl-config"):
+        _generate_appl_config(task, group_uids, item_cache, args, provider,
+                              formatter, True)
+
+
+def _generate_spec_documentation(item_cache: ItemCache, config: Item,
+                                 args: argparse.Namespace,
+                                 provider: LicenseProvider) -> None:
+    some_item = next(iter(item_cache.values()))
+    for task in yield_tasks(config, "spec-documentation"):
+        context = create_content_context(task, provider)
+        create_content, create_mapper, _ = _bind_context(args.format, context)
         mapper = create_mapper(some_item)
         content = create_content()
-        spec_doc_config = create_config(config["spec-documentation"],
-                                        SpecDocumentConfig)
+        spec_doc_config = create_config(_task_config(task), SpecDocumentConfig)
         spec_doc_config.add_get_spec_name(mapper, content)
         generate_specification_documentation(content, spec_doc_config, mapper)
-        glossary_documents = config["glossary"].pop("documents")
-        glossary_config = create_config(config["glossary"], GlossaryConfig)
-        for document in glossary_documents:
+
+
+def _generate_documentation(item_cache: ItemCache, config: Item,
+                            args: argparse.Namespace,
+                            provider: LicenseProvider) -> None:
+    some_item = next(iter(item_cache.values()))
+    group_uids = _get_group_uids(config)
+    _generate_spec_documentation(item_cache, config, args, provider)
+    for task in yield_tasks(config, "glossary"):
+        context = create_content_context(task, provider)
+        create_content, _, create_interface_mapper = _bind_context(
+            args.format, context)
+        settings = _task_config(task)
+        documents = settings.pop("documents", [])
+        glossary_config = create_config(settings, GlossaryConfig)
+        for document in documents:
             glossary_config.documents.append(
                 create_config(document, DocumentGlossaryConfig))
         generate_glossary(glossary_config, item_cache,
                           create_interface_mapper(some_item, group_uids),
                           create_content)
-        generate_interface_documentation(config["interface-documentation"],
-                                         item_cache, create_interface_mapper,
+    for task in yield_tasks(config, "interface-documentation"):
+        context = create_content_context(task, provider)
+        create_content, _, create_interface_mapper = _bind_context(
+            args.format, context)
+        generate_interface_documentation(task, item_cache,
+                                         create_interface_mapper,
                                          create_content)
+
+
+def _generate_more(item_cache: ItemCache, config: Item,
+                   args: argparse.Namespace, provider: LicenseProvider,
+                   formatter: Optional[ClangFormatter]) -> None:
+    if not args.no_code:
+        _generate_code(item_cache, config, args, provider, formatter)
+    if not args.no_documentation:
+        _generate_documentation(item_cache, config, args, provider)
+
+
+def _check_interface_domains(config: Item) -> bool:
+    tasks_by_domain: dict[str, list[str]] = {}
+    for task in yield_tasks(config, "interface"):
+        for domain in task["domains"]:
+            tasks_by_domain.setdefault(domain, []).append(task["task-name"])
+    unique = True
+    for domain, names in sorted(tasks_by_domain.items()):
+        if len(names) > 1:
+            logging.error("the interface tasks %s map the domain %s",
+                          ", ".join(names), domain)
+            unique = False
+    return unique
 
 
 def _export(args: argparse.Namespace, formatter: Optional[ClangFormatter],
             invocation_directory: str) -> None:
-    config, working_directory = load_specware_config(args.config_file)
-    Content.AUTOMATICALLY_GENERATED_WARNING = config.get(
-        "automatically-generated-warning",
-        Content.AUTOMATICALLY_GENERATED_WARNING)
     target_files, item_files = _split_targets(args.targets,
                                               invocation_directory)
-    with contextlib.chdir(working_directory):
-        item_cache = ItemCache(create_config(config["spec"], ItemCacheConfig),
-                               type_provider=SpecWareTypeProvider({}),
-                               is_item_enabled=item_is_enabled)
-        for uid in config["glossary"]["project-groups"]:
-            group = item_cache[uid]
-            assert group.type == "glossary/group"
-            augment_glossary_terms(group, [])
+    with open_tree(args.config_file,
+                   item_is_enabled) as (config, item_cache, working_directory):
+        provider = LicenseProvider(item_cache.values())
+        check_license_items(config, provider)
+        if not _check_interface_domains(config):
+            return
+        for task in yield_tasks(config, "glossary"):
+            for uid in task["project-groups"]:
+                group = item_cache[uid]
+                assert group.type == "glossary/group"
+                augment_glossary_terms(group, [])
 
         uids: set[str] = set()
         if item_files:
@@ -275,13 +379,14 @@ def _export(args: argparse.Namespace, formatter: Optional[ClangFormatter],
             uids.update(gather_referencing_items(item_cache, uids))
 
         if not args.no_code and not args.no_validation_code:
-            _generate_validation(item_cache, config, args, formatter,
+            _generate_validation(item_cache, config, args, provider, formatter,
                                  working_directory, target_files, uids)
 
         if not args.targets:
-            _generate_more(item_cache, config, args, formatter)
+            _generate_more(item_cache, config, args, provider, formatter)
         elif uids:
-            _generate_selected(item_cache, config, args, formatter, uids)
+            _generate_selected(item_cache, config, args, provider, formatter,
+                               uids)
 
 
 def cliexport(argv: list[str] = sys.argv):
@@ -290,11 +395,5 @@ def cliexport(argv: list[str] = sys.argv):
     """
     args = _parse_args(argv)
     invocation_directory = os.getcwd()
-    with monitor_logging() as monitor:
-        try:
-            _export(args, create_clang_formatter(args), invocation_directory)
-        except ClangFormatError as err:
-            logging.error("%s", err)
-        except subprocess.CalledProcessError as err:
-            log_clang_format_failure(err)
-        return monitor.get_status().exit_code()
+    return run_with_clang_formatter(
+        args, lambda formatter: _export(args, formatter, invocation_directory))

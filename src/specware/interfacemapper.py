@@ -24,9 +24,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from specitems import (BibTeXCitationProvider, Item, ItemGetValue,
-                       ItemGetValueContext, MarkdownMapper, SphinxMapper,
-                       get_reference, make_label)
+from specitems import (BibTeXCitationProvider, ContentContext, Item,
+                       ItemGetValue, ItemGetValueContext, MarkdownMapper,
+                       SphinxMapper, get_reference, make_label)
 
 from .contentc import get_value_header_file
 
@@ -113,8 +113,9 @@ def get_value_sphinx_param(ctx: ItemGetValueContext) -> str:
 class SphinxInterfaceMapper(SphinxMapper):
     """ Sphinx item mapper for the interface documentation. """
 
-    def __init__(self, item: Item, group_uids: list[str]):
-        super().__init__(item)
+    def __init__(self, item: Item, group_uids: list[str],
+                 context: str | ContentContext):
+        super().__init__(item, context)
         self._group_uids = set(group_uids)
         BibTeXCitationProvider(self)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",
@@ -261,8 +262,9 @@ def get_value_markdown_param(ctx: ItemGetValueContext) -> str:
 class MarkdownInterfaceMapper(MarkdownMapper):
     """ Markdown item mapper for the interface documentation. """
 
-    def __init__(self, item: Item, group_uids: list[str]):
-        super().__init__(item)
+    def __init__(self, item: Item, group_uids: list[str],
+                 context: str | ContentContext):
+        super().__init__(item, context)
         self._group_uids = set(group_uids)
         BibTeXCitationProvider(self)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",

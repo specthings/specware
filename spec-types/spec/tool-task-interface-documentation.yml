@@ -1,0 +1,49 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: task-type
+  spec-value: interface-documentation
+  uid: tool-task
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      accepted-licenses:
+        description: |
+          It shall be the licenses which a produced file accepts for a part
+          whose license expression permits not the license of the file.
+        spec-type: list-str
+      automatically-generated-warning:
+        description: |
+          It shall be the warning which every produced file carries.
+          An empty warning adds no comment block to a file.
+        spec-type: str
+      enabled:
+        description: |
+          It shall be the enabled set of the documentation.
+        spec-type: list-str
+      groups:
+        description: |
+          It shall be the documented interface groups.
+        spec-type: tool-interface-doc-group-list
+      license:
+        description: |
+          It shall be the license of a produced file.
+        spec-type: spdx-license-identifier
+      types:
+        description: |
+          It shall be the documentation of the interface types.
+        spec-type: tool-interface-doc-types
+    description: |
+      This set of attributes specifies an interface documentation task.
+    mandatory-attributes:
+    - license
+spec-name: Tool Interface Documentation Task
+spec-type: tool-task-interface-documentation
+type: spec

@@ -28,6 +28,7 @@ from specitems import augment_glossary_terms, SphinxContent
 
 from specware import document_directive, SphinxInterfaceMapper
 
+from .conftest import doc_context
 from .util import create_item_cache
 
 
@@ -36,8 +37,9 @@ def test_interfacedoc_compact(tmpdir):
     augment_glossary_terms(item_cache["/glossary"], [])
 
     item = item_cache["/func"]
-    content = SphinxContent(topic_as_definition=True)
-    document_directive(content, SphinxInterfaceMapper(item, []), item, [])
+    content = SphinxContent(context=doc_context(), topic_as_definition=True)
+    document_directive(content, SphinxInterfaceMapper(item, [], doc_context()),
+                       item, [])
     assert str(content) == """Calling sequence
     .. code-block:: c
 
@@ -93,8 +95,9 @@ Constraints
 """
 
     item = item_cache["/func2"]
-    content = SphinxContent(topic_as_definition=True)
-    document_directive(content, SphinxInterfaceMapper(item, []), item, [])
+    content = SphinxContent(context=doc_context(), topic_as_definition=True)
+    document_directive(content, SphinxInterfaceMapper(item, [], doc_context()),
+                       item, [])
     assert str(content) == """Calling sequence
     .. code-block:: c
 

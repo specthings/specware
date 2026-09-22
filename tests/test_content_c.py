@@ -30,6 +30,8 @@ from specware import (align_declarations, CContent, CInclude,
                       enabled_by_to_exp, ExpressionMapper,
                       PythonExpressionMapper)
 
+from .conftest import code_context
+
 
 def test_align_declarations():
     assert align_declarations(["int(* x) (const struct y *z)"
@@ -48,14 +50,14 @@ def test_align_declarations():
 
 
 def test_doxyfy():
-    content = CContent()
+    content = CContent(code_context())
     content.wrap(None)
     assert str(content) == ""
     content.wrap(" ")
     assert str(content) == ""
     content.wrap([" "])
     assert str(content) == ""
-    content.wrap(CContent())
+    content.wrap(CContent(code_context()))
     assert str(content) == ""
     content.wrap("""```c
 
@@ -80,14 +82,14 @@ ghi
 @code
 @endcode
 """
-    content = CContent()
+    content = CContent(code_context())
     content.wrap("{file}`abc`")
     assert str(content) == """`abc`
 """
 
 
 def test_add_have_config():
-    content = CContent()
+    content = CContent(code_context())
     content.add_have_config()
     assert str(content) == """#ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -106,10 +108,10 @@ def test_add_have_config():
 
 def test_add_includes():
     assert not CInclude("a") == "a"
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([])
     assert str(content) == ""
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("a"), CInclude("a")])
     assert str(content) == """#include <a>
 """
@@ -118,45 +120,45 @@ def test_add_includes():
 
 #include <b>
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("c"), CInclude("b")], local=True)
     assert str(content) == """#include "b"
 #include "c"
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("d/f"), CInclude("d/e")])
     assert str(content) == """#include <d/e>
 #include <d/f>
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("h"), CInclude("g/h")])
     assert str(content) == """#include <h>
 #include <g/h>
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("i/l/k"), CInclude("i/j/k")])
     assert str(content) == """#include <i/j/k>
 #include <i/l/k>
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("a", "X")])
     assert str(content) == """#if X
   #include <a>
 #endif
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("a", "X"), CInclude("a")])
     assert str(content) == """#if X
   #include <a>
 #endif
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("a"), CInclude("a", "X")])
     assert str(content) == """#if X
   #include <a>
 #endif
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes(
         [CInclude("a", "X"),
          CInclude("b", "X"),
@@ -166,7 +168,7 @@ def test_add_includes():
   #include <b>
 #endif
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes(
         [CInclude("a", "Y"),
          CInclude("a", "X"),
@@ -179,7 +181,7 @@ def test_add_includes():
   #include <a>
 #endif
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_includes([CInclude("a", "X"), CInclude("b")])
     assert str(content) == """#include <b>
 
@@ -190,7 +192,7 @@ def test_add_includes():
 
 
 def test_comment_block():
-    content = CContent()
+    content = CContent(code_context())
     with content.comment_block():
         content.add("")
         assert str(content) == """/*
@@ -217,14 +219,14 @@ def test_comment_block():
 
 
 def test_for_loop():
-    content = CContent()
+    content = CContent(code_context())
     with content.for_loop("i = 0", "i < 3", "++i"):
         content.add("j[i] = i;")
     assert str(content) == """for ( i = 0; i < 3; ++i ) {
   j[i] = i;
 }
 """
-    content = CContent()
+    content = CContent(code_context())
     with content.for_loop("iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii = 0",
                           "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii < 3",
                           "++iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"):
@@ -240,7 +242,7 @@ def test_for_loop():
 
 
 def test_add_brief_description():
-    content = CContent()
+    content = CContent(code_context())
     content.add_brief_description("")
     assert str(content) == ""
     content.append("")
@@ -260,14 +262,14 @@ def test_add_brief_description():
 
 
 def test_add_param_description():
-    content = CContent()
+    content = CContent(code_context())
     content.add_param_description([])
     assert str(content) == ""
     params = [{"description": "A", "dir": None, "name": "a"}]
     content.add_param_description(params)
     assert str(content) == """@param a A
 """
-    content = CContent()
+    content = CContent(code_context())
     params = [
         {
             "description": "A",
@@ -302,7 +304,7 @@ def test_add_param_description():
 
 
 def test_add_description_block():
-    content = CContent()
+    content = CContent(code_context())
     content.add_description_block("", None)
     assert str(content) == ""
     content.add_description_block("a", "b")
@@ -312,13 +314,13 @@ def test_add_description_block():
  * b
  */
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_description_block("a", None)
     assert str(content) == """/**
  * @brief a
  */
 """
-    content = CContent()
+    content = CContent(code_context())
     content.add_description_block(None, "b")
     assert str(content) == """/**
  * b
@@ -327,7 +329,7 @@ def test_add_description_block():
 
 
 def test_add_to_group():
-    content = CContent()
+    content = CContent(code_context())
     with content.add_to_group("a"):
         content.add("b")
     assert str(content) == """/**
@@ -343,11 +345,11 @@ b
 
 
 def test_function():
-    content = CContent()
+    content = CContent(code_context())
     content.call_function("a =", "b", [])
     assert str(content) == """a = b();
 """
-    content = CContent()
+    content = CContent(code_context())
     content.call_function(None, "a", [
         "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     ])
@@ -355,7 +357,7 @@ def test_function():
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.call_function(
         None,
         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -364,25 +366,25 @@ def test_function():
         content
     ) == """aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa();
 """
-    content = CContent()
+    content = CContent(code_context())
     content.call_function("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =",
                           "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", [])
     assert str(content) == """aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa =
   bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb();
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function("a", "b", [])
     assert str(content) == """a b( void );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function("a *", "b", [])
     assert str(content) == """a *b( void );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function("a", "b", ["..."])
     assert str(content) == """a b( ... );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function("void", "b", [
         "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
         "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
@@ -395,7 +397,7 @@ def test_function():
   ...
 );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function("a *", "b", [
         "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx x",
         "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy y",
@@ -408,7 +410,7 @@ def test_function():
   ...
 );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function(
         "a *",
         "b", [
@@ -424,7 +426,7 @@ def test_function():
   ...
 );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function(
         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa *",
         "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", [
@@ -439,13 +441,13 @@ bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb(
   zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz      *( *z )( void )
 );
 """
-    content = CContent()
+    content = CContent(code_context())
     content.declare_function("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa *",
                              "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", [])
     assert str(content) == """aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa *
 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb( void );
 """
-    content = CContent()
+    content = CContent(code_context())
     with content.function("a", "b", []):
         content.add("c")
     assert str(content) == """a b( void )
@@ -456,14 +458,14 @@ bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb( void );
 
 
 def test_condition():
-    content = CContent()
+    content = CContent(code_context())
     with content.condition("a"):
         content.add("b")
     assert str(content) == """if ( a ) {
   b
 }
 """
-    content = CContent()
+    content = CContent(code_context())
     with content.first_condition("a"):
         content.add("b")
     with content.next_condition("c"):
@@ -481,14 +483,14 @@ def test_condition():
 
 
 def test_add_paragraph():
-    content = CContent()
+    content = CContent(code_context())
     content.add_paragraph("a", "")
     assert str(content) == ""
     content.add_paragraph("a", "b")
     assert str(content) == """@par a
 b
 """
-    content = CContent()
+    content = CContent(code_context())
     with content.doxygen_block():
         content.add_paragraph("a", ["b", "", "c"])
     assert str(content) == """/**
@@ -503,7 +505,7 @@ b
 
 
 def test_defgroup():
-    content = CContent()
+    content = CContent(code_context())
     with content.defgroup_block("a", "b"):
         content.add("c")
     assert str(content) == """/**
@@ -512,7 +514,7 @@ def test_defgroup():
  * c
  */
 """
-    content = CContent()
+    content = CContent(code_context())
     with content.defgroup_block(
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"):
@@ -525,7 +527,7 @@ def test_defgroup():
 
 
 def test_prepend_copyrights_and_licenses():
-    content = CContent()
+    content = CContent(code_context())
     content.add("x")
     assert str(content) == """x
 """
@@ -638,3 +640,17 @@ def test_enabled_by_to_python_exp():
         to_python_exp({"foo": "bar"})
     with pytest.raises(ValueError):
         to_python_exp({"foo": "bar", "bla": "blub"})
+
+
+def test_automatically_generated_warning():
+    for warning, expected in (("", "#include <a.h>\n\nint b;\n"),
+                              ("Line 1.\n\nLine 2.\n",
+                               "#include <a.h>\n\n/*\n * Line 1.\n *\n"
+                               " * Line 2.\n */\n\nint b;\n")):
+        context = code_context()
+        context.automatically_generated_warning = warning
+        content = CContent(context)
+        content.add("#include <a.h>")
+        content.add_automatically_generated_warning()
+        content.add("int b;")
+        assert str(content) == expected

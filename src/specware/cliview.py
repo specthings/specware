@@ -26,21 +26,20 @@
 
 import argparse
 import ast
-import contextlib
+import functools
 import itertools
 import sys
 from typing import Any, Callable, Optional, Iterable
 
 from specitems import (COL_SPAN, CommonMarkContent, Item, ItemCache,
-                       ItemCacheConfig, ItemGetValueContext, ItemMapper, Link,
-                       MarkdownContent, ROW_SPAN, SphinxContent, TextContent,
-                       create_config)
+                       ItemGetValueContext, ItemMapper, Link, MarkdownContent,
+                       ROW_SPAN, SphinxContent, TextContent, yield_tasks)
 
-from specware import (augment_with_test_case_links, augment_with_test_links,
-                      gather_api_items, gather_build_files,
-                      get_register_bits_run, get_register_member_name,
-                      load_specware_config, recursive_is_enabled, Transition,
-                      TransitionMap, validate, SpecWareTypeProvider)
+from specware import (open_tree, augment_with_test_case_links,
+                      augment_with_test_links, gather_api_items,
+                      gather_build_files, get_register_bits_run,
+                      get_register_member_name, recursive_is_enabled,
+                      Transition, TransitionMap, validate)
 
 _DOC_FORMAT = {
     "commonmark": CommonMarkContent,
@@ -662,21 +661,20 @@ def cliview(argv: list[str] = sys.argv):
 
     # pylint: disable=too-many-branches
     args = _parse_args(argv)
-    config, working_directory = load_specware_config(args.config_file)
-    with contextlib.chdir(working_directory):
-        item_cache_config = create_config(config["spec"], ItemCacheConfig)
-        item_cache_config.enabled_set = args.enabled.split(
-            ",") if args.enabled else []
-        type_provider = SpecWareTypeProvider({})
-        item_cache = ItemCache(item_cache_config,
-                               type_provider=type_provider,
-                               is_item_enabled=recursive_is_enabled)
+    with open_tree(
+            args.config_file, recursive_is_enabled,
+            args.enabled.split(",") if args.enabled else []) as (config,
+                                                                 item_cache,
+                                                                 _):
         augment_with_test_links(item_cache)
         augment_with_test_case_links(item_cache)
         root = item_cache["/req/root"]
         mapper = ItemMapper(root)
         _prepare_mapper(mapper)
-        create_content = _DOC_FORMAT[args.format]
+        # The view writes to the standard output, so its content states no
+        # license.
+        create_content = functools.partial(_DOC_FORMAT[args.format],
+                                           context="CC-BY-SA-4.0")
 
         if args.filter == "action-table":
             for uid in args.UIDs:
@@ -715,8 +713,9 @@ def cliview(argv: list[str] = sys.argv):
             for name in sorted(item_cache.items_by_type.keys()):
                 print(name)
         elif args.filter == "build":
-            for name in gather_build_files(config["build"], item_cache, False):
-                print(name)
+            for task in yield_tasks(config, "build"):
+                for name in gather_build_files(task, item_cache, False):
+                    print(name)
         else:
             validate(root, _validate)
             _view(root, mapper, 0, None, args.validated)

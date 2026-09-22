@@ -24,6 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import functools
 import os
 import pytest
 
@@ -33,14 +34,22 @@ from specitems import (augment_glossary_terms, EmptyItem, ItemMapper,
 from specware import (document_directive, generate_interface_documentation,
                       MarkdownInterfaceMapper, SphinxInterfaceMapper)
 
+from .conftest import doc_context
 from .util import create_item_cache
+
+_MARKDOWN_CONTENT = functools.partial(MarkdownContent, context=doc_context())
+_MARKDOWN_MAPPER = functools.partial(MarkdownInterfaceMapper,
+                                     context=doc_context())
+_SPHINX_CONTENT = functools.partial(SphinxContent, context=doc_context())
+_SPHINX_MAPPER = functools.partial(SphinxInterfaceMapper,
+                                   context=doc_context())
 
 
 def test_interfacedoc(tmpdir):
     item_cache = create_item_cache(tmpdir, "spec-interface")
 
     directive_item = item_cache["/func3"]
-    directive_content = SphinxContent()
+    directive_content = SphinxContent(context=doc_context())
     document_directive(directive_content, ItemMapper(EmptyItem()),
                        directive_item, [])
     assert str(directive_content) == """.. rubric:: CALLING SEQUENCE:
@@ -76,8 +85,8 @@ def test_interfacedoc(tmpdir):
     doc_config_2["directives-target"] = directives_2_rst
     types_rst = os.path.join(tmpdir, "types.rst")
     types_config["target"] = types_rst
-    generate_interface_documentation(config, item_cache, SphinxInterfaceMapper,
-                                     SphinxContent)
+    generate_interface_documentation(config, item_cache, _SPHINX_MAPPER,
+                                     _SPHINX_CONTENT)
 
     introduction_md = os.path.join(tmpdir, "introduction.md")
     doc_config["introduction-target"] = introduction_md
@@ -89,8 +98,8 @@ def test_interfacedoc(tmpdir):
     doc_config_2["directives-target"] = directives_2_md
     types_md = os.path.join(tmpdir, "types.md")
     types_config["target"] = types_md
-    generate_interface_documentation(config, item_cache,
-                                     MarkdownInterfaceMapper, MarkdownContent)
+    generate_interface_documentation(config, item_cache, _MARKDOWN_MAPPER,
+                                     _MARKDOWN_CONTENT)
 
     with open(introduction_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
@@ -394,7 +403,7 @@ Group A description. The directives provided by the Group A are:
     with open(directives_2_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. Copyright (C) 2020 embedded brains GmbH & Co. KG
+.. Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
 
 .. This file was automatically generated.  Do not edit it.
 
@@ -478,7 +487,7 @@ The following constraints apply to this directive:
     with open(types_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+.. Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
 
 .. This file was automatically generated.  Do not edit it.
 
@@ -995,7 +1004,7 @@ Group A description. The directives provided by the Group A are:
     with open(directives_2_md, "r") as src:
         content = """% SPDX-License-Identifier: CC-BY-SA-4.0
 
-% Copyright (C) 2020 embedded brains GmbH & Co. KG
+% Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
 
 % This file was automatically generated.  Do not edit it.
 
@@ -1088,7 +1097,7 @@ The following constraints apply to this directive:
     with open(types_md, "r") as src:
         content = """% SPDX-License-Identifier: CC-BY-SA-4.0
 
-% Copyright (C) 2020, 2023 embedded brains GmbH & Co. KG
+% Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
 
 % This file was automatically generated.  Do not edit it.
 

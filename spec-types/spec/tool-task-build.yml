@@ -1,0 +1,43 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: task-type
+  spec-value: build
+  uid: tool-task
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      arch:
+        description: |
+          It shall be the architecture of the build.
+        spec-type: str
+      base-directory-map:
+        description: |
+          It shall map a source directory to a target directory.
+        spec-type: tool-validation-base-directory-map-list
+      bsp:
+        description: |
+          It shall be the board support package of the build.
+        spec-type: str
+      build-uids:
+        description: |
+          It shall be the UIDs of the build items.
+        spec-type: list-uid
+      enabled-set:
+        description: |
+          It shall be the enabled set of the build.
+        spec-type: list-str
+    description: |
+      This set of attributes specifies a build task.  The task produces no
+      file, so it states no license.
+    mandatory-attributes: all
+spec-name: Tool Build Task
+spec-type: tool-task-build
+type: spec

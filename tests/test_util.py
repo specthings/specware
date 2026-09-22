@@ -26,39 +26,13 @@
 
 import contextlib
 import logging
-from pathlib import Path
 import pytest
 import subprocess
 
-from specware import (load_specware_config, log_clang_format_failure,
-                      run_command)
+from specware import log_clang_format_failure, run_command
 import specware
 
 from .util import get_and_clear_log
-
-
-def test_load_specware_config(tmpdir):
-    match = ("^cannot find file specware.yml "
-             "in the current directory or its parent directories$")
-    with pytest.raises(FileNotFoundError, match=match):
-        load_specware_config(None)
-    config_file = Path(tmpdir) / "specware.yml"
-    with open(config_file, "wb") as out:
-        out.write(b"foo:\n  bar\n")
-    with contextlib.chdir(tmpdir):
-        config, working_directory = load_specware_config(None)
-    assert config == {"foo": "bar"}
-    assert working_directory == tmpdir
-    with contextlib.chdir(tmpdir):
-        config, working_directory = load_specware_config(str(config_file))
-    assert config == {"foo": "bar"}
-    assert working_directory == tmpdir
-    directory = Path(tmpdir) / "dir"
-    directory.mkdir()
-    with contextlib.chdir(directory):
-        config, working_directory = load_specware_config(None)
-    assert config == {"foo": "bar"}
-    assert working_directory == tmpdir
 
 
 def test_run(caplog, monkeypatch):

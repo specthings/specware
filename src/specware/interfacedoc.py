@@ -199,7 +199,7 @@ def _document_directive(content: TextContent, mapper: ItemMapper,
         content.wrap(mapper.substitute(item["brief"], item))
     with content.topic("Calling sequence"):
         with content.directive("code-block", "c"):
-            code = CContent()
+            code = CContent(content.license)
             _add_definition(code, code_mapper, item, "definition",
                             item["definition"])
             content.add(code)
@@ -392,9 +392,16 @@ def generate_interface_documentation(
                 items.append(child)
         items.sort(key=functools.partial(
             _directive_key, list(group.parents("placement-order"))))
-        _generate_introduction(create_content(), mapper,
-                               doc_config["introduction-target"], group, items)
-        _generate_directives(create_content(), mapper,
-                             doc_config["directives-target"], group, items,
-                             enable_set)
-    _generate_types(create_content(), mapper, config["types"], item_cache)
+        content = create_content()
+        with mapper.work(content.context):
+            _generate_introduction(content, mapper,
+                                   doc_config["introduction-target"], group,
+                                   items)
+        content = create_content()
+        with mapper.work(content.context):
+            _generate_directives(content, mapper,
+                                 doc_config["directives-target"], group, items,
+                                 enable_set)
+    content = create_content()
+    with mapper.work(content.context):
+        _generate_types(content, mapper, config["types"], item_cache)

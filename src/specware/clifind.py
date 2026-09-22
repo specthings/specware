@@ -27,16 +27,15 @@ Provides a command line interface to find the items related to generated files.
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
-import contextlib
 import itertools
 import os
 import sys
 
-from specitems import Item, ItemCache, ItemCacheConfig, create_config
-from specware import (SpecWareTypeProvider, get_items_by_type_map,
+from specitems import (Item)
+from specware import (open_tree, get_items_by_type_map,
                       get_benchmark_and_test_suite_items,
                       get_interface_and_requirement_items,
-                      get_validation_items, load_specware_config)
+                      get_validation_items)
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -65,10 +64,7 @@ def clifind(argv: list[str] = sys.argv) -> None:
     """ Find the items related to generated files. """
     cwd = os.getcwd()
     args = _parse_args(argv)
-    config, working_directory = load_specware_config(args.config_file)
-    with contextlib.chdir(working_directory):
-        item_cache = ItemCache(create_config(config["spec"], ItemCacheConfig),
-                               type_provider=SpecWareTypeProvider({}))
+    with open_tree(args.config_file) as (_, item_cache, _):
         file_to_item: dict[str, list[str]] = {}
         items_by_type = get_items_by_type_map(item_cache.values())
         for item in itertools.chain(
