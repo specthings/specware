@@ -33,13 +33,49 @@ from specware import (augment_with_test_case_links, generate_validation,
                       get_affected_targets, SpecWareTypeProvider,
                       TransitionMap)
 
-from .conftest import code_context
+from .conftest import code_context, OPTION_EXPRESSIONS
 from .util import create_item_cache, get_and_clear_log
+
+
+def test_validation_option_expressions(tmpdir):
+    base_directory = os.path.join(tmpdir, "base")
+    validation_config = {
+        "option-expressions": [{
+            "pattern": "BOOM",
+            "expression": "defined(${.:/option-name})"
+        }, {
+            "pattern": "[A-Z_]+",
+            "expression": "${.:/option-name}"
+        }],
+        "base-directory-map": [{
+            "source":
+            os.path.normpath(
+                os.path.join(os.path.dirname(__file__), "spec-validation")),
+            "target":
+            base_directory
+        }]
+    }
+    item_cache = create_item_cache(tmpdir, "spec-validation")
+    augment_with_test_case_links(item_cache)
+    generate_validation(validation_config, item_cache, code_context())
+    with open(os.path.join(base_directory, "action2.c"), "r") as src:
+        assert "\n#if defined(BOOM)\n" in src.read()
+    with open(os.path.join(base_directory, "tc34.c"), "r") as src:
+        tc34 = src.read()
+    assert "\n#if FOOBAR\n" in tc34
+    assert "\n  #if FOOBAR\n" in tc34
+    validation_config["option-expressions"] = []
+    with pytest.raises(ValueError,
+                       match="no option expression of the task "
+                       "matches the option"):
+        generate_validation(validation_config, item_cache, code_context())
 
 
 def test_validation(tmpdir):
     base_directory = os.path.join(tmpdir, "base")
     validation_config = {
+        "option-expressions":
+        OPTION_EXPRESSIONS,
         "base-directory-map": [{
             "source": "/does/not/exist",
             "target": "?"
@@ -2802,6 +2838,7 @@ def test_transition_map_pre_cond_not_applicable_propagates_transitively():
 def test_validation_invalid_actions(caplog, tmpdir):
     item_cache = EmptyItemCache(SpecWareTypeProvider({}))
     validation_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
         "base-directory-map": [{
             "source": "/foobar/spec",
             "target": tmpdir

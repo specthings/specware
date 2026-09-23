@@ -38,7 +38,8 @@ from specitems import (ClangFormatter, ContentContext, Item, ItemCache,
                        get_value_plural)
 
 from .build import get_build_base_directory
-from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
+from .contentc import (CContent, CInclude, enabled_by_to_exp,
+                       OptionExpressionMapper, OptionExpressions,
                        GenericContent, get_integer_type, get_value_compound,
                        get_value_params, get_value_doxygen_group,
                        get_value_doxygen_function, get_value_unspecified_type)
@@ -515,8 +516,10 @@ class _TestItem:
             self._add_fixture_node_and_remark(content, epilogue)
 
     def generate(self, content: CContent, base_directory: str,
-                 test_case_to_suites: _CaseToSuite) -> None:
+                 test_case_to_suites: _CaseToSuite,
+                 _options: OptionExpressions) -> None:
         """ Generate the content. """
+        # pylint: disable=too-many-locals
         self.add_test_case_description(content, test_case_to_suites)
         instance = self.add_context(content)
         content.add(self.substitute_code(self["test-support"]))
@@ -568,7 +571,8 @@ class _TestSuiteItem(_TestItem):
     """ A test suite item. """
 
     def generate(self, content: CContent, _base_directory: str,
-                 _test_case_to_suites: _CaseToSuite) -> None:
+                 _test_case_to_suites: _CaseToSuite,
+                 _options: OptionExpressions) -> None:
         with content.defgroup_block(self.ident, self.name):
             group = self.item.parent("requirement-refinement")["identifier"]
             content.add(f"@ingroup {group}")
@@ -597,7 +601,8 @@ class _FatalErrorItem(_TestItem):
         return list(set(self.item["test-local-includes"] + ["tx-support.h"]))
 
     def generate(self, content: CContent, _base_directory: str,
-                 _test_case_to_suites: _CaseToSuite) -> None:
+                 _test_case_to_suites: _CaseToSuite,
+                 _options: OptionExpressions) -> None:
         with content.defgroup_block(self.ident, self.name):
             group = self.item.parent("requirement-refinement")["identifier"]
             content.add(f"@ingroup {group}")
@@ -1080,7 +1085,8 @@ class _ActionRequirementTestItem(_TestItem):
         super().add_header_body(content, header)
 
     def generate(self, content: CContent, base_directory: str,
-                 test_case_to_suites: _CaseToSuite) -> None:
+                 test_case_to_suites: _CaseToSuite,
+                 options: OptionExpressions) -> None:
         self.add_test_case_description(content, test_case_to_suites)
         header = self["test-header"]
         if header:
@@ -1115,7 +1121,7 @@ class _ActionRequirementTestItem(_TestItem):
         self.add_function(content, "test-prepare", "Prepare")
         self.add_function(content, "test-action", "Action")
         self.add_function(content, "test-cleanup", "Cleanup")
-        transition_map.add_map(content, self.ident)
+        transition_map.add_map(content, self.ident, options)
         self._add_fixture_scope(content)
         content.add([
             f"static T_fixture {self.ident}_Fixture = {{",
@@ -1163,7 +1169,8 @@ class _RuntimeMeasurementTestItem(_TestItem):
             None)
         content.add("T_ticks end;")
 
-    def _add_requests(self, content: CContent) -> CContent:
+    def _add_requests(self, content: CContent,
+                      options: OptionExpressions) -> CContent:
         requests = content.fragment()
         prepare = self.add_support_method(content, "test-prepare", "Prepare")
         cleanup = self.add_support_method(content, "test-cleanup", "Cleanup")
@@ -1173,7 +1180,8 @@ class _RuntimeMeasurementTestItem(_TestItem):
             enabled_by = item["enabled-by"]
             use_enabled_by = not isinstance(enabled_by, bool) or not enabled_by
             if use_enabled_by:
-                exp = enabled_by_to_exp(enabled_by, ExpressionMapper())
+                exp = enabled_by_to_exp(
+                    enabled_by, OptionExpressionMapper(options, self.item))
                 if_exp = f"#if {exp}"
                 requests.add(if_exp)
                 content.add(if_exp)
@@ -1215,7 +1223,8 @@ class _RuntimeMeasurementTestItem(_TestItem):
         return requests
 
     def generate(self, content: CContent, base_directory: str,
-                 test_case_to_suites: _CaseToSuite) -> None:
+                 test_case_to_suites: _CaseToSuite,
+                 options: OptionExpressions) -> None:
         self.add_test_case_description(content, test_case_to_suites)
         instance = self.add_context(content)
         content.add(self.substitute_code(self["test-support"]))
@@ -1244,7 +1253,7 @@ class _RuntimeMeasurementTestItem(_TestItem):
             f"  .teardown = {teardown},", "  .scope = NULL,",
             f"  .initial_context = {instance}", "};"
         ])
-        requests = self._add_requests(content)
+        requests = self._add_requests(content, options)
         with content.function_block(f"void T_case_body_{self.ident}( void )"):
             pass
         content.gap = False
@@ -1315,7 +1324,7 @@ class _SourceFile:
             _RuntimeMeasurementTestItem(item, self._formatter))
 
     def generate(self, test_case_to_suites: _CaseToSuite,
-                 context: ContentContext) -> None:
+                 context: ContentContext, options: OptionExpressions) -> None:
         """
         Generate the source file and the corresponding build specification.
         """
@@ -1343,9 +1352,11 @@ class _SourceFile:
         content.add_includes(local_includes, local=True)
         content.add_includes([CInclude("rtems/test.h")])
         for item in sorted(self._test_cases, key=lambda x: x.name):
-            item.generate(content, base_directory, test_case_to_suites)
+            item.generate(content, base_directory, test_case_to_suites,
+                          options)
         for item in sorted(self._test_suites, key=lambda x: x.name):
-            item.generate(content, base_directory, test_case_to_suites)
+            item.generate(content, base_directory, test_case_to_suites,
+                          options)
         content.write(os.path.join(base_directory, self._file),
                       formatter=self._formatter)
 
@@ -1561,13 +1572,15 @@ def generate_validation(config: dict,
     source_files, test_case_to_suites = _gather(item_cache,
                                                 config["base-directory-map"],
                                                 formatter)
+    options = OptionExpressions(config["option-expressions"])
 
     if not targets:
         for src in source_files.values():
-            src.generate(test_case_to_suites, context)
+            src.generate(test_case_to_suites, context, options)
     else:
         for target in targets:
-            source_files[target].generate(test_case_to_suites, context)
+            source_files[target].generate(test_case_to_suites, context,
+                                          options)
 
 
 def augment_with_test_case_links(item_cache: ItemCache) -> None:

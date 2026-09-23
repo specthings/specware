@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      expression:
+        description: |
+          It shall be the C preprocessor expression which tests an option of a
+          matching name.  A variable substitution in the context of the item
+          of the guarded content is performed on the value.
+          ``$${.:/option-name}`` yields the name of the option.
+          ``$${.:/option-group:<group>}`` yields a group of the match, where
+          ``<group>`` is the number or the name of the group.
+        spec-type: str
+      pattern:
+        description: |
+          It shall be a Python regular expression which matches the whole name
+          of an option.
+        spec-type: str
+    description: |
+      This set of attributes specifies how a guard tests an option.
+    mandatory-attributes: all
+spec-name: Tool Option Expression
+spec-type: tool-option-expression
+type: spec

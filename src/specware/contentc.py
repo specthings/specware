@@ -25,6 +25,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from contextlib import contextmanager
+import functools
 import math
 import re
 import sys
@@ -638,6 +639,65 @@ def add_item_marker(content: Content, marker: str, item: Item) -> None:
             content.add(line)
 
 
+def _get_option_group(match: re.Match, ctx: ItemGetValueContext) -> str:
+    group: int | str = ctx.args if ctx.args else 0
+    if isinstance(group, str) and group.isdigit():
+        group = int(group)
+    value = match.group(group)
+    return "" if value is None else value
+
+
+class OptionExpressions:  # pylint: disable=too-few-public-methods
+    """
+    Maps an option to the C preprocessor expression which tests it.
+
+    The first rule whose pattern matches the whole option name provides the
+    expression.
+    """
+
+    def __init__(self, rules: list[dict[str, str]]) -> None:
+        """
+        Initialize the rules.
+
+        Args:
+            rules: The rules of the task.  A rule states a Python regular
+                expression as its pattern and the expression which tests an
+                option of a matching name.
+        """
+        self._rules = [(re.compile(rule["pattern"]), rule["expression"])
+                       for rule in rules]
+
+    def get_expression(self, item: Item, option: str) -> str:
+        """
+        Get the expression which tests the option.
+
+        Args:
+            item: The item of the guarded content.  A variable substitution
+                in the context of the item is performed on the expression.
+                ``${.:/option-name}`` yields the option name and
+                ``${.:/option-group:<group>}`` yields a group of the match.
+            option: The name of the option.
+
+        Returns:
+            The expression.
+
+        Raises:
+            ValueError: No rule matches the option name.
+        """
+        for pattern, expression in self._rules:
+            match = pattern.fullmatch(option)
+            if match is not None:
+                mapper = ItemMapper(item)
+                mapper.add_default_get_value("option-name",
+                                             lambda _ctx: option)
+                mapper.add_default_get_value(
+                    "option-group", functools.partial(_get_option_group,
+                                                      match))
+                return mapper.substitute(expression)
+        raise ValueError(f"no option expression of the task matches the "
+                         f"option {option} of {item.uid}")
+
+
 class ExpressionMapper:
     """ Maps symbols and operations to form a C expression. """
 
@@ -647,8 +707,6 @@ class ExpressionMapper:
 
     def map_symbol(self, symbol: str) -> str:
         """ Map the symbol to build an expression. """
-        if symbol.startswith("CPU_"):
-            return f"( {symbol} == TRUE )"
         return f"defined({symbol})"
 
     def op_and(self) -> str:
@@ -662,6 +720,25 @@ class ExpressionMapper:
     def op_not(self, symbol: str) -> str:
         """ Returns the negation of the symbol. """
         return f"!{symbol}"
+
+
+class OptionExpressionMapper(ExpressionMapper):
+    """ Maps an option through the rules of the task. """
+
+    def __init__(self, options: OptionExpressions, item: Item) -> None:
+        """
+        Initialize the mapper.
+
+        Args:
+            options: The rules which map an option to its expression.
+            item: The item of the guarded content.
+        """
+        super().__init__()
+        self._options = options
+        self._item = item
+
+    def map_symbol(self, symbol: str) -> str:
+        return self._options.get_expression(self._item, symbol)
 
 
 class PythonExpressionMapper(ExpressionMapper):

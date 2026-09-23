@@ -403,7 +403,7 @@ Group A description. The directives provided by the Group A are:
     with open(directives_2_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+.. Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 
 .. This file was automatically generated.  Do not edit it.
 
@@ -487,7 +487,7 @@ The following constraints apply to this directive:
     with open(types_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+.. Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 
 .. This file was automatically generated.  Do not edit it.
 
@@ -1004,7 +1004,7 @@ Group A description. The directives provided by the Group A are:
     with open(directives_2_md, "r") as src:
         content = """% SPDX-License-Identifier: CC-BY-SA-4.0
 
-% Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+% Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 
 % This file was automatically generated.  Do not edit it.
 
@@ -1097,7 +1097,7 @@ The following constraints apply to this directive:
     with open(types_md, "r") as src:
         content = """% SPDX-License-Identifier: CC-BY-SA-4.0
 
-% Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+% Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 
 % This file was automatically generated.  Do not edit it.
 

@@ -41,6 +41,7 @@ from specitems import (ClangFormatter, ContentContext, GenericContent, Item,
 
 from .contentc import (CContent, CInclude, DEFAULT_ITEM_MARKER,
                        add_item_marker, enabled_by_to_exp, ExpressionMapper,
+                       OptionExpressionMapper, OptionExpressions,
                        forward_declaration, get_value_compound,
                        get_value_double_colon, get_value_doxygen_function,
                        get_value_doxygen_group, get_value_doxygen_ref,
@@ -136,7 +137,12 @@ class _InterfaceMapper(ItemMapper):
         Map an item-level enabled-by attribute value to the corresponding
         defined expression.
         """
-        return self._node.header_file.options[enabled_by]
+        node = self._node
+        header_file = node.header_file
+        option = header_file.options[enabled_by]
+        header_file.add_includes(option)
+        header_file.add_dependency(node, option)
+        return header_file.option_expression(enabled_by)
 
     def _get_value_compound(self, ctx: ItemGetValueContext) -> str:
         if not self._is_doc:
@@ -176,7 +182,7 @@ class _InterfaceExpressionMapper(ExpressionMapper):
             return self._mapper.substitute(symbol, prefix=self._prefix)
 
 
-def _filter_op_binary(op_name: str, options: dict[str, str],
+def _filter_op_binary(op_name: str, options: dict[str, Item],
                       enabled_by: Any) -> Any:
     new_enabled_by = []
     for next_enabled_by in enabled_by:
@@ -190,7 +196,7 @@ def _filter_op_binary(op_name: str, options: dict[str, str],
     return {op_name: new_enabled_by}
 
 
-def _filter_op_not(options: dict[str, str], enabled_by: Any) -> Any:
+def _filter_op_not(options: dict[str, Item], enabled_by: Any) -> Any:
     exp = _discard_non_options(options, enabled_by)
     if exp is None:
         return None
@@ -204,7 +210,7 @@ _FILTER_OP = {
 }
 
 
-def _discard_non_options(options: dict[str, str], enabled_by: Any) -> Any:
+def _discard_non_options(options: dict[str, Item], enabled_by: Any) -> Any:
     if isinstance(enabled_by, bool):
         return enabled_by
     if isinstance(enabled_by, list):
@@ -224,20 +230,7 @@ class _ItemLevelExpressionMapper(ExpressionMapper):
         self._mapper = mapper
 
     def map_symbol(self, symbol: str) -> str:
-        with self._mapper.code():
-            return self._mapper.substitute(
-                self._mapper.enabled_by_to_defined(symbol))
-
-
-class _HeaderExpressionMapper(ExpressionMapper):
-
-    def __init__(self, item: Item, options: dict[str, str]):
-        super().__init__()
-        self._mapper = ItemMapper(item)
-        self._options = options
-
-    def map_symbol(self, symbol: str) -> str:
-        return self._mapper.substitute(self._options[symbol])
+        return self._mapper.enabled_by_to_defined(symbol)
 
 
 def _add_definition(node: "_Node", item: Item, prefix: str,
@@ -1164,7 +1157,7 @@ def _bubble_sort(nodes: list[_Node]) -> list[_Node]:
     return nodes
 
 
-def _merge_enabled_by(options: dict[str, str], link: Link) -> Any:
+def _merge_enabled_by(options: dict[str, Item], link: Link) -> Any:
     enabled_by = _discard_non_options(options, link["enabled-by"])
     enabled_by_2 = _discard_non_options(options, link.item["enabled-by"])
     if enabled_by == enabled_by_2:
@@ -1186,9 +1179,10 @@ class _HeaderFile:
     # pylint: disable=too-many-instance-attributes
     def __init__(self,
                  item: Item,
-                 options: dict[str, str],
+                 options: dict[str, Item],
                  enabled: list[str],
                  context: ContentContext,
+                 option_expressions: OptionExpressions,
                  formatter: Optional[ClangFormatter] = None,
                  item_marker: str = DEFAULT_ITEM_MARKER):
         # pylint: disable=too-many-arguments
@@ -1203,6 +1197,11 @@ class _HeaderFile:
         self.options = options
         self.enabled = enabled
         self.item_marker = item_marker
+        self._option_expressions = option_expressions
+
+    def option_expression(self, option: str) -> str:
+        """ Get the expression which tests the option in the header file. """
+        return self._option_expressions.get_expression(self._item, option)
 
     def add_includes(self, item: Item) -> None:
         """ Add the includes of the item to the header file includes. """
@@ -1294,7 +1293,8 @@ class _HeaderFile:
         """ Finalize the header file. """
         self.add_prologue()
         with self.content.header_guard(self._item["path"]):
-            exp_mapper = _HeaderExpressionMapper(self._item, self.options)
+            exp_mapper = OptionExpressionMapper(self._option_expressions,
+                                                self._item)
             includes = [
                 CInclude(
                     item["path"],
@@ -1346,25 +1346,23 @@ class _ZephyrHeaderFile(_HeaderFile):
 _HEADER_FILE = {"default": _HeaderFile, "zephyr": _ZephyrHeaderFile}
 
 
-def _generate_header_file(item: Item, domains: dict[str, str],
-                          options: dict[str,
-                                        str], enabled: list[str], style: str,
+def _generate_header_file(item: Item, config: dict, options: dict[str, Item],
                           file_path: Optional[str], context: ContentContext,
-                          formatter: Optional[ClangFormatter],
-                          item_marker: str) -> None:
+                          formatter: Optional[ClangFormatter]) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
-
     if file_path is None:
         domain = item.parent("interface-placement")
         assert domain["interface-type"] == "domain"
-        domain_path = domains.get(domain.uid, None)
+        domain_path = config["domains"].get(domain.uid, None)
         if domain_path is None:
             return
     else:
         domain_path = None
-    header_file = _HEADER_FILE[style](item, options, enabled, context,
-                                      formatter, item_marker)
+    header_file = _HEADER_FILE[config.get("style", "default")](
+        item, options, config["enabled"], context,
+        OptionExpressions(config["option-expressions"]), formatter,
+        config.get("item-marker", DEFAULT_ITEM_MARKER))
     header_file.generate_nodes()
     header_file.finalize()
     header_file.write(domain_path, file_path)
@@ -1380,13 +1378,12 @@ def _create_header_context(config: dict, item: Item,
 
 
 def _gather_options(item_level_interfaces: list[str],
-                    item_cache: ItemCache) -> dict[str, str]:
-    options: dict[str, str] = {}
+                    item_cache: ItemCache) -> dict[str, Item]:
+    options: dict[str, Item] = {}
     for uid in item_level_interfaces:
         for child in item_cache[uid].children("interface-ingroup"):
             if child.type == "interface/unspecified-define":
-                define = f"defined(${{{child.uid}:/name}})"
-                options[child["name"]] = define
+                options[child["name"]] = child
     return options
 
 
@@ -1422,17 +1419,13 @@ def generate_interfaces(config: dict,
         header_file_uids: The optional UIDs of the header file items to
             generate.  All header files are generated if it is None.
     """
-    domains = config["domains"]
-    enabled = config["enabled"]
-    style = config.get("style", "default")
     options = _gather_options(config["item-level-interfaces"], item_cache)
     for item in item_cache.items_by_type.get("interface/header-file", []):
         if header_file_uids is not None and item.uid not in header_file_uids:
             continue
-        _generate_header_file(item, domains, options, enabled, style, None,
+        _generate_header_file(item, config, options, None,
                               _create_header_context(config, item, context),
-                              formatter,
-                              config.get("item-marker", DEFAULT_ITEM_MARKER))
+                              formatter)
 
 
 def generate_header_file(config: dict,
@@ -1452,8 +1445,6 @@ def generate_header_file(config: dict,
     """
     options = _gather_options(config["item-level-interfaces"],
                               header_file.cache)
-    _generate_header_file(header_file, config["domains"], options,
-                          config["enabled"], config["style"], file_path,
-                          _create_header_context(config, header_file,
-                                                 context), formatter,
-                          config.get("item-marker", DEFAULT_ITEM_MARKER))
+    _generate_header_file(header_file, config, options, file_path,
+                          _create_header_context(config, header_file, context),
+                          formatter)

@@ -66,6 +66,11 @@ tasks:
   enabled: []
   item-level-interfaces: []
   license: BSD-2-Clause
+  option-expressions:
+  - expression: ( ${{.:/option-name}} == TRUE )
+    pattern: CPU_.*
+  - expression: defined(${{.:/option-name}})
+    pattern: .*
   task-name: interface
   task-type: interface
 - accepted-licenses: []
@@ -100,6 +105,11 @@ tasks:
   - source: {spec_rtems}
     target: {tmpdir}
   license: BSD-2-Clause
+  option-expressions:
+  - expression: ( ${{.:/option-name}} == TRUE )
+    pattern: CPU_.*
+  - expression: defined(${{.:/option-name}})
+    pattern: .*
   task-name: validation
   task-type: validation
 - accepted-licenses: []

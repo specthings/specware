@@ -36,6 +36,15 @@ CODE_LICENSE = "BSD-2-Clause"
 #: The license of the generated documentation of the test fixtures.
 DOC_LICENSE = "CC-BY-SA-4.0"
 
+#: The option rules of an RTEMS tree.
+OPTION_EXPRESSIONS = [{
+    "pattern": "CPU_.*",
+    "expression": "( ${.:/option-name} == TRUE )"
+}, {
+    "pattern": ".*",
+    "expression": "defined(${.:/option-name})"
+}]
+
 
 @functools.lru_cache(maxsize=1)
 def license_provider() -> LicenseProvider:

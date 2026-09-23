@@ -54,10 +54,14 @@ spec-info:
           It shall be the rules which state the license of a header file.  A
           pattern matches the ``path`` attribute of the header file item.
         spec-type: tool-target-license-list
+      option-expressions:
+        description: null
+        spec-type: tool-option-expression-list
     description: |
       This set of attributes specifies an interface generation task.
     mandatory-attributes:
     - license
+    - option-expressions
 spec-name: Tool Interface Task
 spec-type: tool-task-interface
 type: spec

@@ -1,14 +1,16 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 brief: Variable brief description.
 copyrights:
-- Copyright (C) 2020 embedded brains GmbH & Co. KG
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 definition:
   default: |
     ${forward-decl:/name} *${.:/name}
   variants: []
 description: Variable description.
 enabled-by:
-  not: ASM
+  and:
+  - not: ASM
+  - RTEMS_MULTIPROCESSING
 index-entries: []
 interface-type: variable
 links:

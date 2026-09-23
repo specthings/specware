@@ -34,7 +34,8 @@ from typing import Any, Iterator, NamedTuple, Optional
 from specitems import EnabledSet, is_enabled, Item
 
 from .contentc import (CContent, enabled_by_to_exp, ExpressionMapper,
-                       get_integer_type)
+                       get_integer_type, OptionExpressionMapper,
+                       OptionExpressions)
 
 
 class Transition(NamedTuple):
@@ -692,10 +693,11 @@ class TransitionMap:
                     f"uint{bits}_t Post_{condition['name']} : {state_bits};")
         content.add(f"}} {ident}_Entry;")
 
-    def add_map(self, content: CContent, ident: str) -> None:
+    def add_map(self, content: CContent, ident: str,
+                options: OptionExpressions) -> None:
         """ Add the transition map definitions to the content. """
         entries = []
-        mapper = ExpressionMapper()
+        mapper = OptionExpressionMapper(options, self._item)
         for entry in self.entries():
             transitions = entry[2]
             if len(transitions) == 1:

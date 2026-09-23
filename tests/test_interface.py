@@ -33,7 +33,8 @@ from specitems import EmptyItemCache, LicenseAggregate
 from specware import (generate_header_file, generate_interfaces,
                       get_affected_header_files)
 
-from .conftest import CODE_LICENSE, code_context, zephyr_context
+from .conftest import (CODE_LICENSE, code_context, OPTION_EXPRESSIONS,
+                       zephyr_context)
 from .util import create_item_cache
 
 
@@ -46,6 +47,8 @@ def test_interface_license_by_target(tmpdir):
             "/domain-abc": base_directory
         },
         "enabled": [],
+        "option-expressions":
+        OPTION_EXPRESSIONS,
         "license-by-target": [{
             "pattern": "h2?",
             "license": "MIT"
@@ -71,6 +74,7 @@ def test_interface_item_marker(tmpdir):
     base_directory = os.path.join(tmpdir, "base")
     item_cache = create_item_cache(tmpdir, "spec-interface")
     interface_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
         "item-level-interfaces": ["/command-line"],
         "domains": {
             "/domain-abc": base_directory
@@ -91,10 +95,42 @@ def test_interface_item_marker(tmpdir):
     assert "\n\n\n" not in content
 
 
+def test_interface_option_expressions(tmpdir):
+    base_directory = os.path.join(tmpdir, "base")
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    interface_config = {
+        "item-level-interfaces": ["/command-line"],
+        "domains": {
+            "/domain-abc": base_directory
+        },
+        "enabled": [],
+        "option-expressions": [{
+            "pattern": "ASM",
+            "expression": "defined(${.:/option-name})"
+        }, {
+            "pattern": "RTEMS_.*",
+            "expression": "${.:/option-name}"
+        }]
+    }
+    generate_interfaces(interface_config, item_cache, code_context())
+    with open(os.path.join(base_directory, "include", "h.h"), "r") as src:
+        content = src.read()
+    assert "#if !defined(ASM) || RTEMS_SMP\n" in content
+    assert "#if defined(ASM) && RTEMS_MULTIPROCESSING\n" in content
+    assert "#if !defined(ASM) && RTEMS_MULTIPROCESSING\n" in content
+    interface_config["option-expressions"] = interface_config[
+        "option-expressions"][1:]
+    with pytest.raises(ValueError,
+                       match="no option expression of the task "
+                       "matches the option ASM of /h"):
+        generate_interfaces(interface_config, item_cache, code_context())
+
+
 def test_interface(tmpdir):
     base_directory = os.path.join(tmpdir, "base")
 
     interface_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
         "item-level-interfaces": [],
         "domains": {
             "/domain-abc": base_directory
@@ -154,6 +190,7 @@ def test_interface(tmpdir):
 #ifndef _H_H
 #define _H_H
 
+#include <cpuopts.h>
 #include <h2.h>
 #include <h3.h>
 #include <math.h>
@@ -1082,7 +1119,7 @@ typedef union Union {
   long m_1;
 } Union;
 
-#if !defined(ASM)
+#if !defined(ASM) && defined(RTEMS_MULTIPROCESSING)
   /* Generated from spec:/var */
 
   /**
@@ -1146,6 +1183,7 @@ __attribute__((__const__)) static inline int VeryLongFunction(
         assert content == src.read()
 
     header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
         "item-level-interfaces": ["/command-line"],
         "domains": {},
         "enabled": [],
@@ -1165,6 +1203,7 @@ __attribute__((__const__)) static inline int VeryLongFunction(
 #ifndef _H_H
 #define _H_H
 
+#include <cpuopts.h>
 #include <h2.h>
 #include <h3.h>
 #include <math.h>
@@ -1569,7 +1608,7 @@ typedef union Union {
   long m_1;
 } Union;
 
-#if !defined(ASM)
+#if !defined(ASM) && defined(RTEMS_MULTIPROCESSING)
   /**
    * @ingroup GroupC
    *
@@ -1633,6 +1672,7 @@ def _generate_header_file_with(tmpdir, style, spec_dir, uid="/h"):
     """ Generate a header file using an additional specification. """
     item_cache = create_item_cache(tmpdir, ["spec-interface", spec_dir])
     header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
         "item-level-interfaces": ["/command-line"],
         "domains": {},
         "enabled": [],
@@ -1700,6 +1740,7 @@ def test_get_affected_header_files(tmpdir):
 def test_generate_interfaces_selection(tmpdir):
     base_directory = os.path.join(tmpdir, "base")
     interface_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
         "item-level-interfaces": ["/command-line"],
         "domains": {
             "/domain-abc": base_directory

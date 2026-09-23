@@ -30,9 +30,10 @@ from specitems import EmptyItemCache, Item, SphinxContent
 
 from specware import (add_item_marker, align_declarations, CContent, CInclude,
                       DEFAULT_ITEM_MARKER, enabled_by_to_exp, ExpressionMapper,
+                      OptionExpressionMapper, OptionExpressions,
                       PythonExpressionMapper)
 
-from .conftest import code_context
+from .conftest import code_context, OPTION_EXPRESSIONS
 
 
 def test_align_declarations():
@@ -568,7 +569,10 @@ x
 
 
 def to_c_exp(enabled_by):
-    return enabled_by_to_exp(enabled_by, ExpressionMapper())
+    return enabled_by_to_exp(
+        enabled_by,
+        OptionExpressionMapper(OptionExpressions(OPTION_EXPRESSIONS),
+                               Item(EmptyItemCache(), "/x", {})))
 
 
 def test_enabled_by_to_exp():
@@ -669,3 +673,29 @@ def test_add_item_marker():
     text = SphinxContent(context="CC-BY-SA-4.0")
     add_item_marker(text, DEFAULT_ITEM_MARKER, item)
     assert str(text) == ".. Generated from spec:/a/b\n"
+
+
+def test_option_expressions():
+    item = Item(EmptyItemCache(), "/x", {})
+    options = OptionExpressions([{
+        "pattern": "LWIP_(TESTMODE|TCPIP_THREAD_TEST)",
+        "expression": "defined(${.:/option-name})"
+    }, {
+        "pattern":
+        "HAVE_(?P<feature>[A-Z]+)(_X)?",
+        "expression":
+        "LWIP_${.:/option-group:1} ${.:/option-group:feature} "
+        "${.:/option-group} '${.:/option-group:2}'"
+    }, {
+        "pattern": "LWIP_.*",
+        "expression": "${.:/option-name}"
+    }])
+    assert options.get_expression(item,
+                                  "LWIP_TESTMODE") == "defined(LWIP_TESTMODE)"
+    assert options.get_expression(item, "LWIP_TCP") == "LWIP_TCP"
+    assert options.get_expression(item,
+                                  "HAVE_TCP") == "LWIP_TCP TCP HAVE_TCP ''"
+    with pytest.raises(ValueError) as err:
+        options.get_expression(item, "XLWIP_TCP")
+    assert str(err.value) == ("no option expression of the task matches the "
+                              "option XLWIP_TCP of /x")

@@ -32,10 +32,14 @@ spec-info:
         description: |
           It shall be the license of a produced file.
         spec-type: spdx-license-identifier
+      option-expressions:
+        description: null
+        spec-type: tool-option-expression-list
     description: |
       This set of attributes specifies a validation test generation task.
     mandatory-attributes:
     - license
+    - option-expressions
 spec-name: Tool Validation Task
 spec-type: tool-task-validation
 type: spec
