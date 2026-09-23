@@ -1302,3 +1302,42 @@ m_1
 : Brief member 1 description.
 """
         assert content == src.read()
+
+
+def test_interfacedoc_item_marker(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    augment_glossary_terms(item_cache["/glossary"], [])
+    targets = [
+        os.path.join(tmpdir, name) for name in ("i.rst", "d.rst", "t.rst")
+    ]
+    config = {
+        "enabled": [],
+        "groups": [{
+            "group": "/gb",
+            "introduction-target": targets[0],
+            "directives-target": targets[1]
+        }],
+        "item-marker":
+        "Find related header with spec:${.:/uid}",
+        "types": {
+            "domains": ["/domain-abc"],
+            "groups": [],
+            "target": targets[2]
+        }
+    }
+    generate_interface_documentation(config, item_cache, _SPHINX_MAPPER,
+                                     _SPHINX_CONTENT)
+    for target in targets:
+        with open(target, "r", encoding="utf-8") as src:
+            text = src.read()
+        assert ".. Find related header with spec:/" in text
+        assert "Generated from" not in text
+    config["item-marker"] = ""
+    generate_interface_documentation(config, item_cache, _SPHINX_MAPPER,
+                                     _SPHINX_CONTENT)
+    for target in targets:
+        with open(target, "r", encoding="utf-8") as src:
+            text = src.read()
+        assert "Find related header" not in text
+        assert "Generated from" not in text
+        assert "\n\n\n" not in text

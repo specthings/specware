@@ -26,8 +26,10 @@
 
 import pytest
 
-from specware import (align_declarations, CContent, CInclude,
-                      enabled_by_to_exp, ExpressionMapper,
+from specitems import EmptyItemCache, Item, SphinxContent
+
+from specware import (add_item_marker, align_declarations, CContent, CInclude,
+                      DEFAULT_ITEM_MARKER, enabled_by_to_exp, ExpressionMapper,
                       PythonExpressionMapper)
 
 from .conftest import code_context
@@ -654,3 +656,16 @@ def test_automatically_generated_warning():
         content.add_automatically_generated_warning()
         content.add("int b;")
         assert str(content) == expected
+
+
+def test_add_item_marker():
+    item = Item(EmptyItemCache(), "/a/b", {"name": "B"})
+    content = CContent(code_context())
+    add_item_marker(content, DEFAULT_ITEM_MARKER, item)
+    add_item_marker(content, "", item)
+    add_item_marker(content, "Find ${.:/name} with spec:${.:/uid}", item)
+    assert str(content) == ("/* Generated from spec:/a/b */\n\n"
+                            "/* Find B with spec:/a/b */\n")
+    text = SphinxContent(context="CC-BY-SA-4.0")
+    add_item_marker(text, DEFAULT_ITEM_MARKER, item)
+    assert str(text) == ".. Generated from spec:/a/b\n"

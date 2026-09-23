@@ -25,6 +25,14 @@ spec-info:
           accepts for a part whose license expression permits not the license
           of that source.
         spec-type: list-str
+      documentation-item-marker:
+        description: |
+          It shall be the line which marks the documentation content of an
+          item.  A variable substitution in the context of the item is
+          performed on the value.  ``$${.:/uid}`` yields the UID of the item.
+          An empty line marks nothing.  The default is ``Generated from
+          spec:$${.:/uid}``.
+        spec-type: str
       documentation-license:
         description: |
           It shall be the license of a produced documentation source.
@@ -34,6 +42,13 @@ spec-info:
           It shall be the licenses which the Doxygen source accepts for a part
           whose license expression permits not the license of that source.
         spec-type: list-str
+      doxygen-item-marker:
+        description: |
+          It shall be the line which marks the Doxygen content of an item.  A
+          variable substitution in the context of the item is performed on the
+          value.  ``$${.:/uid}`` yields the UID of the item.  An empty line
+          marks nothing.  The default is ``Generated from spec:$${.:/uid}``.
+        spec-type: str
       doxygen-license:
         description: |
           It shall be the license of the Doxygen source.

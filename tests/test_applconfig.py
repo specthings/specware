@@ -1281,3 +1281,32 @@ def test_generate_application_configuration_no_documentation(tmpdir):
 
     assert os.path.exists(doxygen_h)
     assert not os.path.exists(g_rst)
+
+
+def test_generate_application_configuration_item_markers(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-applconfig")
+    doxygen_h = os.path.join(tmpdir, "marker.h")
+    g_rst = os.path.join(tmpdir, "marker.rst")
+    applconfig_config = {
+        "enabled-source": ["X"],
+        "enabled-documentation": ["X"],
+        "doxygen-target": doxygen_h,
+        "doxygen-item-marker": "Find related documentation with "
+        "spec:${.:/uid}",
+        "documentation-item-marker": "",
+        "groups": [{
+            "uid": "/g",
+            "target": g_rst
+        }]
+    }
+    generate_application_configuration(applconfig_config, [], item_cache,
+                                       _SPHINX_MAPPER, _SPHINX_CONTENT,
+                                       code_context())
+    with open(doxygen_h, "r", encoding="utf-8") as src:
+        doxygen = src.read()
+    assert "/* Find related documentation with spec:/g */\n" in doxygen
+    assert "Generated from" not in doxygen
+    with open(g_rst, "r", encoding="utf-8") as src:
+        text = src.read()
+    assert "spec:/" not in text
+    assert "\n\n\n" not in text

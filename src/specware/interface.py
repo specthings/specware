@@ -39,7 +39,8 @@ from specitems import (ClangFormatter, ContentContext, GenericContent, Item,
                        ItemMapper, Link, get_value_default, get_value_plural,
                        to_camel_case)
 
-from .contentc import (CContent, CInclude, enabled_by_to_exp, ExpressionMapper,
+from .contentc import (CContent, CInclude, DEFAULT_ITEM_MARKER,
+                       add_item_marker, enabled_by_to_exp, ExpressionMapper,
                        forward_declaration, get_value_compound,
                        get_value_double_colon, get_value_doxygen_function,
                        get_value_doxygen_group, get_value_doxygen_ref,
@@ -554,7 +555,7 @@ class _Node:
 
     def generate_directly(self) -> None:
         """ Directly generate the node content. """
-        self.content.add(f"/* Generated from spec:{self.item.uid} */")
+        add_item_marker(self.content, self.header_file.item_marker, self.item)
         _NODE_GENERATORS[self.item["interface-type"]](self)
 
     def generate(self) -> None:
@@ -1188,7 +1189,9 @@ class _HeaderFile:
                  options: dict[str, str],
                  enabled: list[str],
                  context: ContentContext,
-                 formatter: Optional[ClangFormatter] = None):
+                 formatter: Optional[ClangFormatter] = None,
+                 item_marker: str = DEFAULT_ITEM_MARKER):
+        # pylint: disable=too-many-arguments
         # pylint: disable=too-many-positional-arguments
         self._item = item
         self.content = CContent(context)
@@ -1199,6 +1202,7 @@ class _HeaderFile:
         self._formatter = formatter
         self.options = options
         self.enabled = enabled
+        self.item_marker = item_marker
 
     def add_includes(self, item: Item) -> None:
         """ Add the includes of the item to the header file includes. """
@@ -1284,7 +1288,7 @@ class _HeaderFile:
                 _Node(self, self._item).substitute_text(self._item["brief"]))
         self.content.add_copyrights_and_licenses()
         self.content.add_automatically_generated_warning()
-        self.content.add(f"/* Generated from spec:{self._item.uid} */")
+        add_item_marker(self.content, self.item_marker, self._item)
 
     def finalize(self) -> None:
         """ Finalize the header file. """
@@ -1346,7 +1350,8 @@ def _generate_header_file(item: Item, domains: dict[str, str],
                           options: dict[str,
                                         str], enabled: list[str], style: str,
                           file_path: Optional[str], context: ContentContext,
-                          formatter: Optional[ClangFormatter]) -> None:
+                          formatter: Optional[ClangFormatter],
+                          item_marker: str) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
 
@@ -1359,7 +1364,7 @@ def _generate_header_file(item: Item, domains: dict[str, str],
     else:
         domain_path = None
     header_file = _HEADER_FILE[style](item, options, enabled, context,
-                                      formatter)
+                                      formatter, item_marker)
     header_file.generate_nodes()
     header_file.finalize()
     header_file.write(domain_path, file_path)
@@ -1426,7 +1431,8 @@ def generate_interfaces(config: dict,
             continue
         _generate_header_file(item, domains, options, enabled, style, None,
                               _create_header_context(config, item, context),
-                              formatter)
+                              formatter,
+                              config.get("item-marker", DEFAULT_ITEM_MARKER))
 
 
 def generate_header_file(config: dict,
@@ -1449,4 +1455,5 @@ def generate_header_file(config: dict,
     _generate_header_file(header_file, config["domains"], options,
                           config["enabled"], config["style"], file_path,
                           _create_header_context(config, header_file,
-                                                 context), formatter)
+                                                 context), formatter,
+                          config.get("item-marker", DEFAULT_ITEM_MARKER))

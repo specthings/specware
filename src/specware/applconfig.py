@@ -33,10 +33,10 @@ from specitems import (ClangFormatter, ContentContext, EnabledSet,
                        GenericContent, get_value_plural, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, TextContent)
 
-from .contentc import (CContent, get_value_double_colon,
-                       get_value_doxygen_function, get_value_doxygen_group,
-                       get_value_doxygen_ref, get_value_hash,
-                       get_value_header_file)
+from .contentc import (CContent, DEFAULT_ITEM_MARKER, add_item_marker,
+                       get_value_double_colon, get_value_doxygen_function,
+                       get_value_doxygen_group, get_value_doxygen_ref,
+                       get_value_hash, get_value_header_file)
 from .rtems import is_export_affected
 
 _GROUP_MEMBER_ROLES = ("appl-config-group-member", "interface-ingroup")
@@ -68,19 +68,22 @@ class _ContentAdaptor:
     By default, Sphinx content is generated.
     """
 
-    def __init__(self, mapper: ItemMapper, content: Any) -> None:
+    def __init__(self,
+                 mapper: ItemMapper,
+                 content: Any,
+                 item_marker: str = DEFAULT_ITEM_MARKER) -> None:
         self.mapper = mapper
         self.content = content
+        self.item_marker = item_marker
 
     def substitute(self, text: Optional[str]) -> str:
         """ Substitute the optional text using the item mapper. """
         return self.mapper.substitute(text)
 
-    def add_group(self, uid: str, name: str, description: str) -> None:
+    def add_group(self, group: Item, name: str, description: str) -> None:
         """ Add the option group. """
         self.content.add_automatically_generated_warning()
-        with self.content.comment_block():
-            self.content.add(f"Generated from spec:{uid}")
+        add_item_marker(self.content, self.item_marker, group)
         self.content.add_header(name, level=self.content.section_level)
         self.content.add(description)
 
@@ -96,11 +99,10 @@ class _ContentAdaptor:
             else:
                 self.content.add(text)
 
-    def add_option(self, uid: str, name: str,
+    def add_option(self, item: Item, name: str,
                    index_entries: list[str]) -> None:
         """ Add the option. """
-        with self.content.comment_block():
-            self.content.add(f"Generated from spec:{uid}")
+        add_item_marker(self.content, self.item_marker, item)
         with self.content.directive("raw", "latex"):
             self.content.add("\\clearpage")
         self.content.add_index_entries([name] + index_entries)
@@ -148,8 +150,11 @@ class _ContentAdaptor:
 
 class _TextContentAdaptor(_ContentAdaptor):
 
-    def __init__(self, mapper: ItemMapper, content: TextContent) -> None:
-        super().__init__(mapper, content)
+    def __init__(self,
+                 mapper: ItemMapper,
+                 content: TextContent,
+                 item_marker: str = DEFAULT_ITEM_MARKER) -> None:
+        super().__init__(mapper, content, item_marker)
 
 
 class _DoxygenContentAdaptor(_ContentAdaptor):
@@ -158,8 +163,9 @@ class _DoxygenContentAdaptor(_ContentAdaptor):
     def __init__(self,
                  mapper: ItemMapper,
                  context: ContentContext,
-                 formatter: Optional[ClangFormatter] = None) -> None:
-        super().__init__(mapper, CContent(context))
+                 formatter: Optional[ClangFormatter] = None,
+                 item_marker: str = DEFAULT_ITEM_MARKER) -> None:
+        super().__init__(mapper, CContent(context), item_marker)
         self._formatter = formatter
         self._reset()
 
@@ -175,17 +181,17 @@ class _DoxygenContentAdaptor(_ContentAdaptor):
         self._notes = ""
         self._description = ""
 
-    def add_group(self, uid: str, name: str, description: str) -> None:
+    def add_group(self, group: Item, name: str, description: str) -> None:
         identifier = f"RTEMSApplConfig{name.replace(' ', '')}"
-        self.content.add(f"/* Generated from spec:{uid} */")
+        add_item_marker(self.content, self.item_marker, group)
         with self.content.defgroup_block(identifier, name):
             self.content.add("@ingroup RTEMSApplConfig")
             self.content.wrap(description)
             self.content.add("@{")
 
-    def add_option(self, uid: str, name: str,
+    def add_option(self, item: Item, name: str,
                    _index_entries: list[str]) -> None:
-        self.content.add(f"/* Generated from spec:{uid} */")
+        add_item_marker(self.content, self.item_marker, item)
         self.content.open_doxygen_block()
         self._name = name
 
@@ -291,12 +297,12 @@ def document_option(content: TextContent, mapper: ItemMapper, item: Item,
 def _generate(group: Item, options: dict[str, Item], enabled_set: EnabledSet,
               content: _ContentAdaptor) -> None:
     content.register_license_and_copyrights_of_item(group)
-    content.add_group(group.uid, group["name"],
+    content.add_group(group, group["name"],
                       content.substitute(group["description"]))
     for item in sorted(options.values(), key=lambda x: x["name"]):
         content.mapper.item = item
         content.register_license_and_copyrights_of_item(item)
-        content.add_option(item.uid, item["name"], item["index-entries"])
+        content.add_option(item, item["name"], item["index-entries"])
         _document_option(item, enabled_set, content)
     content.add_licence_and_copyrights()
 
@@ -436,8 +442,9 @@ def generate_application_configuration(
     text_mapper = create_mapper(some_item, group_uids)
     doxygen_mapper = ItemMapper(some_item)
     _add_doxygen_get_values(doxygen_mapper)
-    doxygen_content = _DoxygenContentAdaptor(doxygen_mapper, doxygen_context,
-                                             formatter)
+    doxygen_content = _DoxygenContentAdaptor(
+        doxygen_mapper, doxygen_context, formatter,
+        config.get("doxygen-item-marker", DEFAULT_ITEM_MARKER))
     doxygen_content.content.add_automatically_generated_warning()
     with doxygen_content.content.defgroup_block(
             "RTEMSApplConfig", "Application Configuration Options"):
@@ -449,7 +456,10 @@ def generate_application_configuration(
         if write_documentation:
             _generate_documentation(
                 config, group_config, group, options,
-                _TextContentAdaptor(text_mapper, create_content()))
+                _TextContentAdaptor(
+                    text_mapper, create_content(),
+                    config.get("documentation-item-marker",
+                               DEFAULT_ITEM_MARKER)))
         _generate(group, options, config["enabled-source"], doxygen_content)
     doxygen_content.content.prepend_copyrights_and_licenses()
     doxygen_content.content.prepend([

@@ -67,6 +67,30 @@ def test_interface_license_by_target(tmpdir):
             "/* SPDX-License-Identifier: BSD-2-Clause */\n")
 
 
+def test_interface_item_marker(tmpdir):
+    base_directory = os.path.join(tmpdir, "base")
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    interface_config = {
+        "item-level-interfaces": ["/command-line"],
+        "domains": {
+            "/domain-abc": base_directory
+        },
+        "enabled": [],
+        "item-marker": "Find related documentation with spec:${.:/uid}"
+    }
+    generate_interfaces(interface_config, item_cache, code_context())
+    with open(os.path.join(base_directory, "include", "h.h"), "r") as src:
+        content = src.read()
+    assert "/* Find related documentation with spec:/h */\n" in content
+    assert "Generated from" not in content
+    interface_config["item-marker"] = ""
+    generate_interfaces(interface_config, item_cache, code_context())
+    with open(os.path.join(base_directory, "include", "h.h"), "r") as src:
+        content = src.read()
+    assert "spec:/" not in content
+    assert "\n\n\n" not in content
+
+
 def test_interface(tmpdir):
     base_directory = os.path.join(tmpdir, "base")
 

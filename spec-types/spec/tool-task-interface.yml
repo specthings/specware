@@ -37,6 +37,13 @@ spec-info:
           It shall be the UIDs of the interface items which produce a file of
           their own.
         spec-type: list-uid
+      item-marker:
+        description: |
+          It shall be the line which marks the C content of an item.  A
+          variable substitution in the context of the item is performed on the
+          value.  ``$${.:/uid}`` yields the UID of the item.  An empty line
+          marks nothing.  The default is ``Generated from spec:$${.:/uid}``.
+        spec-type: str
       license:
         description: |
           It shall be the license of a produced file which no rule of

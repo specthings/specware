@@ -32,7 +32,10 @@ from typing import (Any, Callable, Iterable, Iterator, Match, NamedTuple,
                     Optional)
 
 from specitems import (ClangFormatter, Content, ContentContext, GenericContent,
-                       Item, ItemGetValueContext, MARKDOWN_ROLES)
+                       Item, ItemGetValueContext, ItemMapper, MARKDOWN_ROLES)
+
+#: The item marker of a task which states none.
+DEFAULT_ITEM_MARKER = "Generated from spec:${.:/uid}"
 
 _PARAM = {
     None: "@param ",
@@ -603,6 +606,36 @@ def get_value_compound(ctx: ItemGetValueContext) -> Any:
 def get_value_unspecified_type(ctx: ItemGetValueContext) -> Any:
     """ Get the value as a compound (unspecified struct or union). """
     return f"{ctx.item['interface-type'][12:]} {ctx.item['name']}"
+
+
+def _get_uid(ctx: ItemGetValueContext) -> str:
+    return ctx.item.uid
+
+
+def add_item_marker(content: Content, marker: str, item: Item) -> None:
+    """
+    Add the line which marks the content of the item.
+
+    C content gets the line as a comment of its own, every other content gets
+    it as a comment block.
+
+    Args:
+        content: The content which receives the line.
+        marker: The marker of the task.  A variable substitution in the
+            context of the item is performed on the value.  ``${.:/uid}``
+            yields the UID of the item.  An empty marker adds nothing.
+        item: The item which the marked content comes from.
+    """
+    if not marker:
+        return
+    mapper = ItemMapper(item)
+    mapper.add_default_get_value("uid", _get_uid)
+    line = mapper.substitute(marker)
+    if isinstance(content, CContent):
+        content.add(f"/* {line} */")
+    else:
+        with content.comment_block():
+            content.add(line)
 
 
 class ExpressionMapper:

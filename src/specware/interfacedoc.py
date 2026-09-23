@@ -31,8 +31,8 @@ from typing import Any, Callable, Iterable, Optional
 from specitems import (EnabledSet, Item, ItemCache, ItemGetValueContext,
                        ItemMapper, make_label, TextContent)
 
-from .contentc import (CContent, get_value_compound,
-                       get_value_forward_declaration,
+from .contentc import (CContent, DEFAULT_ITEM_MARKER, add_item_marker,
+                       get_value_compound, get_value_forward_declaration,
                        get_value_unspecified_type)
 from .interfacemapper import sanitize_name
 
@@ -58,12 +58,13 @@ class CodeMapper(ItemMapper):
 
 
 def _generate_introduction(content: TextContent, mapper: ItemMapper,
-                           target: str, group: Item,
-                           items: list[Item]) -> None:
+                           target: str, group: Item, items: list[Item],
+                           item_marker: str) -> None:
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     content.register_license_and_copyrights_of_item(group)
     content.add_automatically_generated_warning()
-    with content.comment_block():
-        content.add(f"Generated from spec:{group.uid}")
+    add_item_marker(content, item_marker, group)
     group_name = group["name"]
     content.push_label(make_label(group_name))
     with content.section("Introduction"):
@@ -230,7 +231,7 @@ def document_directive(content: TextContent, mapper: ItemMapper, item: Item,
 
 def _generate_directives(content: TextContent, mapper: ItemMapper, target: str,
                          group: Item, items: list[Item],
-                         enable_set: EnabledSet) -> None:
+                         enable_set: EnabledSet, item_marker: str) -> None:
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-positional-arguments
     content.register_license_and_copyrights_of_item(group)
@@ -248,8 +249,7 @@ def _generate_directives(content: TextContent, mapper: ItemMapper, target: str,
             content.register_license_and_copyrights_of_item(item)
             name = item["name"]
             code_mapper = CodeMapper(item)
-            with content.comment_block():
-                content.add(f"Generated from spec:{item.uid}")
+            add_item_marker(content, item_marker, item)
             with content.directive("raw", "latex"):
                 content.add("\\clearpage")
             directive = f"{name}()"
@@ -324,7 +324,7 @@ def _is_opaque_type(item: Item) -> Optional[Item]:
 
 
 def _generate_types(content: TextContent, mapper: ItemMapper, config: dict,
-                    item_cache: ItemCache) -> None:
+                    item_cache: ItemCache, item_marker: str) -> None:
     types: list[Item] = []
     for domain in config["domains"]:
         _gather_types(item_cache[domain], types)
@@ -343,8 +343,7 @@ for more information about the usage of the various data types.""")
                 "types in alphabetical order:")
             for item in sorted(types, key=lambda x: x["name"]):
                 content.register_license_and_copyrights_of_item(item)
-                with content.comment_block():
-                    content.add(f"Generated from spec:{item.uid}")
+                add_item_marker(content, item_marker, item)
                 name = item["name"]
                 content.add_index_entries([name] + item["index-entries"])
                 with content.section(name,
@@ -379,6 +378,7 @@ def generate_interface_documentation(
     """
     groups = config["groups"]
     enable_set = config["enabled"]
+    item_marker = config.get("item-marker", DEFAULT_ITEM_MARKER)
     group_uids = [doc_config["group"] for doc_config in groups]
     group_uids.extend(uid for uid in config["types"]["groups"])
     some_item = next(iter(item_cache.values()))
@@ -396,12 +396,13 @@ def generate_interface_documentation(
         with mapper.work(content.context):
             _generate_introduction(content, mapper,
                                    doc_config["introduction-target"], group,
-                                   items)
+                                   items, item_marker)
         content = create_content()
         with mapper.work(content.context):
             _generate_directives(content, mapper,
                                  doc_config["directives-target"], group, items,
-                                 enable_set)
+                                 enable_set, item_marker)
     content = create_content()
     with mapper.work(content.context):
-        _generate_types(content, mapper, config["types"], item_cache)
+        _generate_types(content, mapper, config["types"], item_cache,
+                        item_marker)
