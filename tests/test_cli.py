@@ -32,10 +32,9 @@ import pytest
 
 import specware
 
-from specware.cliexport import _bind_context, cliexport
+from specware.cliexport import cliexport
 from specware.cliexportheader import cliexportheader
 
-from .conftest import doc_context
 from specware.clifind import clifind
 from specware.cliview import cliview
 
@@ -581,13 +580,16 @@ def test_cliexport_item_via_two_paths(tmpdir):
     assert os.path.exists(os.path.join(tmpdir, "tc.c"))
 
 
-def test_bind_context_creates_a_work_per_content():
-    create_content, _, _ = _bind_context("rest", doc_context())
-    first = create_content()
-    second = create_content()
-    first.register_copyright("Copyright (C) 2020 John Doe")
-    assert first.context.licenses.copyrights().get_statements()
-    assert not second.context.licenses.copyrights().get_statements()
+def test_cliexport_gives_each_documentation_file_its_own_copyrights(tmpdir):
+    config_file = _create_specview_yml(tmpdir)
+    exit_code = cliexport(
+        ["command", "--config-file", config_file, "--no-code"])
+    assert exit_code == 0
+    introduction = (Path(tmpdir) /
+                    "introduction.rst").read_text(encoding="utf-8")
+    types = (Path(tmpdir) / "types.rst").read_text(encoding="utf-8")
+    assert "Copyright (C) 2021 embedded brains GmbH & Co. KG" in introduction
+    assert "Copyright" not in types
 
 
 _EXTRA_TASK_TYPE = {
