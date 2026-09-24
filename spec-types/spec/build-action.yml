@@ -22,22 +22,22 @@ spec-info:
         description: |
           The action asserts that the action value is aligned according to the
           attribute value.
-        spec-type: int
+        spec-type: build-action-int
       assert-eq:
         description: |
           The action asserts that the action value is equal to the attribute
           value.
-        spec-type: bool-or-int-or-str
+        spec-type: build-action-bool-or-int-or-str
       assert-ge:
         description: |
           The action asserts that the action value is greater than or equal to
           the attribute value.
-        spec-type: int-or-str
+        spec-type: build-action-int-or-str
       assert-gt:
         description: |
           The action asserts that the action value is greater than the
           attribute value.
-        spec-type: int-or-str
+        spec-type: build-action-int-or-str
       assert-int16:
         description: |
           The action asserts that the action value is a valid signed 16-bit
@@ -52,7 +52,7 @@ spec-info:
         description: |
           The action asserts that the action value is in the attribute value
           set.
-        spec-type: list-int-or-str
+        spec-type: build-action-list-int-or-str
       assert-int64:
         description: |
           The action asserts that the action value is a valid signed 64-bit
@@ -67,17 +67,17 @@ spec-info:
         description: |
           The action asserts that the action value is less than or equal to the
           attribute value.
-        spec-type: int-or-str
+        spec-type: build-action-int-or-str
       assert-lt:
         description: |
           The action asserts that the action value is less than the attribute
           value.
-        spec-type: int-or-str
+        spec-type: build-action-int-or-str
       assert-ne:
         description: |
           The action asserts that the action value is not equal to the
           attribute value.
-        spec-type: bool-or-int-or-str
+        spec-type: build-action-bool-or-int-or-str
       assert-power-of-two:
         description: |
           The action asserts that the action value is a power of two.

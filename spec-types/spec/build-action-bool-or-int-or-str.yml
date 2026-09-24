@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  bool:
+    description: null
+  int:
+    description: null
+    format:
+      default: '{}'
+      path: /format
+      type: int-format-attribute
+  str:
+    description: null
+spec-name: Build Action Boolean or Integer or String
+spec-type: build-action-bool-or-int-or-str
+type: spec

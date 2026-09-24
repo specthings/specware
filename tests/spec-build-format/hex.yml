@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+actions:
+- get-integer: null
+- assert-aligned: 4096
+- assert-eq: 16384
+- assert-ge: 4096
+- assert-gt: 0
+- assert-in-set:
+  - 4096
+  - 8192
+- assert-le: 65536
+- assert-lt: 131072
+- assert-ne: 12288
+- format-and-define: null
+build-type: option
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+default:
+- enabled-by: true
+  value: 16384
+description: |
+  Hex.
+enabled-by: true
+format: '{:#010x}'
+links: []
+name: HEX
+type: build
