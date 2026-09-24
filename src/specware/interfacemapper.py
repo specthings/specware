@@ -110,6 +110,11 @@ def get_value_sphinx_param(ctx: ItemGetValueContext) -> str:
     return f"``{sanitize_name(ctx.value[ctx.key])}``"
 
 
+def get_value_sphinx_header_file(ctx: ItemGetValueContext) -> str:
+    """ Gets a header file. """
+    return f"``<{ctx.value[ctx.key]}>``"
+
+
 class SphinxInterfaceMapper(SphinxMapper):
     """ Sphinx item mapper for the interface documentation. """
 
@@ -135,7 +140,7 @@ class SphinxInterfaceMapper(SphinxMapper):
                            get_value_sphinx_param)
         self.add_get_value("interface/group:/name", self._get_group)
         self.add_get_value("interface/header-file:/path",
-                           get_value_header_file)
+                           get_value_sphinx_header_file)
         self.add_get_value("interface/macro:/name", self._get_function)
         self.add_get_value("interface/macro:/params/name",
                            get_value_sphinx_param)

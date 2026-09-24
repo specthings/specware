@@ -1682,6 +1682,23 @@ def _generate_header_file_with(tmpdir, style, spec_dir, uid="/h"):
                          os.path.join(tmpdir, "header.h"))
 
 
+def test_interface_header_file_reference(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-interface")
+    header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": "default"
+    }
+    path = os.path.join(tmpdir, "h4.h")
+    generate_header_file(header_file_config, item_cache["/h4"], code_context(),
+                         path)
+    with open(path, "r", encoding="utf-8") as src:
+        content = src.read()
+    assert " * I am defined in `<h4.h>`.\n" in content
+
+
 @pytest.mark.parametrize("style", ["default", "zephyr"])
 def test_interface_invalid_register_domain(tmpdir, style):
     with pytest.raises(ValueError,

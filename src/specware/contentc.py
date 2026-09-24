@@ -573,7 +573,7 @@ def get_value_double_colon(ctx: ItemGetValueContext) -> Any:
 
 def get_value_header_file(ctx: ItemGetValueContext) -> Any:
     """ Get the value formatted as a header file. """
-    return f"``<{ctx.value[ctx.key]}>``"
+    return f"`<{ctx.value[ctx.key]}>`"
 
 
 def get_value_hash(ctx: ItemGetValueContext) -> Any:
