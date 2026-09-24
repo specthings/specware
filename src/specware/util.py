@@ -26,16 +26,20 @@
 
 import argparse
 import contextlib
+import functools
 import logging
 import os
 from pathlib import Path
 import subprocess
-from typing import Any, Callable, Iterator, NamedTuple, Optional, Union
+import sys
+from typing import (Any, Callable, Iterator, NamedTuple, Optional, TypeVar,
+                    Union, cast)
 
 from specitems import (ClangFormatter, IsEnabled, Item, ItemCache,
                        ItemCacheConfig, ItemDataByUID, SpecTypeProvider,
-                       create_config, find_config_file, load_config_item,
-                       monitor_logging, pickle_load_data_by_uid)
+                       create_config, create_type_provider, find_config_file,
+                       load_config_item, monitor_logging,
+                       pickle_load_data_by_uid)
 
 
 class ClangFormatError(Exception):
@@ -156,7 +160,7 @@ def run_with_clang_formatter(
     with monitor_logging() as monitor:
         try:
             run(create_clang_formatter(args))
-        except ClangFormatError as err:
+        except (ClangFormatError, ConfigFileError) as err:
             logging.error("%s", err)
         except subprocess.CalledProcessError as err:
             log_clang_format_failure(err)
@@ -214,6 +218,35 @@ def run_command(args: list[str],
         return actual_status
 
 
+class ConfigFileError(Exception):
+    """ Indicates that the configuration file is missing or invalid. """
+
+
+_Function = TypeVar("_Function", bound=Callable[..., Any])
+
+
+def exit_on_config_file_error(function: _Function) -> _Function:
+    """
+    Make the command exit with a message where its configuration file is
+    missing or invalid.
+
+    Args:
+        function: The command.
+
+    Returns:
+        The command which exits with status 1 on a :class:`ConfigFileError`.
+    """
+
+    @functools.wraps(function)
+    def _run(*args: Any, **kwargs: Any) -> Any:
+        try:
+            return function(*args, **kwargs)
+        except ConfigFileError as err:
+            sys.exit(str(err))
+
+    return cast(_Function, _run)
+
+
 class Tree(NamedTuple):
     """ Is the tree of a configuration file. """
 
@@ -243,11 +276,20 @@ def open_tree(config_file: Optional[str],
         is_item_enabled: The optional enabled status of an item.
         enabled_set: The optional enabled set of the item cache.
 
+    The configuration is verified with the types of every installed package,
+    so it may state tasks of the tools of another package.
+
     Yields:
         The tree.
+
+    Raises:
+        ConfigFileError: The configuration file is missing or invalid.
     """
+    try:
+        config = load_config_item(config_file, create_type_provider())
+    except (FileNotFoundError, ValueError) as err:
+        raise ConfigFileError(str(err)) from err
     type_provider = SpecWareTypeProvider({})
-    config = load_config_item(config_file, type_provider)
     directory = str(find_config_file(config_file).parent)
     with contextlib.chdir(directory):
         item_cache_config = create_config(config["item-cache"],

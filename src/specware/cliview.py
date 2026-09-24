@@ -35,11 +35,12 @@ from specitems import (COL_SPAN, CommonMarkContent, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, Link, MarkdownContent,
                        ROW_SPAN, SphinxContent, TextContent, yield_tasks)
 
-from specware import (open_tree, augment_with_test_case_links,
-                      augment_with_test_links, gather_api_items,
-                      gather_build_files, get_register_bits_run,
-                      get_register_member_name, recursive_is_enabled,
-                      Transition, TransitionMap, validate)
+from specware import (exit_on_config_file_error, open_tree,
+                      augment_with_test_case_links, augment_with_test_links,
+                      gather_api_items, gather_build_files,
+                      get_register_bits_run, get_register_member_name,
+                      recursive_is_enabled, Transition, TransitionMap,
+                      validate)
 
 _DOC_FORMAT = {
     "commonmark": CommonMarkContent,
@@ -656,6 +657,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     return parser.parse_args(argv[1:])
 
 
+@exit_on_config_file_error
 def cliview(argv: list[str] = sys.argv):
     """ View the specification. """
 

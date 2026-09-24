@@ -28,6 +28,10 @@ import contextlib
 import os
 from pathlib import Path
 
+import pytest
+
+import specware
+
 from specware.cliexport import _bind_context, cliexport
 from specware.cliexportheader import cliexportheader
 
@@ -584,3 +588,97 @@ def test_bind_context_creates_a_work_per_content():
     first.register_copyright("Copyright (C) 2020 John Doe")
     assert first.context.licenses.copyrights().get_statements()
     assert not second.context.licenses.copyrights().get_statements()
+
+
+_EXTRA_TASK_TYPE = {
+    "SPDX-License-Identifier":
+    "CC-BY-SA-4.0 OR BSD-2-Clause",
+    "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+    "enabled-by":
+    True,
+    "links": [{
+        "role": "spec-member",
+        "uid": "root"
+    }, {
+        "role": "spec-refinement",
+        "spec-key": "task-type",
+        "spec-value": "extra",
+        "uid": "tool-task"
+    }],
+    "spec-description":
+    None,
+    "spec-example":
+    None,
+    "spec-info": {
+        "dict": {
+            "attributes": {
+                "count": {
+                    "description": "It shall be a count.\n",
+                    "spec-type": "int"
+                }
+            },
+            "description": "This set of attributes specifies an extra task.\n",
+            "mandatory-attributes": "all"
+        }
+    },
+    "spec-name":
+    "Tool Extra Task",
+    "spec-type":
+    "tool-task-extra",
+    "type":
+    "spec"
+}
+
+
+class _EntryPoint:
+
+    def __init__(self, load_types) -> None:
+        self._load_types = load_types
+
+    def load(self):
+        return self._load_types
+
+
+def _create_config_with_extra_task(tmpdir) -> str:
+    config_file = _create_specview_yml(tmpdir)
+    with open(config_file, "r", encoding="utf-8") as src:
+        text = src.read()
+    text = text.replace(
+        "tasks:\n", "tasks:\n- count: 1\n  task-name: extra\n"
+        "  task-type: extra\n", 1)
+    with open(config_file, "w", encoding="utf-8") as dst:
+        dst.write(text)
+    return config_file
+
+
+def test_cliexport_verifies_the_tasks_of_installed_packages(
+        tmpdir, caplog, monkeypatch):
+    config_file = _create_config_with_extra_task(tmpdir)
+    argv = [
+        "command", "--config-file", config_file, "--no-code",
+        "--no-documentation"
+    ]
+    exit_code = cliexport(argv)
+    assert exit_code == 1
+    log = get_and_clear_log(caplog)
+    assert ("unknown subtype for key 'task-type' for type 'tool-task': "
+            "extra") in log
+    assert f"the configuration file {config_file} is invalid" in log
+
+    def _entry_points(group):
+        assert group == "specitems_type_provider.plugins"
+        return [
+            _EntryPoint(specware.load_specware_types),
+            _EntryPoint(lambda: {"/spec/tool-task-extra": _EXTRA_TASK_TYPE})
+        ]
+
+    monkeypatch.setattr("importlib.metadata.entry_points", _entry_points)
+    exit_code = cliexport(argv)
+    assert exit_code == 0
+
+
+def test_clifind_reports_a_missing_config_file(tmpdir):
+    config_file = os.path.join(tmpdir, "missing.yml")
+    with pytest.raises(SystemExit) as err:
+        clifind(["command", "--config-file", config_file, "th"])
+    assert "missing.yml" in str(err.value)

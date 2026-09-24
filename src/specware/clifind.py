@@ -32,7 +32,8 @@ import os
 import sys
 
 from specitems import (Item)
-from specware import (open_tree, get_items_by_type_map,
+from specware import (exit_on_config_file_error, open_tree,
+                      get_items_by_type_map,
                       get_benchmark_and_test_suite_items,
                       get_interface_and_requirement_items,
                       get_validation_items)
@@ -60,6 +61,7 @@ def _process_item_data(cwd: str, file_to_item: dict[str, list[str]],
                 os.path.normpath(os.path.relpath(item.file, cwd)))
 
 
+@exit_on_config_file_error
 def clifind(argv: list[str] = sys.argv) -> None:
     """ Find the items related to generated files. """
     cwd = os.getcwd()
