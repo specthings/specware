@@ -898,6 +898,8 @@ static void Directive_Action( Directive_Context *ctx )
   ctx->status = rtems_task_ident( ctx->name, ctx->node, ctx->id );
 }
 
+/* clang-format off */
+
 static const Directive_Entry
 Directive_Entries[] = {
   { 0, 0, 0, 0, Directive_Post_Status_InvAddr, Directive_Post_Id_NullPtr },
@@ -916,6 +918,8 @@ Directive_Map[] = {
   0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3,
   0, 4, 0, 1, 0, 3, 0, 4, 0, 3
 };
+
+/* clang-format on */
 
 static size_t Directive_Scope( void *arg, char *buf, size_t n )
 {
@@ -2558,6 +2562,8 @@ static void Action2_Cleanup( void )
   /* Cleanup */
 }
 
+/* clang-format off */
+
 static const Action2_Entry
 Action2_Entries[] = {
   { 0, 1, 0, 0, Action2_Post_A_A1, Action2_Post_B_NA },
@@ -2581,6 +2587,8 @@ static const uint8_t
 Action2_Map[] = {
   4, 3, 3, 0, 0, 0, 1, 1, 1, 5, 1, 6, 0, 0, 0, 2, 2, 2
 };
+
+/* clang-format on */
 
 static size_t Action2_Scope( void *arg, char *buf, size_t n )
 {

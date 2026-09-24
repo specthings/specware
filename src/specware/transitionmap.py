@@ -714,7 +714,10 @@ class TransitionMap:
                 enumerators.append(self._get_entry(ident, transitions[0]))
                 enumerators.append("#endif")
                 entries.append("\n".join(enumerators))
-        content.add([f"static const {ident}_Entry", f"{ident}_Entries[] = {{"])
+        content.add([
+            "/* clang-format off */", "", f"static const {ident}_Entry",
+            f"{ident}_Entries[] = {{"
+        ])
         entries[-1] = entries[-1].replace("},", "}")
         content.append(entries)
         integer_type = get_integer_type(len(self._entries))
@@ -728,7 +731,7 @@ class TransitionMap:
         wrapper.subsequent_indent = "  "
         wrapper.width = 79
         content.append(wrapper.wrap(text))
-        content.append("};")
+        content.append(["};", "", "/* clang-format on */"])
 
     def get_post_entry_member(self, co_idx: int) -> str:
         """
