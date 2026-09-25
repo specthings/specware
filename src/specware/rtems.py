@@ -31,6 +31,8 @@ from typing import Any, Callable, Iterable
 from specitems import (EnabledSet, Item, ItemCache, create_unique_link,
                        link_is_enabled, to_iterable)
 
+from .registerblock import get_interface_members
+
 _NOT_PRE_QUALIFIED = frozenset((
     "/acfg/constraint/option-not-pre-qualified",
     "/constraint/constant-not-pre-qualified",
@@ -49,6 +51,10 @@ _ENABLEMENT_ROLES = ("interface-function", "interface-ingroup",
                      "interface-ingroup-hidden", "requirement-refinement",
                      "validation")
 
+# An item is enabled through the items which link to it by these roles.
+_ENABLEMENT_CHILD_ROLES = ("register-block-base", "register-block-host",
+                           "register-block-include")
+
 
 def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
     """
@@ -58,8 +64,10 @@ def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
     if not item.is_enabled(enabled_set):
         return False
     result = True
-    for parent in item.parents(_ENABLEMENT_ROLES,
-                               is_link_enabled=link_is_enabled):
+    for parent in itertools.chain(
+            item.parents(_ENABLEMENT_ROLES, is_link_enabled=link_is_enabled),
+            item.children(_ENABLEMENT_CHILD_ROLES,
+                          is_link_enabled=link_is_enabled)):
         if recursive_is_enabled(enabled_set, parent):
             return True
         result = False
@@ -158,8 +166,9 @@ _EXPORT_CHILD_ROLES = ("interface-function", "interface-placement",
                        "requirement-disposition", "requirement-refinement",
                        "test-case", "validation")
 
-_EXPORT_PARENT_ROLES = _PARENT_ROLES + ("constraint", "errno",
-                                        "register-block-include")
+_EXPORT_PARENT_ROLES = _PARENT_ROLES + (
+    "constraint", "errno", "register-block-base", "register-block-host",
+    "register-block-include")
 
 # Items reached through the shallow roles contribute to the generated content
 # of the visiting item, however, the items related to them do not.  Expanding
@@ -445,7 +454,7 @@ def _validate_tree(item: Item, validator: Callable[[Item, bool], bool],
     if type_name in _CONTAINER_TYPE:
         validation_dependencies.extend(
             (item_2.uid, "interface placement")
-            for item_2 in item.children("interface-placement"))
+            for item_2 in get_interface_members(item))
     validated = validator(item, validated)
     item.view["validated"] = validated
     item.view["validation-dependencies"] = sorted(validation_dependencies)
@@ -457,7 +466,7 @@ def _validate_containers(item: Item) -> bool:
     if item.type in _CONTAINER_TYPE:
         # If at least one not validated child exists, then the container is not
         # validated
-        for item_2 in item.children("interface-placement"):
+        for item_2 in get_interface_members(item):
             try:
                 if not item_2.view["validated"]:
                     validated = False
@@ -473,14 +482,15 @@ def _validate_containers(item: Item) -> bool:
     return validated
 
 
-def _fixup_pre_qualified(item: Item, types: list[str],
-                         roles: str | list[str]) -> None:
+def _fixup_pre_qualified(
+        item: Item, types: list[str],
+        get_members: Callable[[Item], Iterable[Item]]) -> None:
     for type_name in types:
         for item_2 in item.cache.items_by_type.get(type_name, []):
             # Count of not pre-qualified (index 0) and pre-qualified (index 1)
             # children
             count = [0, 0]
-            for item_3 in item_2.children(roles):
+            for item_3 in get_members(item_2):
                 count[int(item_3.view["pre-qualified"])] += 1
             # If at least one not pre-qualified child exists and no
             # pre-qualified child exists, then the item is not pre-qualified.
@@ -497,11 +507,12 @@ def validate(root: Item, validator: Callable[[Item, bool], bool]) -> set[Item]:
     related_items: set[Item] = set()
     _validate_tree(root, validator, (0, ), related_items)
     _validate_containers(root)
-    _fixup_pre_qualified(root,
-                         ["interface/appl-config-group", "interface/group"],
-                         ["interface-ingroup", "interface-ingroup-hidden"])
+    _fixup_pre_qualified(
+        root, ["interface/appl-config-group", "interface/group"],
+        lambda item_2: item_2.children(
+            ["interface-ingroup", "interface-ingroup-hidden"]))
     _fixup_pre_qualified(root, ["interface/header-file"],
-                         "interface-placement")
+                         get_interface_members)
     return related_items
 
 

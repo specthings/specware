@@ -124,6 +124,66 @@ def test_recursive_is_enabled():
     assert not e.enabled
 
 
+def _block(links):
+    return {
+        "enabled-by": True,
+        "interface-type": "register-block",
+        "links": links
+    }
+
+
+def _header(enabled_by, uids):
+    return {
+        "enabled-by":
+        enabled_by,
+        "interface-type":
+        "header-file",
+        "links": [{
+            "role": "register-block-host",
+            "style": "default",
+            "uid": uid
+        } for uid in uids]
+    }
+
+
+def test_recursive_is_enabled_register_block():
+    item_cache = EmptyItemCache()
+    item_cache.add_items(
+        {
+            "/h-alpha":
+            _header("alpha", ["/derived"]),
+            "/h-beta":
+            _header("beta", ["/includer"]),
+            "/base":
+            _block([]),
+            "/derived":
+            _block([{
+                "role": "register-block-base",
+                "uid": "/base"
+            }]),
+            "/includer":
+            _block([{
+                "name": "INC",
+                "role": "register-block-include",
+                "uid": "/included"
+            }]),
+            "/included":
+            _block([]),
+            "/orphan":
+            _block([])
+        },
+        set_types=False)
+    enabled = {
+        "alpha": ["/base", "/derived", "/h-alpha", "/orphan"],
+        "beta": ["/h-beta", "/included", "/includer", "/orphan"]
+    }
+    for config, uids in enabled.items():
+        item_cache.set_selection(
+            ItemSelection(item_cache, [config], recursive_is_enabled))
+        assert sorted(item.uid for item in item_cache.values()
+                      if item.enabled) == uids
+
+
 def _validate(item, validated):
     return validated
 

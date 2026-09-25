@@ -1,0 +1,32 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This header file hosts register blocks.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: header-file
+links:
+- role: interface-placement
+  uid: /domain-abc
+- role: interface-ingroup
+  uid: /ga
+- role: interface-ingroup
+  uid: hb
+- identifier: RBHostBase
+  register-block-group: Host base
+  role: register-block-host
+  style: default
+  uid: hb
+- prefix: drv
+  role: register-block-host
+  style: zephyr
+  uid: hd
+- identifier: RBHostSub
+  register-block-group: Host sub
+  role: register-block-host
+  style: default
+  uid: hs
+path: hh.h
+prefix: include
+type: interface

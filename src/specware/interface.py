@@ -48,6 +48,12 @@ from .contentc import (CContent, CInclude, DEFAULT_ITEM_MARKER,
                        get_value_forward_declaration, get_value_hash,
                        get_value_header_file, get_value_params,
                        get_value_unspecified_type)
+from .registerblock import (RegisterBlockPart, get_register_block_group,
+                            get_register_block_host_of_domain,
+                            get_register_block_hosts,
+                            get_register_block_identifier,
+                            get_register_block_layout,
+                            get_register_block_prefixes)
 from .rtems import is_export_affected
 from .util import get_register_bits_run, get_register_member_name
 
@@ -62,8 +68,14 @@ def _get_ingroups(item: Item) -> _ItemMap:
     return ingroups
 
 
+def _get_group_identifier(item: Item) -> str:
+    if item.type == "interface/register-block":
+        return get_register_block_identifier(item)
+    return item["identifier"]
+
+
 def _get_group_identifiers(groups: _ItemMap) -> list[str]:
-    return [item["identifier"] for item in groups.values()]
+    return [_get_group_identifier(item) for item in groups.values()]
 
 
 def _get_cite(ctx: ItemGetValueContext) -> str:
@@ -269,6 +281,7 @@ class _RegisterMemberContext(NamedTuple):
     regs: dict[str, Any]
     reg_counts: dict[str, int]
     reg_indices: dict[str, int]
+    parts: list[RegisterBlockPart]
 
 
 def _add_register_padding(content: CContent, new_offset: int, old_offset: int,
@@ -409,11 +422,10 @@ def _get_register_bits_shift(start: int, stride: int, first: int) -> str:
     return f"( {start} {'+' if stride > 0 else '-'} {term} )"
 
 
-def _get_register_bits_prefix(item: Item, reg_name: str) -> str:
+def _get_register_bits_prefix(item: Item, host: Optional[Link],
+                              reg_name: str) -> str:
     """ Get the define prefix of the bit fields of a register. """
-    prefix = item["register-prefix"]
-    if prefix is None:
-        prefix = item["name"]
+    prefix, _ = get_register_block_prefixes(item, host)
     prefix = f"{prefix}_{reg_name}_" if prefix else f"{reg_name}_"
     return prefix.upper()
 
@@ -507,9 +519,13 @@ class _Node:
     """ Nodes of a header file. """
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, header_file: "_HeaderFile", item: Item):
+    def __init__(self,
+                 header_file: "_HeaderFile",
+                 item: Item,
+                 host: Optional[Link] = None):
         self.header_file = header_file
         self.item = item
+        self.host = host
         self.ingroups = _get_ingroups(item)
         self.dependents: set[_Node] = set()
         self.depends_on: set[_Node] = set()
@@ -618,10 +634,16 @@ class _Node:
         """ Generate a macro. """
         self._add_generic_definition(_Node._get_macro_definition)
 
+    def _new_register_member_context(self) -> _RegisterMemberContext:
+        layout = get_register_block_layout(self.item)
+        return _RegisterMemberContext({}, {}, collections.defaultdict(int),
+                                      collections.defaultdict(int),
+                                      layout.definition)
+
     def _add_register_bits(self, group: str) -> _RegisterMemberContext:
-        ctx = _RegisterMemberContext({}, {}, collections.defaultdict(int),
-                                     collections.defaultdict(int))
-        for index, register in enumerate(self.item["registers"]):
+        ctx = self._new_register_member_context()
+        for part in get_register_block_layout(self.item).registers:
+            register = part.data
             name = register["name"]
             group_ident = group + to_camel_case(name)
             width = register["width"]
@@ -631,17 +653,17 @@ class _Node:
                 "type": f"uint{width}_t",
                 "group": group_ident
             }
-            brief = self.substitute_text(register["brief"])
+            brief = self.substitute_text(register["brief"], part.item)
             with self.content.defgroup_block(group_ident, f"{brief} ({name})"):
                 self.content.add_brief_description(
                     "This group contains register bit definitions.")
-                self.content.wrap(self.substitute_text(
-                    register["description"]))
+                self.content.wrap(
+                    self.substitute_text(register["description"], part.item))
                 self.content.add("@{")
             for index_2, bits in enumerate(register["bits"]):
                 self.content.add(
                     _add_definition(
-                        self, self.item, f"registers[{index}]/bits[{index_2}]",
+                        self, part.item, f"{part.prefix}/bits[{index_2}]",
                         bits,
                         functools.partial(_Node._get_register_bits_definition,
                                           reg_name=name,
@@ -651,16 +673,17 @@ class _Node:
 
     def _add_register_block_includes(self,
                                      ctx: _RegisterMemberContext) -> None:
-        for link in self.item.links_to_parents("register-block-include"):
+        for part in get_register_block_layout(self.item).includes:
+            link = part.data
             name = link["name"]
             ctx.regs[name] = {}
             ctx.regs[name]["size"] = link.item["register-block-size"]
             ctx.regs[name]["type"] = link.item["name"]
-            ctx.regs[name]["group"] = link.item["identifier"]
+            ctx.regs[name]["group"] = get_register_block_identifier(link.item)
 
     def _get_register_member_info(self, ctx: _RegisterMemberContext) -> None:
         offset = -1
-        for index, member in enumerate(self.item["definition"]):
+        for index, member in enumerate(part.data for part in ctx.parts):
             assert member["offset"] > offset
             offset = member["offset"]
             default = [member["default"]] if member["default"] else []
@@ -684,13 +707,13 @@ class _Node:
                 self.substitute_text(self.item["brief"]))
             self.content.wrap(self.substitute_text(self.item["description"]))
             self.content.add("@{")
-        for index, member in enumerate(self.item["definition"]):
+        for part in ctx.parts:
             self.content.add(
                 _add_definition(
-                    self, self.item, f"definition[{index}]", member,
+                    self, part.item, part.prefix, part.data,
                     functools.partial(_Node._get_register_define_definition,
                                       ctx=ctx,
-                                      offset=member["offset"])))
+                                      offset=part.data["offset"])))
         self.content.add_close_group()
 
     def _add_register_struct(self, ctx: _RegisterMemberContext,
@@ -703,13 +726,13 @@ class _Node:
         default_padding = min(*ctx.sizes.values(), 8)
         offset = 0
         with self.content.indent():
-            for index, member in enumerate(self.item["definition"]):
-                member_offset = member["offset"]
+            for index, part in enumerate(ctx.parts):
+                member_offset = part.data["offset"]
                 _add_register_padding(self.content, member_offset, offset,
                                       default_padding)
                 self.content.add(
                     _add_definition(
-                        self, self.item, f"definition[{index}]", member,
+                        self, part.item, part.prefix, part.data,
                         functools.partial(
                             _Node._get_register_member_definition, ctx=ctx)))
                 offset = member_offset + ctx.sizes[index]
@@ -724,14 +747,18 @@ class _Node:
         else:
             self._add_register_struct(ctx, size)
 
+    def _add_register_block_dependencies(self) -> None:
+        for part in get_register_block_layout(self.item).includes:
+            parent = part.data.item
+            self.header_file.add_includes(parent)
+            self.header_file.add_dependency(self, parent)
+
     def generate_register_block(self) -> None:
         """ Generate a register block. """
         self.header_file.add_includes(self.item.map("/c/if/uint32_t"))
-        for parent in self.item.parents("register-block-include"):
-            self.header_file.add_includes(parent)
-            self.header_file.add_dependency(self, parent)
-        group = self.item["identifier"]
-        name = self.item["register-block-group"]
+        self._add_register_block_dependencies()
+        group = get_register_block_identifier(self.item, self.host)
+        name = get_register_block_group(self.item, self.host)
         with self.content.defgroup_block(group, name):
             self.content.add_ingroup(_get_group_identifiers(self.ingroups))
             self.content.add_brief_description(
@@ -865,7 +892,7 @@ class _Node:
                                       definition: Any, reg_name: str,
                                       reg_width: int) -> GenericContent:
         lines = []  # list[str]
-        prefix = _get_register_bits_prefix(self.item, reg_name)
+        prefix = _get_register_bits_prefix(self.item, self.host, reg_name)
         for index, bit in enumerate(definition):
             if index != 0:
                 lines.append("")
@@ -875,7 +902,13 @@ class _Node:
                                          bit))
         return lines
 
-    def _get_register_define_definition(self, item: Item, _prefix: str,
+    def _get_offset_prefix(self) -> str:
+        prefix = self.item["name"]
+        if self.host is not None:
+            prefix = self.host.data.get("prefix", None) or prefix
+        return prefix.upper()
+
+    def _get_register_define_definition(self, _item: Item, _prefix: str,
                                         definition: Any,
                                         ctx: _RegisterMemberContext,
                                         offset: int) -> GenericContent:
@@ -886,7 +919,7 @@ class _Node:
         with content.doxygen_block():
             content.add(f"@brief See @ref {ctx.regs[name]['group']}.")
         content.append(
-            f"#define {item['name'].upper()}_{alias.upper()} {offset:#x}")
+            f"#define {self._get_offset_prefix()}_{alias.upper()} {offset:#x}")
         return content
 
     def _get_register_member_definition(
@@ -1004,7 +1037,7 @@ class _ZephyrNode(_Node):
                                       definition: Any, reg_name: str,
                                       reg_width: int) -> GenericContent:
         lines = []  # list[str]
-        prefix = _get_register_bits_prefix(self.item, reg_name)
+        prefix = _get_register_bits_prefix(self.item, self.host, reg_name)
         for bit in sorted(definition, key=lambda x: x["start"]):
             lines.extend(
                 _get_zephyr_register_bits_lines(
@@ -1013,9 +1046,9 @@ class _ZephyrNode(_Node):
         return lines
 
     def _add_register_bits(self, group: str) -> _RegisterMemberContext:
-        ctx = _RegisterMemberContext({}, {}, collections.defaultdict(int),
-                                     collections.defaultdict(int))
-        for index, register in enumerate(self.item["registers"]):
+        ctx = self._new_register_member_context()
+        for part in get_register_block_layout(self.item).registers:
+            register = part.data
             name = register["name"]
             width = register["width"]
             assert width in [8, 16, 32, 64]
@@ -1024,7 +1057,7 @@ class _ZephyrNode(_Node):
             for index_2, bits in enumerate(register["bits"]):
                 self.content.append(
                     _add_definition(
-                        self, self.item, f"registers[{index}]/bits[{index_2}]",
+                        self, part.item, f"{part.prefix}/bits[{index_2}]",
                         bits,
                         functools.partial(
                             _ZephyrNode._get_register_bits_definition,
@@ -1032,34 +1065,36 @@ class _ZephyrNode(_Node):
                             reg_width=width)))
         return ctx
 
-    def _get_register_define_definition(self, item: Item, _prefix: str,
+    def _get_offset_prefix(self) -> str:
+        _, prefix = get_register_block_prefixes(self.item, self.host)
+        return prefix.upper()
+
+    def _get_register_define_definition(self, _item: Item, _prefix: str,
                                         definition: Any,
                                         ctx: _RegisterMemberContext,
                                         offset: int) -> GenericContent:
         name, alias = get_register_member_name(definition)
-        prefix = item.get("offset-prefix", None)
-        if prefix is None:
-            prefix = item["name"]
-        define = f"#define {prefix.upper()}_{alias.upper()}"
+        define = f"#define {self._get_offset_prefix()}_{alias.upper()}"
         count = definition["count"]
         if count == 1:
             return f"{define} {offset:#x}U"
         return f"{define}(i) ({offset:#x}U + {ctx.regs[name]['size']}U * (i))"
 
     def _add_register_defines(self, ctx: _RegisterMemberContext) -> None:
-        for index, member in enumerate(self.item["definition"]):
+        for part in ctx.parts:
             self.content.append(
                 _add_definition(
-                    self, self.item, f"definition[{index}]", member,
+                    self, part.item, part.prefix, part.data,
                     functools.partial(
                         _ZephyrNode._get_register_define_definition,
                         ctx=ctx,
-                        offset=member["offset"])))
+                        offset=part.data["offset"])))
 
     def _add_register_block_includes(self,
                                      ctx: _RegisterMemberContext) -> None:
         super()._add_register_block_includes(ctx)
-        for link in self.item.links_to_parents("register-block-include"):
+        for part in get_register_block_layout(self.item).includes:
+            link = part.data
             # Register block structures are not typedefed in this style
             ctx.regs[link["name"]]["type"] = f"struct {link.item['name']}"
 
@@ -1089,13 +1124,13 @@ class _ZephyrNode(_Node):
         default_padding = min(*ctx.sizes.values(), 8)
         offset = 0
         with self.content.indent():
-            for index, member in enumerate(self.item["definition"]):
-                member_offset = member["offset"]
+            for index, part in enumerate(ctx.parts):
+                member_offset = part.data["offset"]
                 self._append_register_padding(member_offset, offset,
                                               default_padding)
                 self.content.append(
                     _add_definition(
-                        self, self.item, f"definition[{index}]", member,
+                        self, part.item, part.prefix, part.data,
                         functools.partial(
                             _ZephyrNode._get_register_member_definition,
                             ctx=ctx)))
@@ -1107,18 +1142,15 @@ class _ZephyrNode(_Node):
     def generate_register_block(self) -> None:
         domain, size = _get_register_domain_and_size(self.item)
         self.header_file.add_includes(self.item.map("/zephyr/if/genmask"))
-        for parent in self.item.parents("register-block-include"):
-            self.header_file.add_includes(parent)
-            self.header_file.add_dependency(self, parent)
-        group = self.item["identifier"]
-        name = self.item["register-block-group"]
-        ctx = self._add_register_bits(group)
+        self._add_register_block_dependencies()
+        ctx = self._add_register_bits("")
         self._add_register_block_includes(ctx)
         self._get_register_member_info(ctx)
         if domain == "memory":
             self.header_file.add_includes(self.item.map("/c/if/uint32_t"))
             self._add_register_struct(ctx, size)
         else:
+            name = get_register_block_group(self.item, self.host)
             self.content.add(f"/* {name} address offsets */")
             self._add_register_defines(ctx)
 
@@ -1204,17 +1236,41 @@ class _HeaderFile:
         return self._option_expressions.get_expression(self._item, option)
 
     def add_includes(self, item: Item) -> None:
-        """ Add the includes of the item to the header file includes. """
+        """
+        Add the includes of the item to the header file includes.
+
+        A register block which header files host adds the host of the domain
+        of this header file.
+        """
         for parent in item.parents("interface-placement"):
             if parent.type in [
                     "interface/header-file",
                     "interface/unspecified-header-file"
             ]:
                 self._includes.append(parent)
+        if get_register_block_hosts(item):
+            self._includes.append(
+                get_register_block_host_of_domain(
+                    item, self._item.parent("interface-placement")).item)
 
     def add_node(self, item: Item) -> None:
         """ Add a node for the item. """
         self._nodes[item.uid] = _Node(self, item)
+
+    def add_hosted_node(self, link: Link) -> None:
+        """ Add a node for the register block of the host link. """
+        item = link.item
+        if item.type != "interface/register-block":
+            raise ValueError(f"header file '{self._item.uid}' hosts "
+                             f"'{item.uid}' which is no register block")
+        if any(True for _ in item.parents("interface-placement")):
+            raise ValueError(f"register block '{item.uid}' has an interface "
+                             "placement and header file "
+                             f"'{self._item.uid}' hosts it")
+        get_register_block_host_of_domain(
+            item, self._item.parent("interface-placement"))
+        node_type = _ZephyrNode if link["style"] == "zephyr" else _Node
+        self._nodes[item.uid] = node_type(self, item, link)
 
     def add_dependency(self, node: _Node, item: Item) -> None:
         """
@@ -1231,6 +1287,9 @@ class _HeaderFile:
         for child in self._item.children("interface-placement"):
             self.add_node(child)
             self.content.register_license_and_copyrights_of_item(child)
+        for link in self._item.links_to_parents("register-block-host"):
+            self.add_hosted_node(link)
+            self.content.register_license_and_copyrights_of_item(link.item)
         for node in self._nodes.values():
             node.generate()
 

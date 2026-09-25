@@ -1,0 +1,24 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - default
+      - zephyr
+    description: |
+      It specifies the style in which a header file presents a register block.
+      The value ``default`` denotes a structure of the register block and a
+      Doxygen group of each register.  The value ``zephyr`` denotes register
+      offset defines and bit field defines of the ``BIT()`` and ``GENMASK()``
+      form.
+spec-name: Interface Register Block Style
+spec-type: interface-register-block-style
+type: spec

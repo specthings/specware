@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: register-block-base
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the register block base role of links.  A link of this role
+      goes from a derived ${interface-register-block:/spec-name} item to its
+      base register block.  A register block shall have at most one link of
+      this role.  The derived register block starts with the registers, the
+      members and the included register blocks of its base.  A register of the
+      name of a base register replaces the base register.  A member at the
+      offset of a base member replaces the base member.
+    mandatory-attributes: all
+spec-name: Register Block Base Role
+spec-type: interface-register-block-base-role
+type: spec
