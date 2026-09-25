@@ -28,16 +28,15 @@ import pytest
 
 from specitems import EmptyItemCache, Item, ItemCache, ItemSelection
 
-from specware import (augment_with_test_case_links, augment_with_test_links,
-                      gather_api_items, gather_export_related_items,
-                      gather_referencing_items, gather_related_items,
-                      gather_test_cases, gather_benchmarks_and_test_suites,
-                      get_benchmark_and_test_suite_items,
-                      get_items_by_type_map, get_constraint_items,
-                      get_interface_items, get_interface_and_requirement_items,
-                      get_requirement_items, get_validation_items,
-                      is_export_affected, is_pre_qualified,
-                      is_validation_by_test, recursive_is_enabled, validate)
+from specware import (
+    SpecWareTypeProvider, augment_with_test_case_links,
+    augment_with_test_links, gather_api_items, gather_export_related_items,
+    gather_referencing_items, gather_related_items, gather_test_cases,
+    gather_benchmarks_and_test_suites, get_benchmark_and_test_suite_items,
+    get_items_by_type_map, get_constraint_items, get_interface_items,
+    get_interface_and_requirement_items, get_requirement_items,
+    get_validation_items, is_export_affected, is_pre_qualified,
+    is_validation_by_test, recursive_is_enabled, validate)
 
 from .util import create_item_cache
 
@@ -170,11 +169,22 @@ def test_recursive_is_enabled_register_block():
             "/included":
             _block([]),
             "/orphan":
+            _block([]),
+            "/g-alpha": {
+                "enabled-by": "alpha",
+                "interface-type": "group",
+                "links": [{
+                    "role": "interface-group-member",
+                    "uid": "/member"
+                }]
+            },
+            "/member":
             _block([])
         },
         set_types=False)
     enabled = {
-        "alpha": ["/base", "/derived", "/h-alpha", "/orphan"],
+        "alpha":
+        ["/base", "/derived", "/g-alpha", "/h-alpha", "/member", "/orphan"],
         "beta": ["/h-beta", "/included", "/includer", "/orphan"]
     }
     for config, uids in enabled.items():
@@ -480,3 +490,47 @@ def test_gather_referencing_items(tmpdir):
     assert "/h" not in gather_referencing_items(item_cache, {"/h", "/term"})
 
     assert gather_referencing_items(item_cache, {"/does-not-exist"}) == set()
+
+
+def test_validate_group_member(tmpdir):
+    item_cache = EmptyItemCache(type_provider=SpecWareTypeProvider({}))
+    item_cache.add_items({
+        "/group": {
+            "enabled-by": True,
+            "interface-type": "group",
+            "links": [{
+                "role": "interface-group-member",
+                "uid": "/block"
+            }],
+            "type": "interface"
+        },
+        "/block": {
+            "enabled-by":
+            True,
+            "interface-type":
+            "register-block",
+            "links": [{
+                "role": "constraint",
+                "uid": "/constraint/constant-not-pre-qualified"
+            }],
+            "type":
+            "interface"
+        },
+        "/constraint/constant-not-pre-qualified": {
+            "enabled-by": True,
+            "links": [],
+            "type": "constraint"
+        }
+    })
+    group = item_cache["/group"]
+    validate(group, _validate)
+    dependencies = group.view["validation-dependencies"]
+    assert dependencies == [("/block", "group member")]
+    assert not group.view["pre-qualified"]
+
+    item_cache = create_item_cache(tmpdir,
+                                   ["spec-interface", "spec-interface-host"])
+    assert _uids(gather_related_items(
+        item_cache["/hg"])) == ["/hd", "/hg", "/hi", "/hs"]
+    assert "/hg" in _uids(gather_export_related_items(item_cache["/hh2"]))
+    assert is_export_affected(item_cache["/hh2"], {"/hg"})

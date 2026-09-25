@@ -1,0 +1,17 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This group contains the hosted register blocks.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: MemberNoBlock
+index-entries: []
+interface-type: group
+links:
+- role: interface-placement
+  uid: h-member-no-block
+- role: interface-group-member
+  uid: member-no-block
+name: Member no block
+type: interface

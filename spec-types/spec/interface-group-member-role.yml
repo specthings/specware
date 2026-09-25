@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: interface-group-member
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the interface group member role of links.  A link of this
+      role goes from an ${interface-group:/spec-name} item to an
+      ${interface-register-block:/spec-name} item.  It makes the register
+      block a member of the group.  The register block needs no link to the
+      group, so the group may reside in the tree of an operating system.
+    mandatory-attributes: all
+spec-name: Interface Group Member Link Role
+spec-type: interface-group-member-role
+type: spec

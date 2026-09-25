@@ -31,7 +31,8 @@ import pytest
 from specitems import EmptyItemCache, LicenseAggregate
 
 from specware import (generate_header_file, generate_interfaces,
-                      get_affected_header_files, get_interface_container,
+                      get_affected_header_files, get_group_members,
+                      get_interface_container, get_interface_groups,
                       get_register_block_group, get_register_block_identifier)
 
 from .conftest import (CODE_LICENSE, code_context, OPTION_EXPRESSIONS,
@@ -1816,6 +1817,10 @@ def test_interface_register_block_host(tmpdir):
         get_interface_container(item_cache["/domain-abc"])
     assert get_register_block_identifier(item_cache["/hb"]) == "RBHostBase"
     assert get_register_block_group(item_cache["/hd"]) == "Derivative"
+    assert [item.uid
+            for item in get_interface_groups(item_cache["/hs"])] == ["/hg"]
+    assert [item.uid for item in get_group_members(item_cache["/hg"])
+            ] == ["/hd", "/hi", "/hs"]
 
 
 def test_interface_zephyr_memory_register_block_without_group(tmpdir):
@@ -1844,6 +1849,14 @@ _HOST_HH = """#ifndef _HH_H
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Generated from spec:/hg */
+
+/**
+ * @defgroup RBHostGroup Host group
+ *
+ * @brief This group contains the hosted register blocks.
+ */
 
 /* Generated from spec:/hb */
 
@@ -1931,6 +1944,8 @@ extern "C" {
 /**
  * @defgroup RBHostSub Host sub
  *
+ * @ingroup RBHostGroup
+ *
  * @brief This group contains the Host sub interfaces.
  *
  * @{
@@ -1979,6 +1994,8 @@ extern "C" {
 
 /**
  * @defgroup RBHostInc Host include
+ *
+ * @ingroup RBHostGroup
  *
  * @brief This group contains the Host include interfaces.
  *
@@ -2069,6 +2086,8 @@ _INVALID_HOSTS = [
      "the name of a register block which its base includes"),
     ("conflict", "the header files which host register block '/conflict' "
      "state different values for 'identifier': A, B"),
+    ("member-no-block", "group '/g-member-no-block' has the member "
+     "'/member-no-block' which is no register block"),
     ("two-hosts", "more than one header file of domain '/domain-abc' hosts "
      "register block '/two-hosts': /h-two-hosts, /h-two-hosts-2"),
     ("foreign-include", "no header file of domain '/domain-abc' hosts "

@@ -29,11 +29,12 @@ from typing import Any, NamedTuple, Optional
 from specitems import Item, Link
 
 __all__ = [
-    "RegisterBlockLayout", "RegisterBlockPart", "get_interface_container",
-    "get_interface_members", "get_register_block_base",
-    "get_register_block_group", "get_register_block_host_of_domain",
-    "get_register_block_hosts", "get_register_block_identifier",
-    "get_register_block_layout", "get_register_block_prefixes"
+    "RegisterBlockLayout", "RegisterBlockPart", "get_group_members",
+    "get_interface_container", "get_interface_groups", "get_interface_members",
+    "get_register_block_base", "get_register_block_group",
+    "get_register_block_host_of_domain", "get_register_block_hosts",
+    "get_register_block_identifier", "get_register_block_layout",
+    "get_register_block_prefixes"
 ]
 
 
@@ -81,6 +82,38 @@ def get_interface_members(item: Item) -> list[Item]:
     """
     return list(item.children("interface-placement")) + list(
         item.parents("register-block-host"))
+
+
+def get_interface_groups(item: Item) -> list[Item]:
+    """
+    Get the interface groups of the interface.
+
+    These are the parents of the ``interface-ingroup`` links of the interface
+    and the groups which link to the interface through the
+    ``interface-group-member`` role.
+
+    Raises:
+        ValueError: A group links to an interface which is no register block.
+    """
+    members = list(item.children("interface-group-member"))
+    if members and item.type != "interface/register-block":
+        raise ValueError(f"group '{members[0].uid}' has the member "
+                         f"'{item.uid}' which is no register block")
+    groups = dict(
+        (group.uid, group) for group in item.parents("interface-ingroup"))
+    groups.update((group.uid, group) for group in members)
+    return list(groups.values())
+
+
+def get_group_members(item: Item) -> list[Item]:
+    """
+    Get the members of the interface group.
+
+    These are the children of the ``interface-ingroup`` links of the group
+    and the parents of its ``interface-group-member`` links.
+    """
+    return list(item.children("interface-ingroup")) + list(
+        item.parents("interface-group-member"))
 
 
 def get_interface_container(item: Item) -> Item:
