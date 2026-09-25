@@ -285,7 +285,9 @@ typedef enum {
   /**
    * @brief Enumerator 2 brief description.
    */
-  ENUMERATOR_2
+  #if ENUMERATOR_2_ENABLED
+    ENUMERATOR_2
+  #endif
 } Enum;
 
 /* Generated from spec:/enum3 */
@@ -1291,7 +1293,9 @@ typedef enum {
   /**
    * @brief Enumerator 2 brief description.
    */
-  ENUMERATOR_2
+  #if ENUMERATOR_2_ENABLED
+    ENUMERATOR_2
+  #endif
 } Enum;
 
 /**

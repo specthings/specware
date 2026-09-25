@@ -4,7 +4,9 @@ copyrights:
 - Copyright (C) 2020 embedded brains GmbH & Co. KG
 definition:
   default: null
-  variants: []
+  variants:
+  - definition: null
+    enabled-by: ENUMERATOR_2_ENABLED
 description: null
 enabled-by: true
 index-entries: []
