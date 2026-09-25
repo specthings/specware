@@ -580,22 +580,17 @@ class _Node:
     def generate_enum(self) -> None:
         """ Generate an enum. """
         with self._enum_struct_or_union():
-            enumerators: list[CContent] = []
-            for parent in self.item.parents("interface-enumerator"):
-                enumerator = self._get_description(parent, {})
-                enumerator.append(
+            parents = list(self.item.parents("interface-enumerator"))
+            for index, parent in enumerate(parents):
+                if index > 0:
+                    self.content.append("")
+                self.content.append(self._get_description(parent, {}))
+                get_lines = _Node._get_enumerator_definition
+                if index < len(parents) - 1:
+                    get_lines = _Node._get_enumerator_definition_comma
+                self.content.append(
                     _add_definition(self, parent, "definition",
-                                    parent["definition"],
-                                    _Node._get_enumerator_definition))
-                enumerators.append(enumerator)
-            for enumerator in enumerators[0:-1]:
-                enumerator.last += ","
-                enumerator.append("")
-                self.content.append(enumerator)
-            try:
-                self.content.append(enumerators[-1])
-            except IndexError:
-                pass
+                                    parent["definition"], get_lines))
 
     def generate_define(self) -> None:
         """ Generate a define. """
@@ -810,6 +805,11 @@ class _Node:
         if definition:
             return f"{name} = {self.substitute_code(definition, prefix)}"
         return f"{name}"
+
+    def _get_enumerator_definition_comma(self, item: Item, prefix: str,
+                                         definition: Any) -> GenericContent:
+        # The comma ends the enumerator line inside each branch of a variant.
+        return f"{self._get_enumerator_definition(item, prefix, definition)},"
 
     def _get_define_definition(self, item: Item, prefix: str,
                                definition: Any) -> GenericContent:
