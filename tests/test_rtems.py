@@ -355,6 +355,7 @@ def test_gather_export_related_items(tmpdir):
         "/enumerator-2",
         "/enumerator-b",
         "/forward-decl",
+        "/forward-decl-2",
         "/func",
         "/func2",
         "/func6",
@@ -381,6 +382,7 @@ def test_gather_export_related_items(tmpdir):
         "/td",
         "/td3",
         "/u",
+        "/unspecified-struct",
         "/var",
     ]
 
