@@ -277,7 +277,9 @@ typedef enum {
   /**
    * @brief Enumerator 1 brief description.
    */
-  ENUMERATOR_1,
+  #if ENUMERATOR_1_ENABLED
+    ENUMERATOR_1,
+  #endif
 
   /**
    * @brief Enumerator 2 brief description.
@@ -1276,7 +1278,9 @@ typedef enum {
   /**
    * @brief Enumerator 1 brief description.
    */
-  ENUMERATOR_1,
+  #if ENUMERATOR_1_ENABLED
+    ENUMERATOR_1,
+  #endif
 
   /**
    * @brief Enumerator 2 brief description.
