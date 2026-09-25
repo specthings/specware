@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This header file fails.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: header-file
+links:
+- role: interface-placement
+  uid: /domain-abc
+- identifier: B
+  register-block-group: B
+  role: register-block-host
+  style: default
+  uid: two-hosts
+path: h-two-hosts-2.h
+prefix: include
+type: interface

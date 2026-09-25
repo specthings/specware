@@ -1,0 +1,52 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: register-block-host
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      identifier:
+        description: |
+          If the value is present, then it shall be the identifier of the
+          interface group of the register block in the header file, otherwise
+          the ``identifier`` attribute of the register block is the identifier.
+        spec-type: interface-group-identifier
+      prefix:
+        description: |
+          If the value is present, then it will be used to prefix the register
+          offset defines and the register bit field names in the header file,
+          otherwise the prefixes of the register block will be used.
+        spec-type: str
+      register-block-group:
+        description: |
+          If the value is present, then it shall be the name of the interface
+          group of the register block in the header file, otherwise the
+          ``register-block-group`` attribute of the register block is the
+          name.
+        spec-type: str
+      style:
+        description: |
+          It shall be the style in which the header file presents the register
+          block.
+        spec-type: interface-register-block-style
+    description: |
+      It defines the register block host role of links.  A link of this role
+      goes from an ${interface-header-file:/spec-name} item to an
+      ${interface-register-block:/spec-name} item.  It places the register
+      block into the header file.  A register block which a header file hosts
+      shall have no link with the ${interface-placement:/spec-name}.  Several
+      header files may host one register block.
+    mandatory-attributes:
+    - style
+spec-name: Register Block Host Role
+spec-type: interface-register-block-host-role
+type: spec

@@ -31,7 +31,8 @@ import pytest
 from specitems import EmptyItemCache, LicenseAggregate
 
 from specware import (generate_header_file, generate_interfaces,
-                      get_affected_header_files)
+                      get_affected_header_files, get_interface_container,
+                      get_register_block_group, get_register_block_identifier)
 
 from .conftest import (CODE_LICENSE, code_context, OPTION_EXPRESSIONS,
                        zephyr_context)
@@ -1787,3 +1788,292 @@ def test_generate_interfaces_selection(tmpdir):
                         set())
 
     assert not os.path.exists(os.path.join(base_directory, "include", "h.h"))
+
+
+def test_interface_register_block_host(tmpdir):
+    item_cache = create_item_cache(tmpdir,
+                                   ["spec-interface", "spec-interface-host"])
+    header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": "default"
+    }
+    for uid, content in (("/hh", _HOST_HH), ("/hh2", _HOST_HH2)):
+        path = os.path.join(tmpdir, f"{uid[1:]}.h")
+        generate_header_file(header_file_config, item_cache[uid],
+                             code_context(), path)
+        with open(path, "r", encoding="utf-8") as src:
+            assert src.read().endswith(content)
+    assert get_affected_header_files(item_cache, {"/hb"}) == {"/hh", "/hh2"}
+    assert get_interface_container(item_cache["/hd"]).uid == "/hh"
+    with pytest.raises(IndexError):
+        get_interface_container(item_cache["/domain-abc"])
+    assert get_register_block_identifier(item_cache["/hb"]) == "RBHostBase"
+    assert get_register_block_group(item_cache["/hd"]) == "Derivative"
+
+
+def test_interface_zephyr_memory_register_block_without_group(tmpdir):
+    item_cache = create_item_cache(tmpdir,
+                                   ["spec-interface", "spec-interface-host"])
+    header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": "default"
+    }
+    path = os.path.join(tmpdir, "hh3.h")
+    generate_header_file(header_file_config, item_cache["/hh3"],
+                         code_context(), path)
+    with open(path, "r", encoding="utf-8") as src:
+        assert "struct hm {\n  uint32_t x;\n};\n" in src.read()
+
+
+_HOST_HH = """#ifndef _HH_H
+#define _HH_H
+
+#include <stdint.h>
+#include <zephyr/sys/util.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Generated from spec:/hb */
+
+/**
+ * @defgroup RBHostBase Host base
+ *
+ * @brief This group contains the Host base interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup RBHostBaseA Register A. (A)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define HB_A_EN 0x1U
+
+/** @} */
+
+/**
+ * @defgroup RBHostBaseB Register B. (B)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define HB_B_F_SHIFT 4
+#define HB_B_F_MASK 0xf0U
+#define HB_B_F_GET( _reg ) \\
+  ( ( ( _reg ) & HB_B_F_MASK ) >> \\
+    HB_B_F_SHIFT )
+#define HB_B_F_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~HB_B_F_MASK ) | \\
+    ( ( ( _val ) << HB_B_F_SHIFT ) & \\
+      HB_B_F_MASK ) )
+#define HB_B_F( _val ) \\
+  ( ( ( _val ) << HB_B_F_SHIFT ) & \\
+    HB_B_F_MASK )
+
+/** @} */
+
+/**
+ * @name Registers
+ *
+ * @brief Base.
+ *
+ * @{
+ */
+
+/**
+ * @brief See @ref RBHostBaseA.
+ */
+#define HB_A 0x0
+
+/**
+ * @brief See @ref RBHostBaseB.
+ */
+#define HB_B 0x4
+
+/** @} */
+
+/** @} */
+
+/* A bits */
+#define DRV_A_EN BIT(0)
+
+/* B bits */
+#define DRV_B_G GENMASK(7, 0)
+
+/* C bits */
+#define DRV_C_S BIT(31)
+
+/* Derivative address offsets */
+#define DRV_A 0x0U
+#define DRV_B 0x4U
+#define DRV_C(i) (0x8U + 4U * (i))
+
+/* Generated from spec:/hs */
+
+/**
+ * @defgroup RBHostSub Host sub
+ *
+ * @brief This group contains the Host sub interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup RBHostSubS Register S. (S)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+/** @} */
+
+/**
+ * @brief Sub-block.
+ */
+typedef struct hs {
+  /**
+   * @brief See @ref RBHostSubS.
+   */
+  uint32_t s;
+} hs;
+
+/** @} */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _HH_H */
+"""
+
+_HOST_HH2 = """#ifndef _HH2_H
+#define _HH2_H
+
+#include <hh.h>
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Generated from spec:/hi */
+
+/**
+ * @defgroup RBHostInc Host include
+ *
+ * @brief This group contains the Host include interfaces.
+ *
+ * @{
+ */
+
+/**
+ * @defgroup RBHostIncA Register A. (A)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define HI_A_EN 0x1U
+
+/** @} */
+
+/**
+ * @defgroup RBHostIncB Register B. (B)
+ *
+ * @brief This group contains register bit definitions.
+ *
+ * @{
+ */
+
+#define HI_B_F_SHIFT 4
+#define HI_B_F_MASK 0xf0U
+#define HI_B_F_GET( _reg ) \\
+  ( ( ( _reg ) & HI_B_F_MASK ) >> \\
+    HI_B_F_SHIFT )
+#define HI_B_F_SET( _reg, _val ) \\
+  ( ( ( _reg ) & ~HI_B_F_MASK ) | \\
+    ( ( ( _val ) << HI_B_F_SHIFT ) & \\
+      HI_B_F_MASK ) )
+#define HI_B_F( _val ) \\
+  ( ( ( _val ) << HI_B_F_SHIFT ) & \\
+    HI_B_F_MASK )
+
+/** @} */
+
+/**
+ * @name Registers
+ *
+ * @brief Derivative with an include.
+ *
+ * @{
+ */
+
+/**
+ * @brief See @ref RBHostIncA.
+ */
+#define HI_A 0x0
+
+/**
+ * @brief See @ref RBHostIncB.
+ */
+#define HI_B 0x4
+
+/**
+ * @brief See @ref RBHostSub.
+ */
+#define HI_SUB 0x10
+
+/** @} */
+
+/** @} */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _HH2_H */
+"""
+
+_INVALID_HOSTS = [
+    ("placed", "register block '/placed' has an interface placement and "
+     "header file '/h-placed' hosts it"),
+    ("no-id", "register block '/no-id' has no 'identifier' and no host link "
+     "states one"),
+    ("no-block", "header file '/h-no-block' hosts '/define-a' which is no "
+     "register block"),
+    ("cycle", "register block '/cycle-a' is its own base"),
+    ("two-bases", "register block '/two-bases' has more than one base"),
+    ("include-name", "register block '/include-name' includes a register "
+     "block named 'X' which its base defines"),
+    ("register-name", "register 'Y' of register block '/register-name' has "
+     "the name of a register block which its base includes"),
+    ("conflict", "the header files which host register block '/conflict' "
+     "state different values for 'identifier': A, B"),
+    ("two-hosts", "more than one header file of domain '/domain-abc' hosts "
+     "register block '/two-hosts': /h-two-hosts, /h-two-hosts-2"),
+    ("foreign-include", "no header file of domain '/domain-abc' hosts "
+     "register block '/foreign'"),
+]
+
+
+@pytest.mark.parametrize("case, message", _INVALID_HOSTS)
+def test_interface_invalid_register_block_host(tmpdir, case, message):
+    with pytest.raises(ValueError, match=re.escape(message)):
+        _generate_header_file_with(tmpdir, "default",
+                                   "spec-interface-host-invalid", f"/h-{case}")

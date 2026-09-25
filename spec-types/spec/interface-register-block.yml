@@ -24,7 +24,11 @@ spec-info:
         description: null
         spec-type: interface-description
       identifier:
-        description: null
+        description: |
+          If the value is present, then it shall be the identifier of the
+          interface group of the register block.  A link with the
+          ${interface-register-block-host-role:/spec-name} may state the
+          identifier instead.
         spec-type: interface-group-identifier
       name:
         description: |
@@ -44,8 +48,11 @@ spec-info:
         spec-type: interface-register-list
       register-block-group:
         description: |
-          It shall be the name of the interface group defined for the register
-          block.  For the group identifier see the ``identifier`` attribute.
+          If the value is present, then it shall be the name of the interface
+          group defined for the register block.  For the group identifier see
+          the ``identifier`` attribute.  A link with the
+          ${interface-register-block-host-role:/spec-name} may state the name
+          instead.
         spec-type: str
       register-block-size:
         description: |
@@ -71,6 +78,8 @@ spec-info:
       Register block members are either instances of registers specified by the
       ``registers`` attribute or instances of other register blocks specified
       by links with the ${interface-register-block-include-role:/spec-name}.
+      A link with the ${interface-register-block-base-role:/spec-name} derives
+      the register block from a base register block.
       Registers consists of bit fields (see
       ${interface-register-bits:/spec-name}.  The register block members are
       placed into the address space of the device relative to the base address
@@ -80,10 +89,8 @@ spec-info:
     - brief
     - definition
     - description
-    - identifier
     - name
     - notes
-    - register-block-group
     - register-block-size
     - register-prefix
     - registers

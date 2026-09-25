@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Derivative with an include.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+- default:
+    count: 1
+    name: SUB
+  offset: 16
+  variants: []
+description: null
+enabled-by: true
+index-entries: []
+interface-type: register-block
+links:
+- role: register-block-base
+  uid: hb
+- name: SUB
+  role: register-block-include
+  uid: hs
+name: hi
+notes: null
+register-block-size: null
+register-prefix: null
+registers: []
+type: interface
