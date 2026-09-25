@@ -589,7 +589,8 @@ def get_value_params(ctx: ItemGetValueContext) -> Any:
 def forward_declaration(item: Item) -> str:
     """ Gets the forward declare for the item. """
     target = item.parent("interface-target")
-    return f"{target['interface-type']} {target['name']}"
+    kind = target["interface-type"].removeprefix("unspecified-")
+    return f"{kind} {target['name']}"
 
 
 def get_value_forward_declaration(ctx: ItemGetValueContext) -> Any:

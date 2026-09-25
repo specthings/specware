@@ -306,6 +306,11 @@ typedef enum EnumB {
 /* Forward declaration */
 struct Struct;
 
+/* Generated from spec:/forward-decl-2 */
+
+/* Forward declaration */
+struct US;
+
 /* Generated from spec:/func */
 
 /**
@@ -1302,6 +1307,9 @@ typedef enum EnumB {
 
 /* Forward declaration */
 struct Struct;
+
+/* Forward declaration */
+struct US;
 
 /**
  * @ingroup GroupA
