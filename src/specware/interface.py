@@ -48,12 +48,11 @@ from .contentc import (CContent, CInclude, DEFAULT_ITEM_MARKER,
                        get_value_forward_declaration, get_value_hash,
                        get_value_header_file, get_value_params,
                        get_value_unspecified_type)
-from .registerblock import (RegisterBlockPart, get_register_block_group,
-                            get_register_block_host_of_domain,
-                            get_register_block_hosts,
-                            get_register_block_identifier,
-                            get_register_block_layout,
-                            get_register_block_prefixes)
+from .registerblock import (
+    RegisterBlockPart, get_register_block_group, get_interface_groups,
+    get_register_block_host_of_domain, get_register_block_hosts,
+    get_register_block_identifier, get_register_block_layout,
+    get_register_block_prefixes)
 from .rtems import is_export_affected
 from .util import get_register_bits_run, get_register_member_name
 
@@ -63,7 +62,7 @@ _GetLines = Callable[["_Node", Item, str, Any], GenericContent]
 
 def _get_ingroups(item: Item) -> _ItemMap:
     ingroups: _ItemMap = {}
-    for group in item.parents("interface-ingroup"):
+    for group in get_interface_groups(item):
         ingroups[group.uid] = group
     return ingroups
 

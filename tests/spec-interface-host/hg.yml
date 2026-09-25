@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This group contains the hosted register blocks.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RBHostGroup
+index-entries: []
+interface-type: group
+links:
+- role: interface-placement
+  uid: hh
+- role: interface-group-member
+  uid: hd
+- role: interface-group-member
+  uid: hi
+- role: interface-group-member
+  uid: hs
+name: Host group
+type: interface

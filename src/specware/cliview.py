@@ -56,8 +56,8 @@ _CHILD_ROLES = [
 
 _PARENT_ROLES = [
     "function-implementation", "interface-enumerator",
-    "performance-runtime-limits-provider", "test-timeouts",
-    "verification-provider"
+    "interface-group-member", "performance-runtime-limits-provider",
+    "test-timeouts", "verification-provider"
 ]
 
 

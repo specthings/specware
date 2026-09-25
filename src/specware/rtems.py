@@ -52,8 +52,8 @@ _ENABLEMENT_ROLES = ("interface-function", "interface-ingroup",
                      "validation")
 
 # An item is enabled through the items which link to it by these roles.
-_ENABLEMENT_CHILD_ROLES = ("register-block-base", "register-block-host",
-                           "register-block-include")
+_ENABLEMENT_CHILD_ROLES = ("interface-group-member", "register-block-base",
+                           "register-block-host", "register-block-include")
 
 
 def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
@@ -131,6 +131,9 @@ _CHILD_ROLES = ("requirement-refinement", "interface-ingroup",
 _PARENT_ROLES = ("function-implementation", "interface-enumerator",
                  "performance-runtime-limits")
 
+# Through this role, a group is the child of each of its members.
+_VALIDATION_PARENT_ROLES = _PARENT_ROLES + ("interface-group-member", )
+
 # WARNING: This role set works only with _visit_tree() which stops the
 # recursion once it sees an item the second time.  It is there to support older
 # versions of the RTEMS specification where not every interface was assigned to
@@ -145,7 +148,7 @@ def _visit_tree(item: Item, related_items: set[Item]) -> None:
     related_items.add(item)
     for item_2 in itertools.chain(
             item.children(_BACKWARD_COMPATIBLE_CHILD_ROLES),
-            item.parents(_PARENT_ROLES)):
+            item.parents(_VALIDATION_PARENT_ROLES)):
         _visit_tree(item_2, related_items)
 
 
@@ -174,7 +177,7 @@ _EXPORT_PARENT_ROLES = _PARENT_ROLES + (
 # of the visiting item, however, the items related to them do not.  Expanding
 # them would relate a header file to every item of each included header file
 # and to every member of each interface group.
-_EXPORT_SHALLOW_CHILD_ROLES = ("placement-order", )
+_EXPORT_SHALLOW_CHILD_ROLES = ("interface-group-member", "placement-order")
 
 _EXPORT_SHALLOW_PARENT_ROLES = ("interface-include", "interface-ingroup",
                                 "interface-ingroup-hidden", "interface-target")
@@ -429,8 +432,9 @@ def _validate_tree(item: Item, validator: Callable[[Item, bool], bool],
     validation_dependencies: list[tuple[str, str]] = []
     for index, link in enumerate(
             sorted(
-                itertools.chain(item.links_to_children(_CHILD_ROLES),
-                                item.links_to_parents(_PARENT_ROLES)))):
+                itertools.chain(
+                    item.links_to_children(_CHILD_ROLES),
+                    item.links_to_parents(_VALIDATION_PARENT_ROLES)))):
         item_2 = link.item
         validated = _validate_tree(item_2, validator, order[:-1] +
                                    (order[-1] + index + 1, 0),
@@ -439,7 +443,8 @@ def _validate_tree(item: Item, validator: Callable[[Item, bool], bool],
             role = _VALIDATION_METHOD[item_2.type]
         elif link.role == "requirement-refinement":
             role = "refinement"
-        elif link.role.startswith("interface-ingroup"):
+        elif link.role.startswith("interface-ingroup") or (
+                link.role == "interface-group-member"):
             role = "group member"
         else:
             role = link.role.replace("-", " ")
@@ -477,7 +482,7 @@ def _validate_containers(item: Item) -> bool:
                     f"{item.uid} container member "
                     f"{item_2.uid} has no validated status") from err
     for item_2 in itertools.chain(item.children(_CHILD_ROLES),
-                                  item.parents(_PARENT_ROLES)):
+                                  item.parents(_VALIDATION_PARENT_ROLES)):
         validated = _validate_containers(item_2) and validated
     return validated
 
@@ -509,8 +514,9 @@ def validate(root: Item, validator: Callable[[Item, bool], bool]) -> set[Item]:
     _validate_containers(root)
     _fixup_pre_qualified(
         root, ["interface/appl-config-group", "interface/group"],
-        lambda item_2: item_2.children(
-            ["interface-ingroup", "interface-ingroup-hidden"]))
+        lambda item_2: itertools.chain(
+            item_2.children(["interface-ingroup", "interface-ingroup-hidden"]),
+            item_2.parents("interface-group-member")))
     _fixup_pre_qualified(root, ["interface/header-file"],
                          get_interface_members)
     return related_items
