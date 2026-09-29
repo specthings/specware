@@ -1140,7 +1140,8 @@ class _ZephyrNode(_Node):
 
     def generate_register_block(self) -> None:
         domain, size = _get_register_domain_and_size(self.item)
-        self.header_file.add_includes(self.item.map("/zephyr/if/genmask"))
+        self.header_file.add_includes(
+            self.item.map(self.header_file.register_bit_macros))
         self._add_register_block_dependencies()
         ctx = self._add_register_bits("")
         self._add_register_block_includes(ctx)
@@ -1204,6 +1205,9 @@ def _merge_enabled_by(options: dict[str, Item], link: Link) -> Any:
     return {"and": [enabled_by, enabled_by_2]}
 
 
+DEFAULT_REGISTER_BIT_MACROS = "/zephyr/kernel/sys-util/if/genmask"
+
+
 class _HeaderFile:
     """ A header file. """
 
@@ -1215,7 +1219,8 @@ class _HeaderFile:
                  context: ContentContext,
                  option_expressions: OptionExpressions,
                  formatter: Optional[ClangFormatter] = None,
-                 item_marker: str = DEFAULT_ITEM_MARKER):
+                 item_marker: str = DEFAULT_ITEM_MARKER,
+                 register_bit_macros: str = DEFAULT_REGISTER_BIT_MACROS):
         # pylint: disable=too-many-arguments
         # pylint: disable=too-many-positional-arguments
         self._item = item
@@ -1228,6 +1233,7 @@ class _HeaderFile:
         self.options = options
         self.enabled = enabled
         self.item_marker = item_marker
+        self.register_bit_macros = register_bit_macros
         self._option_expressions = option_expressions
 
     def option_expression(self, option: str) -> str:
@@ -1420,7 +1426,8 @@ def _generate_header_file(item: Item, config: dict, options: dict[str, Item],
     header_file = _HEADER_FILE[config.get("style", "default")](
         item, options, config["enabled"], context,
         OptionExpressions(config["option-expressions"]), formatter,
-        config.get("item-marker", DEFAULT_ITEM_MARKER))
+        config.get("item-marker", DEFAULT_ITEM_MARKER),
+        config.get("register-bit-macros", DEFAULT_REGISTER_BIT_MACROS))
     header_file.generate_nodes()
     header_file.finalize()
     header_file.write(domain_path, file_path)

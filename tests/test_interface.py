@@ -1840,6 +1840,26 @@ def test_interface_zephyr_memory_register_block_without_group(tmpdir):
         assert "struct hm {\n  uint32_t x;\n};\n" in src.read()
 
 
+def test_interface_register_bit_macros(tmpdir):
+    item_cache = create_item_cache(tmpdir,
+                                   ["spec-interface", "spec-interface-host"])
+    header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": "default",
+        "register-bit-macros": "/enum4"
+    }
+    path = os.path.join(tmpdir, "hh.h")
+    generate_header_file(header_file_config, item_cache["/hh"], code_context(),
+                         path)
+    with open(path, "r", encoding="utf-8") as src:
+        content = src.read()
+    assert "#include <h2.h>\n" in content
+    assert "#include <zephyr/sys/util.h>\n" not in content
+
+
 _HOST_HH = """#ifndef _HH_H
 #define _HH_H
 
