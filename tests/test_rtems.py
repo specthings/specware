@@ -532,5 +532,6 @@ def test_validate_group_member(tmpdir):
                                    ["spec-interface", "spec-interface-host"])
     assert _uids(gather_related_items(
         item_cache["/hg"])) == ["/hd", "/hg", "/hi", "/hs"]
+    assert _uids(gather_related_items(item_cache["/hh2"])) == ["/hh2", "/hi"]
     assert "/hg" in _uids(gather_export_related_items(item_cache["/hh2"]))
     assert is_export_affected(item_cache["/hh2"], {"/hg"})
