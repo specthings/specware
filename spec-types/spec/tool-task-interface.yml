@@ -57,6 +57,13 @@ spec-info:
       option-expressions:
         description: null
         spec-type: tool-option-expression-list
+      register-bit-macros:
+        description: |
+          It shall be the UID of the interface item which defines the
+          ``BIT()`` and ``GENMASK()`` macros.  A header file which hosts a
+          register block in the ``zephyr`` style includes the header file of
+          this item.  The default is ``/zephyr/kernel/sys-util/if/genmask``.
+        spec-type: uid
     description: |
       This set of attributes specifies an interface generation task.
     mandatory-attributes:
