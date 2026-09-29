@@ -64,6 +64,13 @@ spec-info:
           register block in the ``zephyr`` style includes the header file of
           this item.  The default is ``/zephyr/kernel/sys-util/if/genmask``.
         spec-type: uid
+      style:
+        description: |
+          It shall be the style of the produced header files.  The default is
+          ``default``.  The ``style`` of a
+          ${interface-register-block-host-role:/spec-name} link selects the
+          style of a hosted register block.
+        spec-type: interface-header-file-style
     description: |
       This set of attributes specifies an interface generation task.
     mandatory-attributes:
