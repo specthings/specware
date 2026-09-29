@@ -1,0 +1,52 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Brief.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+- default:
+    count: 1
+    name: C
+  offset: 0x8
+  variants: []
+description: null
+enabled-by: true
+index-entries: []
+interface-type: register-block
+links:
+- role: register-block-base
+  uid: base
+name: derived
+notes: null
+register-block-size: null
+register-prefix: null
+registers:
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: G
+      start: 0
+      width: 8
+    variants: []
+  brief: |
+    Brief.
+  description: null
+  name: B
+  width: 32
+- bits:
+  - default:
+    - properties: [r, w]
+      brief: null
+      description: null
+      name: S
+      start: 31
+      width: 1
+    variants: []
+  brief: |
+    Brief.
+  description: null
+  name: C
+  width: 32
+type: interface

@@ -38,9 +38,9 @@ from specitems import (COL_SPAN, CommonMarkContent, Item, ItemCache,
 from specware import (exit_on_config_file_error, open_tree,
                       augment_with_test_case_links, augment_with_test_links,
                       gather_api_items, gather_build_files,
-                      get_register_bits_run, get_register_member_name,
-                      recursive_is_enabled, Transition, TransitionMap,
-                      validate)
+                      get_register_bits_run, get_register_block_layout,
+                      get_register_member_name, recursive_is_enabled,
+                      Transition, TransitionMap, validate)
 
 _DOC_FORMAT = {
     "commonmark": CommonMarkContent,
@@ -122,7 +122,8 @@ def _visit_item(item: Item, mapper: ItemMapper, level: int,
 
 def _view_interface_placment(item: Item, mapper: ItemMapper, level: int,
                              validated_filter: str) -> None:
-    for link in item.links_to_children("interface-placement"):
+    for link in itertools.chain(item.links_to_children("interface-placement"),
+                                item.links_to_parents("register-block-host")):
         if _visit_item(link.item, mapper, level, link, validated_filter):
             _view_interface_placment(link.item, mapper, level + 1,
                                      validated_filter)
@@ -507,12 +508,12 @@ def _register_member(place: str, definition: dict[str, Any],
     print(" ".join(parts))
 
 
-def _register_placed(item: Item, includes: dict[str, Item],
+def _register_placed(members: list[Any], includes: dict[str, Item],
                      registers: dict[str,
                                      Any], seen: set[str]) -> tuple[int, int]:
     count = 0
     unclassified = 0
-    for member in item["definition"]:
+    for member in members:
         for definition in _register_definitions(member):
             name, alias = get_register_member_name(definition)
             if name in includes:
@@ -550,13 +551,14 @@ def _register_block(item: Item) -> tuple[int, int]:
     parts.extend(link.item["title"]
                  for link in item.links_to_parents("reference", _any_link))
     print(" ".join(parts))
+    layout = get_register_block_layout(item)
     includes = dict(
-        (link["name"], link.item)
-        for link in item.links_to_parents("register-block-include", _any_link))
+        (part.data["name"], part.data.item) for part in layout.includes)
     registers = dict(
-        (register["name"], register) for register in item["registers"])
+        (part.data["name"], part.data) for part in layout.registers)
     seen: set[str] = set()
-    placed = _register_placed(item, includes, registers, seen)
+    placed = _register_placed([part.data for part in layout.definition],
+                              includes, registers, seen)
     unplaced = _register_unplaced(registers, seen)
     return placed[0] + unplaced[0], placed[1] + unplaced[1]
 
@@ -572,7 +574,12 @@ def _register_blocks(item: Item, blocks: list[Item],
     visited.add(item.uid)
     if item.get("interface-type", None) == "register-block":
         blocks.append(item)
-    for link in item.links_to_children(is_link_enabled=_any_link):
+        return
+    for link in itertools.chain(
+            item.links_to_children(is_link_enabled=_any_link),
+            item.links_to_parents(
+                ["interface-group-member", "register-block-host"],
+                is_link_enabled=_any_link)):
         _register_blocks(link.item, blocks, visited)
 
 

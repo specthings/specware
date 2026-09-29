@@ -388,6 +388,90 @@ def test_cliview_registers(tmpdir, capsys):
     assert capsys.readouterr().out == REGISTERS
 
 
+def _create_view_host_yml(tmpdir):
+    base = Path(__file__).parent.absolute()
+    config_file = Path(tmpdir) / "view-host.yml"
+    with open(config_file, "w", encoding="utf-8") as out:
+        out.write(f"""SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+item-cache:
+  cache-directory: cache
+  paths:
+  - {base / "spec-view-host"}
+  resolve-proxies: true
+links: []
+tasks: []
+type: tool-config
+""")
+    return str(config_file)
+
+
+VIEW_HOST = """/req/root (type=requirement/non-functional/design, not-validated)
+  /if/domain (type=interface/domain, role=requirement-refinement)
+    /if/header (type=interface/header-file, role=interface-placement, \
+not-validated)
+      /if/derived (type=interface/register-block, role=register-block-host, \
+identifier=Derived, register-block-group=Derived, style=default, not-validated)
+      /if/member (type=interface/register-block, role=register-block-host, \
+style=zephyr, not-validated)
+  /if/group (type=interface/group, role=requirement-refinement, not-validated)
+    /if/header (type=interface/header-file, role=interface-ingroup, \
+not-validated)
+      /if/derived (type=interface/register-block, role=register-block-host, \
+identifier=Derived, register-block-group=Derived, style=default, not-validated)
+      /if/member (type=interface/register-block, role=register-block-host, \
+style=zephyr, not-validated)
+    /if/derived (type=interface/register-block, role=interface-group-member, \
+not-validated)
+    /if/member (type=interface/register-block, role=interface-group-member, \
+not-validated)
+"""
+
+REGISTERS_HOST = """derived
+0x0 A 32
+  0 EN rw
+0x4 B 32
+  7:0 G rw
+0x8 C 32
+  31 S rw
+member
+0x0 M 32
+  15:0 V rw
+---
+4 fields, 4 without kind
+"""
+
+REGISTERS_DERIVED = """derived
+0x0 A 32
+  0 EN rw
+0x4 B 32
+  7:0 G rw
+0x8 C 32
+  31 S rw
+---
+3 fields, 3 without kind
+"""
+
+
+def test_cliview_register_block_host(tmpdir, capsys):
+    config_file = _create_view_host_yml(tmpdir)
+    cliview(["command", "--config-file", config_file])
+    assert capsys.readouterr().out == VIEW_HOST
+    legend = "".join(f"{line}\n" for line in REGISTERS.splitlines()[:4])
+    for uid in ("/if/header", "/if/group"):
+        cliview([
+            "command", "--config-file", config_file, "--filter=registers", uid
+        ])
+        assert capsys.readouterr().out == legend + REGISTERS_HOST
+    cliview([
+        "command", "--config-file", config_file, "--filter=registers",
+        "/if/derived"
+    ])
+    assert capsys.readouterr().out == legend + REGISTERS_DERIVED
+
+
 def test_cliview(tmpdir):
     config_file = _create_specview_yml(tmpdir)
     cliview(["command", "--config-file", config_file])

@@ -1,0 +1,21 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This group contains the register blocks.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: Group
+index-entries: []
+interface-type: group
+links:
+- role: requirement-refinement
+  uid: ../req/root
+- role: interface-group-member
+  uid: derived
+- role: interface-group-member
+  uid: member
+name: Group
+text: |
+  The software product shall provide the register blocks.
+type: interface
