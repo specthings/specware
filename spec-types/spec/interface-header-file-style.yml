@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - default
+      - zephyr
+    description: |
+      It specifies the style of a generated header file.  The value
+      ``default`` denotes a file block with the Doxygen group membership, the
+      brief description, the copyrights, the license text and the
+      automatically generated warning.  The value ``zephyr`` denotes a comment
+      block with the copyrights and the SPDX license identifier, and each
+      interface in the Zephyr style.
+spec-name: Interface Header File Style
+spec-type: interface-header-file-style
+type: spec
