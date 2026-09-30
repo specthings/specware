@@ -78,9 +78,15 @@ def _get_domains(item: Item) -> set[str]:
     return domains
 
 
+def _is_hosted_in_second_domain(item: Item) -> bool:
+    return any(True for _ in item.links_to_children("interface-host")) or (
+        bool(get_register_block_hosts(item))
+        and any(True for _ in item.parents("interface-placement")))
+
+
 def _get_ingroups_of_node(item: Item, domain: Item) -> _ItemMap:
     ingroups = _get_ingroups(item)
-    if get_register_block_hosts(item):
+    if _is_hosted_in_second_domain(item):
         return {
             uid: group
             for uid, group in ingroups.items()
@@ -700,8 +706,10 @@ class _Node:
             ctx.regs[name] = {}
             ctx.regs[name]["size"] = link.item["register-block-size"]
             ctx.regs[name]["type"] = link.item["name"]
+            host = self.header_file.get_host(
+                link.item) if _is_hosted_in_second_domain(link.item) else None
             ctx.regs[name]["group"] = get_register_block_identifier(
-                link.item, self.header_file.get_host(link.item))
+                link.item, host)
 
     def _get_register_member_info(self, ctx: _RegisterMemberContext) -> None:
         offset = -1
