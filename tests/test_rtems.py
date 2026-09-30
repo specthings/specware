@@ -183,7 +183,10 @@ def test_recursive_is_enabled_register_block():
             "/h-place": {
                 "enabled-by": True,
                 "interface-type": "header-file",
-                "links": []
+                "links": [{
+                    "role": "interface-ingroup",
+                    "uid": "/g-place"
+                }]
             },
             "/h-host": {
                 "enabled-by":
@@ -201,8 +204,21 @@ def test_recursive_is_enabled_register_block():
                 "links": []
             },
             "/placed-hosted": {
+                "enabled-by":
+                True,
+                "interface-type":
+                "define",
+                "links": [{
+                    "role": "interface-placement",
+                    "uid": "/h-place"
+                }, {
+                    "role": "interface-ingroup",
+                    "uid": "/g-place"
+                }]
+            },
+            "/g-place": {
                 "enabled-by": True,
-                "interface-type": "define",
+                "interface-type": "group",
                 "links": [{
                     "role": "interface-placement",
                     "uid": "/h-place"
@@ -212,12 +228,12 @@ def test_recursive_is_enabled_register_block():
         set_types=False)
     enabled = {
         "alpha": [
-            "/base", "/derived", "/g-alpha", "/h-alpha", "/h-place", "/member",
-            "/orphan", "/placed-hosted"
+            "/base", "/derived", "/g-alpha", "/g-place", "/h-alpha",
+            "/h-place", "/member", "/orphan", "/placed-hosted"
         ],
         "beta": [
-            "/h-beta", "/h-host", "/h-place", "/hosted", "/included",
-            "/includer", "/orphan", "/placed-hosted"
+            "/g-place", "/h-beta", "/h-host", "/h-place", "/hosted",
+            "/included", "/includer", "/orphan", "/placed-hosted"
         ]
     }
     for config, uids in enabled.items():
