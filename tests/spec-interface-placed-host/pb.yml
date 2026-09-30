@@ -1,0 +1,38 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Placed block.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+- default:
+    count: 1
+    name: X
+  offset: 0
+  variants: []
+description: null
+enabled-by: true
+identifier: RBPlaced
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-placement
+  uid: ph
+- role: interface-ingroup
+  uid: pg
+- role: interface-ingroup
+  uid: ng
+name: pb
+notes: null
+register-block-group: Placed
+register-block-size: 4
+register-prefix: null
+registers:
+- bits:
+  - default: []
+    variants: []
+  brief: |
+    Register X.
+  description: null
+  name: X
+  width: 32
+type: interface

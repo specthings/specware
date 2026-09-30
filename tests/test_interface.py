@@ -24,11 +24,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import json
+import logging
 import os
+from pathlib import Path
 import re
+import shutil
 import pytest
 
-from specitems import EmptyItemCache, LicenseAggregate
+from specitems import (EmptyItemCache, LicenseAggregate,
+                       verify_specification_format)
 
 from specware import (generate_header_file, generate_interfaces,
                       get_affected_header_files, get_group_members,
@@ -1823,6 +1828,106 @@ def test_interface_register_block_host(tmpdir):
             ] == ["/hd", "/hi", "/hs"]
 
 
+_PLACED_HOST = [
+    ("/ph", [
+        "#ifndef _PH_H\n",
+        "@defgroup RBPlaced Placed\n *\n * @ingroup RBPlacedGroup\n",
+        "#define PD 5\n"
+    ], ["RBForeign", "RBNoDomain"]),
+    ("/ph2", ["#include <ph.h>\n",
+              "@brief See @ref RBPlaced.\n"], ["ch.h", "RBForeign"]),
+    ("/ch", [
+        "#ifndef RB_FOREIGN_H_\n",
+        "@defgroup RBForeign Foreign\n *\n * @ingroup RBForeignGroup\n",
+        "#define PD 5\n", "#define HD2 2\n", " * @ingroup RBHostedGroup\n"
+    ], ["RBPlaced", "RBNoDomain", "_CH_H"]),
+    ("/dh", [
+        "#define HD2 2\n", " * @ingroup RBHostedGroup\n",
+        "@defgroup RBHostedGroup Hosted group\n"
+    ], ["RBPlacedGroup", "RBForeignGroup"]),
+    ("/ch2", ["#include <ch.h>\n",
+              "@brief See @ref RBForeign.\n"], ["ph.h", "RBPlaced"]),
+]
+
+
+def test_interface_register_block_placed_and_hosted(tmpdir):
+    item_cache = create_item_cache(
+        tmpdir, ["spec-interface", "spec-interface-placed-host"])
+    header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": "default"
+    }
+    for uid, present, absent in _PLACED_HOST:
+        path = os.path.join(tmpdir, f"{uid[1:]}.h")
+        generate_header_file(header_file_config, item_cache[uid],
+                             code_context(), path)
+        with open(path, "r", encoding="utf-8") as src:
+            content = src.read()
+        for text in present:
+            assert text in content
+        for text in absent:
+            assert text not in content
+    assert get_register_block_identifier(item_cache["/pb"]) == "RBPlaced"
+    assert get_register_block_group(item_cache["/pb"]) == "Placed"
+    assert get_affected_header_files(item_cache,
+                                     {"/pd"}) == {"/ch", "/ph", "/zh"}
+    assert get_affected_header_files(
+        item_cache, {"/pb"}) == {"/ch", "/ch2", "/ph", "/ph2", "/zh"}
+
+
+_PLACED_HOST_ZEPHYR = """/*
+ * Copyright (C) 2026 embedded brains GmbH & Co. KG
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#ifndef ZEPHYR_INCLUDE_GRLIB_PB_H_
+#define ZEPHYR_INCLUDE_GRLIB_PB_H_
+
+#include <zephyr/sys/util.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* X bits */
+
+/* Placed address offsets */
+#define PB_X 0x0U
+
+/*
+ * This constant is placed and hosted.
+ */
+#define PD 5
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* ZEPHYR_INCLUDE_GRLIB_PB_H_ */
+"""
+
+
+def test_interface_register_block_placed_and_hosted_zephyr(tmpdir):
+    item_cache = create_item_cache(
+        tmpdir, ["spec-interface", "spec-interface-placed-host"])
+    header_file_config = {
+        "option-expressions": OPTION_EXPRESSIONS,
+        "item-level-interfaces": ["/command-line"],
+        "domains": {},
+        "enabled": [],
+        "style": "zephyr"
+    }
+    path = os.path.join(tmpdir, "zh.h")
+    generate_header_file(header_file_config, item_cache["/zh"],
+                         zephyr_context(), path)
+    with open(path, "r", encoding="utf-8") as src:
+        assert src.read() == _PLACED_HOST_ZEPHYR
+
+
 def test_interface_zephyr_memory_register_block_without_group(tmpdir):
     item_cache = create_item_cache(tmpdir,
                                    ["spec-interface", "spec-interface-host"])
@@ -2092,8 +2197,10 @@ extern "C" {
 """
 
 _INVALID_HOSTS = [
-    ("placed", "register block '/placed' has an interface placement and "
-     "header file '/h-placed' hosts it"),
+    ("placed", "register block '/placed' has an interface placement in the "
+     "domain of header file '/h-placed' which hosts it"),
+    ("placed-define", "define '/placed-define' has an interface placement "
+     "in the domain of header file '/h-placed-define' which hosts it"),
     ("no-id", "register block '/no-id' has no 'identifier' and no host link "
      "states one"),
     ("no-block", "header file '/h-no-block' hosts '/define-a' which is no "
@@ -2120,3 +2227,31 @@ def test_interface_invalid_register_block_host(tmpdir, case, message):
     with pytest.raises(ValueError, match=re.escape(message)):
         _generate_header_file_with(tmpdir, "default",
                                    "spec-interface-host-invalid", f"/h-{case}")
+
+
+@pytest.mark.parametrize("guard, valid", [("ZEPHYR_INCLUDE_GRLIB_PB_H_", True),
+                                          ("ZEPHYR-X\n#define Y", False),
+                                          ("", False)])
+def test_interface_header_guard_format(tmpdir, caplog, guard, valid):
+    spec_dir = Path(tmpdir) / "spec"
+    shutil.copytree(
+        Path(__file__).parent / "spec-interface-placed-host", spec_dir)
+    path = spec_dir / "zh.yml"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text.replace("header-guard: ZEPHYR_INCLUDE_GRLIB_PB_H_",
+                                 f"header-guard: {json.dumps(guard)}"),
+                    encoding="utf-8")
+    item_cache = create_item_cache(tmpdir, ["spec-interface", str(spec_dir)])
+    caplog.set_level(logging.ERROR)
+    verify_specification_format(item_cache)
+    messages = [
+        record.getMessage() for record in caplog.records
+        if record.getMessage().startswith("/zh:")
+    ]
+    if valid:
+        assert not messages
+    else:
+        assert messages == [
+            f"/zh:/links[0]/header-guard: invalid value: "
+            f"{guard}"
+        ]

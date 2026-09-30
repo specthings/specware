@@ -67,6 +67,28 @@ def _get_ingroups(item: Item) -> _ItemMap:
     return ingroups
 
 
+def _get_domains(item: Item) -> set[str]:
+    if item["interface-type"] == "domain":
+        return {item.uid}
+    containers = list(item.parents("interface-placement"))
+    containers.extend(link.item for link in get_register_block_hosts(item))
+    domains: set[str] = set()
+    for container in containers:
+        domains.update(_get_domains(container))
+    return domains
+
+
+def _get_ingroups_of_node(item: Item, domain: Item) -> _ItemMap:
+    ingroups = _get_ingroups(item)
+    if get_register_block_hosts(item):
+        return {
+            uid: group
+            for uid, group in ingroups.items()
+            if domain.uid in _get_domains(group)
+        }
+    return ingroups
+
+
 def _get_group_identifier(item: Item) -> str:
     if item.type == "interface/register-block":
         return get_register_block_identifier(item)
@@ -525,7 +547,7 @@ class _Node:
         self.header_file = header_file
         self.item = item
         self.host = host
-        self.ingroups = _get_ingroups(item)
+        self.ingroups = _get_ingroups_of_node(item, header_file.domain)
         self.dependents: set[_Node] = set()
         self.depends_on: set[_Node] = set()
         self.content = header_file.content.fragment()
@@ -678,7 +700,8 @@ class _Node:
             ctx.regs[name] = {}
             ctx.regs[name]["size"] = link.item["register-block-size"]
             ctx.regs[name]["type"] = link.item["name"]
-            ctx.regs[name]["group"] = get_register_block_identifier(link.item)
+            ctx.regs[name]["group"] = get_register_block_identifier(
+                link.item, self.header_file.get_host(link.item))
 
     def _get_register_member_info(self, ctx: _RegisterMemberContext) -> None:
         offset = -1
@@ -1236,6 +1259,11 @@ class _HeaderFile:
         self.register_bit_macros = register_bit_macros
         self._option_expressions = option_expressions
 
+    @property
+    def domain(self) -> Item:
+        """ Is the domain of the header file. """
+        return self._item.parent("interface-placement")
+
     def option_expression(self, option: str) -> str:
         """ Get the expression which tests the option in the header file. """
         return self._option_expressions.get_expression(self._item, option)
@@ -1245,18 +1273,32 @@ class _HeaderFile:
         Add the includes of the item to the header file includes.
 
         A register block which header files host adds the host of the domain
-        of this header file.
+        of this header file, unless a header file of this domain places the
+        register block.
         """
-        for parent in item.parents("interface-placement"):
-            if parent.type in [
-                    "interface/header-file",
-                    "interface/unspecified-header-file"
-            ]:
-                self._includes.append(parent)
-        if get_register_block_hosts(item):
-            self._includes.append(
-                get_register_block_host_of_domain(
-                    item, self._item.parent("interface-placement")).item)
+        host = self.get_host(item)
+        if host is None:
+            self._includes.extend(
+                parent for parent in item.parents("interface-placement")
+                if parent.type in
+                ["interface/header-file", "interface/unspecified-header-file"])
+        else:
+            self._includes.append(host.item)
+
+    def get_host(self, item: Item) -> Optional[Link]:
+        """
+        Get the link of the header file of the domain of this header file
+        which hosts the item.
+
+        Returns None, if no header file hosts the item or a header file of the
+        domain places it.
+        """
+        domain = self.domain
+        if not get_register_block_hosts(item) or any(
+                parent.parent("interface-placement") == domain
+                for parent in item.parents("interface-placement")):
+            return None
+        return get_register_block_host_of_domain(item, domain)
 
     def add_node(self, item: Item) -> None:
         """ Add a node for the item. """
@@ -1268,14 +1310,25 @@ class _HeaderFile:
         if item.type != "interface/register-block":
             raise ValueError(f"header file '{self._item.uid}' hosts "
                              f"'{item.uid}' which is no register block")
-        if any(True for _ in item.parents("interface-placement")):
-            raise ValueError(f"register block '{item.uid}' has an interface "
-                             "placement and header file "
-                             f"'{self._item.uid}' hosts it")
-        get_register_block_host_of_domain(
-            item, self._item.parent("interface-placement"))
+        self._check_hosted_item(item)
         node_type = _ZephyrNode if link["style"] == "zephyr" else _Node
         self._nodes[item.uid] = node_type(self, item, link)
+
+    def add_hosted_interface(self, link: Link) -> None:
+        """ Add a node for the interface of the host link. """
+        self._check_hosted_item(link.item)
+        self.add_node(link.item)
+
+    def _check_hosted_item(self, item: Item) -> None:
+        domain = self.domain
+        if any(
+                parent.parent("interface-placement") == domain
+                for parent in item.parents("interface-placement")):
+            kind = item["interface-type"].replace("-", " ")
+            raise ValueError(f"{kind} '{item.uid}' has an interface "
+                             "placement in the domain of header file "
+                             f"'{self._item.uid}' which hosts it")
+        get_register_block_host_of_domain(item, domain)
 
     def add_dependency(self, node: _Node, item: Item) -> None:
         """
@@ -1294,6 +1347,9 @@ class _HeaderFile:
             self.content.register_license_and_copyrights_of_item(child)
         for link in self._item.links_to_parents("register-block-host"):
             self.add_hosted_node(link)
+            self.content.register_license_and_copyrights_of_item(link.item)
+        for link in self._item.links_to_parents("interface-host"):
+            self.add_hosted_interface(link)
             self.content.register_license_and_copyrights_of_item(link.item)
         for node in self._nodes.values():
             node.generate()
@@ -1356,7 +1412,8 @@ class _HeaderFile:
     def finalize(self) -> None:
         """ Finalize the header file. """
         self.add_prologue()
-        with self.content.header_guard(self._item["path"]):
+        with self.content.header_guard(self._item["path"],
+                                       self.get_header_guard()):
             exp_mapper = OptionExpressionMapper(self._option_expressions,
                                                 self._item)
             includes = [
@@ -1382,6 +1439,16 @@ class _HeaderFile:
             with self.content.extern_c():
                 for node in self._get_nodes_in_dependency_order():
                     self.content.add(node.content)
+
+    def get_header_guard(self) -> Optional[str]:
+        """
+        Get the header guard of the header file.
+
+        The ``header-guard`` attribute of the placement link of the header file
+        states the guard.  Returns None, if the guard is derived from the path.
+        """
+        link = next(self._item.links_to_parents("interface-placement"))
+        return link.data.get("header-guard", None)
 
     def write(self, domain_path: Optional[str],
               file_path: Optional[str]) -> None:

@@ -1341,3 +1341,23 @@ def test_interfacedoc_item_marker(tmpdir):
         assert "Find related header" not in text
         assert "Generated from" not in text
         assert "\n\n\n" not in text
+
+
+def test_interfacedoc_types_of_placed_and_hosted_interface(tmpdir):
+    item_cache = create_item_cache(
+        tmpdir, ["spec-interface", "spec-interface-placed-host"])
+    target = os.path.join(tmpdir, "t.rst")
+    config = {
+        "enabled": [],
+        "groups": [],
+        "types": {
+            "domains": ["/domain-abc", "/domain-d"],
+            "groups": [],
+            "target": target
+        }
+    }
+    generate_interface_documentation(config, item_cache, _SPHINX_MAPPER,
+                                     _SPHINX_CONTENT)
+    with open(target, "r", encoding="utf-8") as src:
+        text = src.read()
+    assert text.count("This type is placed and hosted.") == 1

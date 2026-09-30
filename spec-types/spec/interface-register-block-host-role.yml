@@ -43,7 +43,9 @@ spec-info:
       goes from an ${interface-header-file:/spec-name} item to an
       ${interface-register-block:/spec-name} item.  It places the register
       block into the header file.  A register block which a header file hosts
-      shall have no link with the ${interface-placement:/spec-name}.  Several
+      shall have no link with the ${interface-placement:/spec-name} to a
+      header file of the same domain.  In the domain of such a link, the
+      placement applies and the values of the host links do not.  Several
       header files may host one register block.
     mandatory-attributes:
     - style

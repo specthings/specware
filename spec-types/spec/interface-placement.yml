@@ -13,12 +13,18 @@ spec-description: null
 spec-example: null
 spec-info:
   dict:
-    attributes: {}
+    attributes:
+      header-guard:
+        description: |
+          If the value is present, then it shall be the header guard of the
+          header file which the link places into its domain, otherwise the
+          header guard is derived from the path of the header file.
+        spec-type: interface-header-guard
     description: |
       It defines the interface placement role of links.  It is used to indicate
       that an interface definition is placed into an interface container, for
       example a header file.
-    mandatory-attributes: all
+    mandatory-attributes: none
 spec-name: Interface Placement Link Role
 spec-type: interface-placement
 type: spec

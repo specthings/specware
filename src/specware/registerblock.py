@@ -37,23 +37,28 @@ __all__ = [
     "get_register_block_prefixes"
 ]
 
+_HOST_ROLES = ("interface-host", "register-block-host")
+
 
 def get_register_block_hosts(item: Item) -> list[Link]:
     """
-    Get the links of the header files which host the register block.
+    Get the links of the header files which host the interface.
 
     Each link is a link from the header file to the register block, so
     ``link.item`` is the header file.  The links are sorted by the UID of the
     header file.
     """
-    return sorted(item.links_to_children("register-block-host"),
+    return sorted(item.links_to_children(_HOST_ROLES),
                   key=lambda link: link.item.uid)
+
+
+def _get_kind(item: Item) -> str:
+    return item["interface-type"].replace("-", " ")
 
 
 def get_register_block_host_of_domain(item: Item, domain: Item) -> Link:
     """
-    Get the link of the header file of the domain which hosts the register
-    block.
+    Get the link of the header file of the domain which hosts the interface.
 
     Raises:
         ValueError: No header file or more than one header file of the domain
@@ -65,10 +70,11 @@ def get_register_block_host_of_domain(item: Item, domain: Item) -> Link:
     ]
     if not hosts:
         raise ValueError(f"no header file of domain '{domain.uid}' hosts "
-                         f"register block '{item.uid}'")
+                         f"{_get_kind(item)} '{item.uid}'")
     if len(hosts) > 1:
         raise ValueError(f"more than one header file of domain "
-                         f"'{domain.uid}' hosts register block '{item.uid}': "
+                         f"'{domain.uid}' hosts {_get_kind(item)} "
+                         f"'{item.uid}': "
                          f"{', '.join(link.item.uid for link in hosts)}")
     return hosts[0]
 
@@ -78,10 +84,11 @@ def get_interface_members(item: Item) -> list[Item]:
     Get the interfaces which the interface container places.
 
     These are the children of the ``interface-placement`` links and the
-    register blocks of the ``register-block-host`` links of the container.
+    interfaces of the ``register-block-host`` and ``interface-host`` links of
+    the container.
     """
     return list(item.children("interface-placement")) + list(
-        item.parents("register-block-host"))
+        item.parents(_HOST_ROLES))
 
 
 def get_interface_groups(item: Item) -> list[Item]:
@@ -141,7 +148,7 @@ def _get_block_value(item: Item, host: Optional[Link], key: str) -> Any:
         value = host.data.get(key, None)
         if value is not None:
             return value
-    else:
+    elif not any(True for _ in item.parents("interface-placement")):
         values = set(link.data[key] for link in get_register_block_hosts(item)
                      if link.data.get(key, None) is not None)
         if len(values) > 1:
@@ -164,7 +171,7 @@ def get_register_block_identifier(item: Item,
 
     The value of the host link takes precedence over the value of the block.
     Without a host link, the value of the host links of the block takes
-    precedence.
+    precedence, unless the block has an interface placement.
     """
     return _get_block_value(item, host, "identifier")
 
@@ -175,7 +182,7 @@ def get_register_block_group(item: Item, host: Optional[Link] = None) -> str:
 
     The value of the host link takes precedence over the value of the block.
     Without a host link, the value of the host links of the block takes
-    precedence.
+    precedence, unless the block has an interface placement.
     """
     return _get_block_value(item, host, "register-block-group")
 

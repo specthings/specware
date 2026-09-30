@@ -524,9 +524,16 @@ class CContent(Content):
             self.wrap(description)
 
     @contextmanager
-    def header_guard(self, filename: str) -> Iterator[None]:
-        """ Open a header guard context. """
-        guard = "_" + _NOT_ALPHANUM.sub("_", filename).upper()
+    def header_guard(self,
+                     filename: str,
+                     guard: Optional[str] = None) -> Iterator[None]:
+        """
+        Open a header guard context.
+
+        Without a guard, the guard is derived from the file name.
+        """
+        if guard is None:
+            guard = "_" + _NOT_ALPHANUM.sub("_", filename).upper()
         self.add([f"#ifndef {guard}", f"#define {guard}"])
         yield
         self.add(f"#endif /* {guard} */")

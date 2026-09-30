@@ -179,13 +179,46 @@ def test_recursive_is_enabled_register_block():
                 }]
             },
             "/member":
-            _block([])
+            _block([]),
+            "/h-place": {
+                "enabled-by": True,
+                "interface-type": "header-file",
+                "links": []
+            },
+            "/h-host": {
+                "enabled-by":
+                "beta",
+                "interface-type":
+                "header-file",
+                "links": [{
+                    "role": "interface-host",
+                    "uid": uid
+                } for uid in ("/hosted", "/placed-hosted")]
+            },
+            "/hosted": {
+                "enabled-by": True,
+                "interface-type": "define",
+                "links": []
+            },
+            "/placed-hosted": {
+                "enabled-by": True,
+                "interface-type": "define",
+                "links": [{
+                    "role": "interface-placement",
+                    "uid": "/h-place"
+                }]
+            }
         },
         set_types=False)
     enabled = {
-        "alpha":
-        ["/base", "/derived", "/g-alpha", "/h-alpha", "/member", "/orphan"],
-        "beta": ["/h-beta", "/included", "/includer", "/orphan"]
+        "alpha": [
+            "/base", "/derived", "/g-alpha", "/h-alpha", "/h-place", "/member",
+            "/orphan", "/placed-hosted"
+        ],
+        "beta": [
+            "/h-beta", "/h-host", "/h-place", "/hosted", "/included",
+            "/includer", "/orphan", "/placed-hosted"
+        ]
     }
     for config, uids in enabled.items():
         item_cache.set_selection(

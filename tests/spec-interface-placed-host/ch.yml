@@ -1,0 +1,26 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This header file hosts a register block of another domain.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: header-file
+links:
+- header-guard: RB_FOREIGN_H_
+  role: interface-placement
+  uid: /domain-c
+- role: interface-host
+  uid: pd
+- role: interface-host
+  uid: hd2
+- role: interface-host
+  uid: hg2
+- identifier: RBForeign
+  register-block-group: Foreign
+  role: register-block-host
+  style: default
+  uid: pb
+path: ch.h
+prefix: include
+type: interface

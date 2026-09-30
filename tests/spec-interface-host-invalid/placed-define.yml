@@ -1,0 +1,18 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This constant is placed and hosted.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+  default: '5'
+  variants: []
+description: null
+enabled-by: true
+index-entries: []
+interface-type: define
+links:
+- role: interface-placement
+  uid: h-placed-define
+name: PLACED_DEFINE
+notes: null
+type: interface

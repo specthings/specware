@@ -1,0 +1,17 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This group contains the hosted register block.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RBForeignGroup
+index-entries: []
+interface-type: group
+links:
+- role: interface-placement
+  uid: ch
+- role: interface-group-member
+  uid: pb
+name: Foreign group
+type: interface

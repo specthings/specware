@@ -412,18 +412,29 @@ VIEW_HOST = """/req/root (type=requirement/non-functional/design, not-validated)
   /if/domain (type=interface/domain, role=requirement-refinement)
     /if/header (type=interface/header-file, role=interface-placement, \
 not-validated)
-      /if/derived (type=interface/register-block, role=register-block-host, \
-identifier=Derived, register-block-group=Derived, style=default, not-validated)
-      /if/member (type=interface/register-block, role=register-block-host, \
-style=zephyr, not-validated)
-  /if/group (type=interface/group, role=requirement-refinement, not-validated)
-    /if/header (type=interface/header-file, role=interface-ingroup, \
+      /if/a-define (type=interface/define, role=interface-placement, \
 not-validated)
       /if/derived (type=interface/register-block, role=register-block-host, \
 identifier=Derived, register-block-group=Derived, style=default, not-validated)
+      /if/host-define (type=interface/define, role=interface-host, \
+not-validated)
       /if/member (type=interface/register-block, role=register-block-host, \
 style=zephyr, not-validated)
+  /if/group (type=interface/group, role=requirement-refinement, not-validated)
+    /if/a-define (type=interface/define, role=interface-ingroup, not-validated)
     /if/derived (type=interface/register-block, role=interface-group-member, \
+not-validated)
+    /if/header (type=interface/header-file, role=interface-ingroup, \
+not-validated)
+      /if/a-define (type=interface/define, role=interface-placement, \
+not-validated)
+      /if/derived (type=interface/register-block, role=register-block-host, \
+identifier=Derived, register-block-group=Derived, style=default, not-validated)
+      /if/host-define (type=interface/define, role=interface-host, \
+not-validated)
+      /if/member (type=interface/register-block, role=register-block-host, \
+style=zephyr, not-validated)
+    /if/host-define (type=interface/define, role=interface-ingroup, \
 not-validated)
     /if/member (type=interface/register-block, role=interface-group-member, \
 not-validated)
