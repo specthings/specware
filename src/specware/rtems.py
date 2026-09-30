@@ -52,8 +52,15 @@ _ENABLEMENT_ROLES = ("interface-function", "interface-ingroup",
                      "validation")
 
 # An item is enabled through the items which link to it by these roles.
-_ENABLEMENT_CHILD_ROLES = ("interface-group-member", "register-block-base",
-                           "register-block-host", "register-block-include")
+_ENABLEMENT_CHILD_ROLES = ("interface-host", "interface-group-member",
+                           "register-block-base", "register-block-host",
+                           "register-block-include")
+
+# A host of an interface with a placement does not decide its enablement.  The
+# placement serves the domain of the placement whatever the hosts are.
+_ENABLEMENT_PLACED_CHILD_ROLES = tuple(role for role in _ENABLEMENT_CHILD_ROLES
+                                       if role not in ("interface-host",
+                                                       "register-block-host"))
 
 
 def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
@@ -64,10 +71,13 @@ def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
     if not item.is_enabled(enabled_set):
         return False
     result = True
+    if any(True for _ in item.parents("interface-placement")):
+        child_roles = _ENABLEMENT_PLACED_CHILD_ROLES
+    else:
+        child_roles = _ENABLEMENT_CHILD_ROLES
     for parent in itertools.chain(
             item.parents(_ENABLEMENT_ROLES, is_link_enabled=link_is_enabled),
-            item.children(_ENABLEMENT_CHILD_ROLES,
-                          is_link_enabled=link_is_enabled)):
+            item.children(child_roles, is_link_enabled=link_is_enabled)):
         if recursive_is_enabled(enabled_set, parent):
             return True
         result = False
@@ -141,7 +151,8 @@ _VALIDATION_PARENT_ROLES = _PARENT_ROLES + ("interface-group-member", )
 _VISIT_CHILD_ROLES = _CHILD_ROLES + ("appl-config-group-member",
                                      "interface-placement")
 
-_VISIT_PARENT_ROLES = _VALIDATION_PARENT_ROLES + ("register-block-host", )
+_VISIT_PARENT_ROLES = _VALIDATION_PARENT_ROLES + ("interface-host",
+                                                  "register-block-host")
 
 
 def _visit_tree(item: Item, related_items: set[Item]) -> None:
@@ -171,8 +182,8 @@ _EXPORT_CHILD_ROLES = ("interface-function", "interface-placement",
                        "test-case", "validation")
 
 _EXPORT_PARENT_ROLES = _PARENT_ROLES + (
-    "constraint", "errno", "register-block-base", "register-block-host",
-    "register-block-include")
+    "constraint", "interface-host", "errno", "register-block-base",
+    "register-block-host", "register-block-include")
 
 # Items reached through the shallow roles contribute to the generated content
 # of the visiting item, however, the items related to them do not.  Expanding

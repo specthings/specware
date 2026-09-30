@@ -1,0 +1,29 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  Placed block with an include.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+definition:
+- default:
+    count: 1
+    name: SUB
+  offset: 0
+  variants: []
+description: null
+enabled-by: true
+identifier: RBPlacedInc
+index-entries: []
+interface-type: register-block
+links:
+- role: interface-placement
+  uid: ph2
+- name: SUB
+  role: register-block-include
+  uid: pb
+name: pi
+notes: null
+register-block-group: Placed include
+register-block-size: 4
+register-prefix: null
+registers: []
+type: interface

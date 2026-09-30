@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 brief: |
-  This header file hosts the register blocks.
+  This header file hosts a register block with an include.
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
@@ -8,19 +8,12 @@ index-entries: []
 interface-type: header-file
 links:
 - role: interface-placement
-  uid: domain
-- role: interface-ingroup
-  uid: group
-- identifier: Derived
-  register-block-group: Derived
+  uid: /domain-c
+- identifier: RBForeignInc
+  register-block-group: Foreign include
   role: register-block-host
   style: default
-  uid: derived
-- role: register-block-host
-  style: zephyr
-  uid: member
-- role: interface-host
-  uid: host-define
-path: header.h
+  uid: pi
+path: ch2.h
 prefix: include
 type: interface

@@ -35,6 +35,7 @@ from .contentc import (CContent, DEFAULT_ITEM_MARKER, add_item_marker,
                        get_value_compound, get_value_forward_declaration,
                        get_value_unspecified_type)
 from .interfacemapper import sanitize_name
+from .registerblock import get_interface_members
 
 
 def _get_code_param(ctx: ItemGetValueContext) -> Any:
@@ -309,10 +310,10 @@ _TYPE_GENERATORS = {
 }
 
 
-def _gather_types(item: Item, types: list[Item]) -> None:
-    for child in item.children("interface-placement"):
+def _gather_types(item: Item, types: dict[str, Item]) -> None:
+    for child in get_interface_members(item):
         if child.type in _TYPE_GENERATORS:
-            types.append(child)
+            types[child.uid] = child
         _gather_types(child, types)
 
 
@@ -325,7 +326,7 @@ def _is_opaque_type(item: Item) -> Optional[Item]:
 
 def _generate_types(content: TextContent, mapper: ItemMapper, config: dict,
                     item_cache: ItemCache, item_marker: str) -> None:
-    types: list[Item] = []
+    types: dict[str, Item] = {}
     for domain in config["domains"]:
         _gather_types(item_cache[domain], types)
     content.add_automatically_generated_warning()
@@ -341,7 +342,7 @@ for more information about the usage of the various data types.""")
             content.wrap(
                 "The following is a complete list of the RTEMS primitive data "
                 "types in alphabetical order:")
-            for item in sorted(types, key=lambda x: x["name"]):
+            for item in sorted(types.values(), key=lambda x: x["name"]):
                 content.register_license_and_copyrights_of_item(item)
                 add_item_marker(content, item_marker, item)
                 name = item["name"]

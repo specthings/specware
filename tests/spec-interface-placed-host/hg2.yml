@@ -1,0 +1,13 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This group is hosted in two domains.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+description: null
+enabled-by: true
+identifier: RBHostedGroup
+index-entries: []
+interface-type: group
+links: []
+name: Hosted group
+type: interface

@@ -60,6 +60,24 @@ _PARENT_ROLES = [
     "test-timeouts", "verification-provider"
 ]
 
+# The interface group membership and the interface placement are each defined
+# by a pair of link roles which relate the items in opposite directions.  The
+# view lists the items of a pair in the order of their UIDs, so the choice of
+# the role does not change the tree.
+_MEMBER_CHILD_ROLES = ["interface-ingroup", "interface-ingroup-hidden"]
+
+_VIEW_CHILD_ROLES = [
+    role for role in _CHILD_ROLES if role not in _MEMBER_CHILD_ROLES
+]
+
+_VIEW_PARENT_ROLES = [
+    role for role in _PARENT_ROLES if role != "interface-group-member"
+]
+
+
+def _sorted_links(links: Iterable[Link]) -> list[Link]:
+    return sorted(links, key=lambda link: link.item.uid)
+
 
 def _get_value_dummy(_ctx: ItemGetValueContext) -> Any:
     return ""
@@ -122,8 +140,11 @@ def _visit_item(item: Item, mapper: ItemMapper, level: int,
 
 def _view_interface_placment(item: Item, mapper: ItemMapper, level: int,
                              validated_filter: str) -> None:
-    for link in itertools.chain(item.links_to_children("interface-placement"),
-                                item.links_to_parents("register-block-host")):
+    for link in _sorted_links(
+            itertools.chain(
+                item.links_to_children("interface-placement"),
+                item.links_to_parents(
+                    ["interface-host", "register-block-host"]))):
         if _visit_item(link.item, mapper, level, link, validated_filter):
             _view_interface_placment(link.item, mapper, level + 1,
                                      validated_filter)
@@ -146,9 +167,13 @@ def _view(item: Item, mapper: ItemMapper, level: int, link: Optional[Link],
     for link_2 in item.links_to_parents("reference"):
         _visit_item(link_2.item, mapper, level + 1, link_2, validated_filter)
     _view_interface_placment(item, mapper, level + 1, validated_filter)
-    for link_2 in item.links_to_children(_CHILD_ROLES):
-        _view(link_2.item, mapper, level + 1, link_2, validated_filter)
-    for link_2 in item.links_to_parents(_PARENT_ROLES):
+    for link_2 in itertools.chain(
+            item.links_to_children(_VIEW_CHILD_ROLES),
+            _sorted_links(
+                itertools.chain(
+                    item.links_to_children(_MEMBER_CHILD_ROLES),
+                    item.links_to_parents("interface-group-member"))),
+            item.links_to_parents(_VIEW_PARENT_ROLES)):
         _view(link_2.item, mapper, level + 1, link_2, validated_filter)
 
 
@@ -577,9 +602,11 @@ def _register_blocks(item: Item, blocks: list[Item],
         return
     for link in itertools.chain(
             item.links_to_children(is_link_enabled=_any_link),
-            item.links_to_parents(
-                ["interface-group-member", "register-block-host"],
-                is_link_enabled=_any_link)):
+            item.links_to_parents([
+                "interface-group-member", "interface-host",
+                "register-block-host"
+            ],
+                                  is_link_enabled=_any_link)):
         _register_blocks(link.item, blocks, visited)
 
 

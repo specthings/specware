@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: role
+  spec-value: interface-host
+  uid: link
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      It defines the interface host role of links.  A link of this role goes
+      from an ${interface-header-file:/spec-name} item to an interface item.
+      It is the reverse of the ${interface-placement:/spec-name}.  It places
+      the interface into the header file.  An interface which a header file
+      hosts shall have no link with the ${interface-placement:/spec-name} to
+      a header file of the same domain.  The style of the header file
+      presents the interface.
+    mandatory-attributes: all
+spec-name: Interface Host Role
+spec-type: interface-host-role
+type: spec

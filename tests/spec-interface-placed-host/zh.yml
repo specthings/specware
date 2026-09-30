@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This header file presents the placed interfaces in the Zephyr style.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: header-file
+links:
+- header-guard: ZEPHYR_INCLUDE_GRLIB_PB_H_
+  role: interface-placement
+  uid: /zephyr/if/domain
+- role: interface-host
+  uid: pd
+- role: register-block-host
+  style: zephyr
+  uid: pb
+path: zephyr/grlib/pb.h
+prefix: soc/include
+type: interface

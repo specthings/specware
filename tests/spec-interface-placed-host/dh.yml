@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+brief: |
+  This header file hosts a type of another domain.
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+index-entries: []
+interface-type: header-file
+links:
+- role: interface-placement
+  uid: domain-d
+- role: interface-host
+  uid: pt
+- role: interface-host
+  uid: hd2
+- role: interface-host
+  uid: hg2
+path: dh.h
+prefix: include
+type: interface
