@@ -13,7 +13,7 @@ spec-info:
       brief:
         description: |
           It shall be the test case check brief description.
-        spec-type: optional-str
+        spec-type: optional-myst
       code:
         description: |
           It shall be the test case check code.

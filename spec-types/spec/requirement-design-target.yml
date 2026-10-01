@@ -17,11 +17,11 @@ spec-info:
       brief:
         description: |
           If the value is present, then it shall briefly describe the target.
-        spec-type: optional-str
+        spec-type: optional-myst
       description:
         description: |
           If the value is present, then it shall thoroughly describe the target.
-        spec-type: optional-str
+        spec-type: optional-myst
       name:
         description: |
           It shall be the target name.

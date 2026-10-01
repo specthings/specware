@@ -17,7 +17,7 @@ spec-info:
       test-brief:
         description: |
           It shall be the test suite brief description.
-        spec-type: str
+        spec-type: myst
       test-case-code:
         description: |
           It shall be the test case code.  The test case code is placed in a
@@ -27,7 +27,7 @@ spec-info:
       test-description:
         description: |
           It shall be the test suite description.
-        spec-type: optional-str
+        spec-type: optional-myst
       test-includes:
         description: |
           It shall be a list of header files included via ``#include <...>``.

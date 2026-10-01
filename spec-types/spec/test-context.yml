@@ -13,11 +13,11 @@ spec-info:
       brief:
         description: |
           It shall be the test context member brief description.
-        spec-type: optional-str
+        spec-type: optional-myst
       description:
         description: |
           It shall be the test context member description.
-        spec-type: optional-str
+        spec-type: optional-myst
       member:
         description: |
           It shall be the test context member definition.  It shall be a valid
