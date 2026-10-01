@@ -77,4 +77,10 @@ Notes
     * unspec_type
 
     * unspec_type_2
+
+    * Area
+
+    * Page
+
+    * No Base
 """

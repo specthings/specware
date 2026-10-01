@@ -43,4 +43,10 @@ notes: |
   * ${unspec-type:/name}
 
   * ${unspec-type-2:/name}
+
+  * ${ref-c-user/area:/name}
+
+  * ${ref-web/page:/name}
+
+  * ${ref-none/x:/name}
 type: interface

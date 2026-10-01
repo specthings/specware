@@ -1,11 +1,12 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2020 embedded brains GmbH & Co. KG
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 interface-type: unspecified-define
 links:
-- label: SphinxRefTarget
-  role: reference
+- role: reference
   uid: ref-c-user
-name: UNSPEC_DEFINE
+- role: reference
+  uid: ref-web
+name: UNSPEC_TWO_REFS
 type: interface

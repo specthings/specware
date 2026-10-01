@@ -83,6 +83,7 @@ tasks:
     group: /if/group
     introduction-target: introduction.rst
   license: CC-BY-SA-4.0
+  target-document-uid: /ref/rfc9293
   task-name: interface-documentation
   task-type: interface-documentation
   types:
@@ -99,6 +100,7 @@ tasks:
   groups:
   - target: acfg.rst
     uid: /if/group-general
+  target-document-uid: /ref/rfc9293
   task-name: appl-config
   task-type: appl-config
 - accepted-licenses: []

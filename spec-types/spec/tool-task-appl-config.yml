@@ -69,6 +69,14 @@ spec-info:
         description: |
           It shall be the documented application configuration groups.
         spec-type: tool-appl-config-doc-group-list
+      target-document-uid:
+        description: |
+          It shall be the UID of the reference item of the document which
+          contains the produced documentation sources.  An example is
+          /ref/rtems/c-user.  Links into this document use Sphinx labels.
+          Links into other documents use URLs.  The attribute has no effect
+          on the Doxygen source.
+        spec-type: absolute-uid
     description: |
       This set of attributes specifies an application configuration task.  The
       task produces a Doxygen source and documentation sources.  Each kind

@@ -30,13 +30,15 @@ import itertools
 from typing import Any, Callable, Optional
 
 from specitems import (ClangFormatter, ContentContext, EnabledSet,
-                       GenericContent, get_value_plural, Item, ItemCache,
-                       ItemGetValueContext, ItemMapper, TextContent)
+                       GenericContent, get_reference_target, get_value_plural,
+                       Item, ItemCache, ItemGetValueContext, ItemMapper,
+                       TextContent)
 
 from .contentc import (CContent, DEFAULT_ITEM_MARKER, add_item_marker,
                        get_value_double_colon, get_value_doxygen_function,
                        get_value_doxygen_group, get_value_doxygen_ref,
                        get_value_hash, get_value_header_file)
+from .interfacemapper import get_interface_reference, get_reference_url
 from .rtems import is_export_affected
 
 _GROUP_MEMBER_ROLES = ("appl-config-group-member", "interface-ingroup")
@@ -315,10 +317,19 @@ def _get_value_doxygen_url(
     ctx: ItemGetValueContext,
     get_value: Callable[[ItemGetValueContext],
                         str] = _get_value) -> Optional[str]:
-    for ref in ctx.item.get("references", []):
-        if ref["type"] == "url":
-            return f"<a href=\"{ref['identifier']}\">{get_value(ctx)}</a>"
+    target = get_interface_reference(ctx.item)
+    if target is not None:
+        url = get_reference_url(ctx.mapper, target)
+        if url is not None:
+            return f"<a href=\"{url}\">{get_value(ctx)}</a>"
     return None
+
+
+def _get_value_doxygen_reference_location(ctx: ItemGetValueContext) -> str:
+    url = get_reference_url(ctx.mapper, get_reference_target(ctx.item))
+    if url is None:
+        return ctx.value[ctx.key]
+    return f"<a href=\"{url}\">{ctx.value[ctx.key]}</a>"
 
 
 def _get_value_doxygen_unspecified_define(ctx: ItemGetValueContext) -> Any:
@@ -354,6 +365,8 @@ def _add_doxygen_get_values(mapper: ItemMapper) -> None:
     mapper.add_get_value("interface/union:/name", get_value_double_colon)
     mapper.add_get_value("interface/unspecified-define:/name",
                          _get_value_doxygen_unspecified_define)
+    mapper.add_get_value("interface/unspecified-enumerator:/name",
+                         _get_value_doxygen_unspecified_define)
     mapper.add_get_value("interface/unspecified-function:/name",
                          _get_value_doxygen_unspecified_function)
     mapper.add_get_value("interface/unspecified-group:/name",
@@ -366,6 +379,8 @@ def _add_doxygen_get_values(mapper: ItemMapper) -> None:
                          _get_value_doxygen_unspecfied_type)
     mapper.add_get_value("interface/unspecified-union:/name",
                          _get_value_doxygen_unspecfied_type)
+    mapper.add_get_value("reference-location:/name",
+                         _get_value_doxygen_reference_location)
 
 
 def is_application_configuration_affected(config: dict, item_cache: ItemCache,

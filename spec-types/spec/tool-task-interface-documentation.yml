@@ -44,6 +44,13 @@ spec-info:
         description: |
           It shall be the license of a produced file.
         spec-type: spdx-license-identifier
+      target-document-uid:
+        description: |
+          It shall be the UID of the reference item of the document which
+          contains the produced documentation sources.  An example is
+          /ref/rtems/c-user.  Links into this document use Sphinx labels.
+          Links into other documents use URLs.
+        spec-type: absolute-uid
       types:
         description: |
           It shall be the documentation of the interface types.
