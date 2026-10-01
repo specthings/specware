@@ -6,7 +6,7 @@ functional-type: function
 links:
 - location: MAY-16
   role: reference
-  uid: ../ref/rfc9293
+  uid: ../ref/rfc9293/section-3-8-6-2-1
 - role: requirement-refinement
   uid: group
 rationale: null
