@@ -20,7 +20,7 @@ spec-info:
       test-brief:
         description: |
           It shall be the test case brief description.
-        spec-type: str
+        spec-type: myst
       test-context:
         description: null
         spec-type: test-context-list
@@ -33,7 +33,7 @@ spec-info:
       test-description:
         description: |
           It shall be the test case description.
-        spec-type: optional-str
+        spec-type: optional-myst
       test-header:
         description: null
         spec-type: test-header

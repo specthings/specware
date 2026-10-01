@@ -18,7 +18,7 @@ spec-info:
         description: |
           It shall provide the statement of compliance with respect to a
           requirement.
-        spec-type: str
+        spec-type: myst
     description: |
       This set of attributes provides a statement of compliance.
     mandatory-attributes: all

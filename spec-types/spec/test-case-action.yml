@@ -13,7 +13,7 @@ spec-info:
       action-brief:
         description: |
           It shall be the test case action brief description.
-        spec-type: optional-str
+        spec-type: optional-myst
       action-code:
         description: |
           It shall be the test case action code.

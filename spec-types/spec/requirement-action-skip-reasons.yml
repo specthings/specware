@@ -20,7 +20,7 @@ spec-info:
         corresponding transitions.  The value shall give a reason why the
         transitions are skipped.
       key-spec-type: requirement-action-name
-      value-spec-type: str
+      value-spec-type: myst
     mandatory-attributes: all
 spec-name: Action Requirement Skip Reasons
 spec-type: requirement-action-skip-reasons

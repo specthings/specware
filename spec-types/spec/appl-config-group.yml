@@ -17,7 +17,7 @@ spec-info:
       description:
         description: |
           It shall be the description of the application configuration group.
-        spec-type: str
+        spec-type: myst
       name:
         description: |
           It shall be human readable name of the application configuration

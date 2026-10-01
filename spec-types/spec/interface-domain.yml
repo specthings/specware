@@ -17,7 +17,7 @@ spec-info:
       description:
         description: |
           It shall be the description of the domain
-        spec-type: str
+        spec-type: myst
       name:
         description: |
           It shall be the human readable name of the domain.

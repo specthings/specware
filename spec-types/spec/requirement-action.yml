@@ -150,7 +150,7 @@ spec-info:
         description: |
           If the value is present, then it shall be the test case brief
           description.
-        spec-type: optional-str
+        spec-type: optional-myst
       test-cleanup:
         description: |
           If the value is present, then it shall be the test cleanup code.  The
@@ -169,7 +169,7 @@ spec-info:
       test-description:
         description: |
           If the value is present, then it shall be the test case description.
-        spec-type: optional-str
+        spec-type: optional-myst
       test-header:
         description: null
         spec-type: test-header

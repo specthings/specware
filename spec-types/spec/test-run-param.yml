@@ -13,7 +13,7 @@ spec-info:
       description:
         description: |
           It shall be the description of the parameter.
-        spec-type: str
+        spec-type: myst
       dir:
         description: null
         spec-type: interface-param-dir
