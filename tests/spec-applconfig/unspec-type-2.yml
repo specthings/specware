@@ -3,9 +3,9 @@ copyrights:
 - Copyright (C) 2020 embedded brains GmbH & Co. KG
 enabled-by: true
 interface-type: unspecified-typedef
-links: []
+links:
+- path: /bar
+  role: reference
+  uid: ref-web
 name: unspec_type_2
-references:
-- identifier: https://bar
-  type: url
 type: interface

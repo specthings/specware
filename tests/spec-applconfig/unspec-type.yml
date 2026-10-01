@@ -3,9 +3,8 @@ copyrights:
 - Copyright (C) 2020 embedded brains GmbH & Co. KG
 enabled-by: true
 interface-type: unspecified-typedef
-links: []
+links:
+- role: reference
+  uid: ref-none
 name: unspec_type
-references:
-- identifier: boom
-  type: function
 type: interface

@@ -57,13 +57,18 @@ _DOC_FORMAT = {
 }
 
 
-def _bind_context(fmt: str, context: ContentContext) -> tuple[Any, Any, Any]:
+def _bind_context(
+        fmt: str,
+        context: ContentContext,
+        target_document_uid: Optional[str] = None) -> tuple[Any, Any, Any]:
     """
     Bind the context to the content and mapper constructors of the format.
 
     Args:
         fmt: The documentation format.
         context: The content context of a task.
+        target_document_uid: The UID of the target document of the
+            documentation of the task.
 
     Returns:
         The content constructor, the mapper constructor and the interface
@@ -78,7 +83,9 @@ def _bind_context(fmt: str, context: ContentContext) -> tuple[Any, Any, Any]:
                               **kwargs)
 
     return (_create_content, functools.partial(create_mapper, context=context),
-            functools.partial(create_interface_mapper, context=context))
+            functools.partial(create_interface_mapper,
+                              context=context,
+                              target_document_uid=target_document_uid))
 
 
 #: The keys of a task which its configuration object takes not.
@@ -101,7 +108,8 @@ def _generate_appl_config(task: dict, group_uids: list[str],
     # The task produces a Doxygen source and documentation sources, and each
     # kind states its own license.
     create_content, _, create_interface_mapper = _bind_context(
-        args.format, create_content_context(task, provider, "documentation-"))
+        args.format, create_content_context(task, provider, "documentation-"),
+        task.get("target-document-uid"))
     generate_application_configuration(task,
                                        group_uids,
                                        item_cache,
@@ -322,7 +330,7 @@ def _generate_documentation(item_cache: ItemCache, config: Item,
     for task in yield_tasks(config, "interface-documentation"):
         context = create_content_context(task, provider)
         create_content, _, create_interface_mapper = _bind_context(
-            args.format, context)
+            args.format, context, task.get("target-document-uid"))
         generate_interface_documentation(task, item_cache,
                                          create_interface_mapper,
                                          create_content)

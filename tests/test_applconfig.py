@@ -27,21 +27,27 @@
 import functools
 import os
 
+import pytest
+
 from specitems import ItemMapper, MarkdownContent, SphinxContent
 
 from specware import (document_option, generate_application_configuration,
                       is_application_configuration_affected,
                       MarkdownInterfaceMapper, SphinxInterfaceMapper)
 
+from specware.interfacemapper import get_interface_reference
+
 from .conftest import code_context, doc_context
 from .util import create_item_cache
 
 _MARKDOWN_CONTENT = functools.partial(MarkdownContent, context=doc_context())
 _MARKDOWN_MAPPER = functools.partial(MarkdownInterfaceMapper,
-                                     context=doc_context())
+                                     context=doc_context(),
+                                     target_document_uid="/ref-c-user")
 _SPHINX_CONTENT = functools.partial(SphinxContent, context=doc_context())
 _SPHINX_MAPPER = functools.partial(SphinxInterfaceMapper,
-                                   context=doc_context())
+                                   context=doc_context(),
+                                   target_document_uid="/ref-c-user")
 
 
 def test_applconfig(tmpdir):
@@ -68,7 +74,7 @@ def test_applconfig(tmpdir):
     with open(g_rst, "r") as src:
         content = """.. SPDX-License-Identifier: CC-BY-SA-4.0
 
-.. Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+.. Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 
 .. This file was automatically generated.  Do not edit it.
 
@@ -121,7 +127,7 @@ references:
 
 * Unspec Group 2
 
-* `Unspec Group 3 <unspec-group-3.html>`_
+* `Unspec Group 3 <https://web/unspec-group-3.html>`_
 
 * :ref:`unspec_func() <SphinxRefUnspecFunc>`
 
@@ -135,11 +141,17 @@ references:
 
 * :ref:`UNSPEC_DEFINE <SphinxRefTarget>`
 
-* `UNSPEC_DEFINE_2 <https://foo>`_
+* `UNSPEC_DEFINE_2 <https://web>`_
 
 * :c:type:`unspec_type`
 
-* `unspec_type_2 <https://bar>`_
+* `unspec_type_2 <https://web/bar>`_
+
+* :ref:`Area_Label`
+
+* `Page <https://web/page.html#page>`_
+
+* No Base
 
 .. Generated from spec:/b
 
@@ -460,7 +472,7 @@ description m
     with open(g_md, "r") as src:
         content = """% SPDX-License-Identifier: CC-BY-SA-4.0
 
-% Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+% Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 
 % This file was automatically generated.  Do not edit it.
 
@@ -524,7 +536,7 @@ references:
 
 - Unspec Group 2
 
-- [Unspec Group 3](unspec-group-3.html)
+- [Unspec Group 3](https://web/unspec-group-3.html)
 
 - {ref}`unspec_func() <SphinxRefUnspecFunc>`
 
@@ -538,11 +550,17 @@ references:
 
 - {ref}`UNSPEC_DEFINE <SphinxRefTarget>`
 
-- [UNSPEC_DEFINE_2](https://foo)
+- [UNSPEC_DEFINE_2](https://web)
 
 - {c:type}`unspec_type`
 
-- [unspec_type_2](https://bar)
+- [unspec_type_2](https://web/bar)
+
+- {ref}`Area_Label`
+
+- [Page](https://web/page.html#page)
+
+- No Base
 
 % Generated from spec:/b
 
@@ -1026,13 +1044,15 @@ description m
  *
  * * @ref b
  *
- * * <a href="unspec-group.html">Unspec Group</a>
+ * * <a href="https://c-user/unspec-group.html#sphinxrefunspecgroup">Unspec
+ *   Group</a>
  *
  * * Unspec Group 2
  *
- * * <a href="unspec-group-3.html">Unspec Group 3</a>
+ * * <a href="https://web/unspec-group-3.html">Unspec Group 3</a>
  *
- * * <a href="unspec-func.html">unspec_func()</a>
+ * * <a
+ *   href="https://c-user/unspec-func.html#sphinxrefunspecfunc">unspec_func()</a>
  *
  * * unspec_func_no_ref()
  *
@@ -1042,13 +1062,19 @@ description m
  *
  * * #DEFINE
  *
- * * #UNSPEC_DEFINE
+ * * <a href="https://c-user#sphinxreftarget">UNSPEC_DEFINE</a>
  *
- * * <a href="https://foo">UNSPEC_DEFINE_2</a>
+ * * <a href="https://web">UNSPEC_DEFINE_2</a>
  *
  * * ::unspec_type
  *
- * * <a href="https://bar">unspec_type_2</a>
+ * * <a href="https://web/bar">unspec_type_2</a>
+ *
+ * * <a href="https://c-user/area.html#area-label">Area</a>
+ *
+ * * <a href="https://web/page.html#page">Page</a>
+ *
+ * * No Base
  * @endparblock
  */
 #define a
@@ -1310,3 +1336,14 @@ def test_generate_application_configuration_item_markers(tmpdir):
         text = src.read()
     assert "spec:/" not in text
     assert "\n\n\n" not in text
+
+
+def test_interface_reference(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-applconfig")
+    assert get_interface_reference(item_cache["/unspec-func-no-ref"]) is None
+    target = get_interface_reference(item_cache["/unspec-func"])
+    assert target is not None
+    assert target.url == ("https://c-user/unspec-func.html"
+                          "#sphinxrefunspecfunc")
+    with pytest.raises(ValueError, match="at most one reference link"):
+        get_interface_reference(item_cache["/unspec-two-refs"])

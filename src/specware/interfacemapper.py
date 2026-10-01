@@ -24,9 +24,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from typing import Callable, Optional
+
 from specitems import (BibTeXCitationProvider, ContentContext, Item,
-                       ItemGetValue, ItemGetValueContext, MarkdownMapper,
-                       SphinxMapper, get_reference, make_label)
+                       ItemGetValue, ItemGetValueContext, ItemMapper,
+                       MarkdownMapper, ReferenceTarget, SphinxMapper,
+                       get_reference, get_reference_target, make_label)
 
 from .contentc import get_value_header_file
 
@@ -34,6 +37,105 @@ from .contentc import get_value_header_file
 def sanitize_name(name: str) -> str:
     """ Remove leading underscores from the name. """
     return name.lstrip("_")
+
+
+def get_interface_reference(item: Item) -> Optional[ReferenceTarget]:
+    """
+    Get the target of the reference link of the interface.
+
+    Return None, if the interface has no reference link.
+
+    Raises:
+        ValueError: The interface has more than one reference link.
+    """
+    links = list(item.links_to_parents("reference"))
+    if not links:
+        return None
+    if len(links) > 1:
+        raise ValueError(f"{item.uid}: an interface shall have at most one "
+                         "reference link")
+    return get_reference_target(links[0].item, links[0])
+
+
+def get_reference_url(mapper: ItemMapper,
+                      target: ReferenceTarget) -> Optional[str]:
+    """
+    Get the URL of the reference target substituted in the context of the
+    referenced work.
+    """
+    if target.url is None:
+        return None
+    return mapper.substitute(target.url, target.work)
+
+
+#: Formats a reference to a label with an optional name.
+FormatLabel = Callable[[Optional[str], str], str]
+
+#: Formats a hyperlink with a name to an URL.
+FormatLink = Callable[[str, str], str]
+
+
+def _format_reference(ctx: ItemGetValueContext,
+                      target: Optional[ReferenceTarget], name: Optional[str],
+                      fallback: str) -> str:
+    """
+    Format a reference to the target.
+
+    Inside the target document, a target with a label yields a reference to
+    the label.  Elsewhere, a target with an URL yields a hyperlink.  A name of
+    None makes the reference to the label take the title of the label target.
+    """
+    if target is None:
+        return fallback
+    mapper = ctx.mapper
+    assert isinstance(mapper, (SphinxInterfaceMapper, MarkdownInterfaceMapper))
+    if (target.label is not None
+            and mapper.target_document_uid == target.work.uid):
+        return mapper.format_reference_label(name, target.label)
+    url = get_reference_url(mapper, target)
+    if url is None:
+        return fallback
+    return mapper.format_reference_link(fallback if name is None else name,
+                                        url)
+
+
+def _get_value_ref(ctx: ItemGetValueContext,
+                   get_value: ItemGetValue,
+                   postfix: str = "",
+                   prefix: str = "") -> str:
+    return _format_reference(ctx, get_interface_reference(ctx.item),
+                             f"{prefix}{ctx.value[ctx.key]}{postfix}",
+                             get_value(ctx))
+
+
+def _get_value_unspecified_group(ctx: ItemGetValueContext) -> str:
+    return _format_reference(ctx, get_interface_reference(ctx.item), None,
+                             ctx.value[ctx.key])
+
+
+def _get_value_reference_location(ctx: ItemGetValueContext) -> str:
+    return _format_reference(ctx, get_reference_target(ctx.item), None,
+                             ctx.value[ctx.key])
+
+
+def _format_sphinx_label(name: Optional[str], label: str) -> str:
+    if name is None:
+        return f":ref:`{label}`"
+    return f":ref:`{name} <{label}>`"
+
+
+def _format_sphinx_link(name: str, url: str) -> str:
+    return f"`{name} <{url}>`_"
+
+
+def _format_markdown_label(name: Optional[str], label: str) -> str:
+    if name is None:
+        return f"{{ref}}`{label}`"
+    return f"{{ref}}`{name} <{label}>`"
+
+
+def _format_markdown_link(name: str, url: str) -> str:
+    return f"[{name}]({url})"
 
 
 def _compound_kind(ctx: ItemGetValueContext) -> str:
@@ -61,48 +163,22 @@ def _get_value_sphinx_compound(ctx: ItemGetValueContext) -> str:
     return f"``{_compound_kind(ctx)}{ctx.value[ctx.key]}``"
 
 
-def _get_value_sphinx_ref(ctx: ItemGetValueContext,
-                          get_value: ItemGetValue,
-                          postfix: str = "",
-                          prefix: str = "") -> str:
-    for ref in ctx.item.get("references", []):
-        ref_type = ref["type"]
-        identifier = ref["identifier"]
-        name_ref = f"`{prefix}{ctx.value[ctx.key]}{postfix} <{identifier}>`"
-        if ref_type == "document" and ref["name"] == "c-user":
-            return f":ref:{name_ref}"
-        if ref_type == "url":
-            return f"{name_ref}_"
-    return get_value(ctx)
-
-
 def _get_value_sphinx_unspecified_define(ctx: ItemGetValueContext) -> str:
-    return _get_value_sphinx_ref(ctx, _get_value_sphinx_macro)
+    return _get_value_ref(ctx, _get_value_sphinx_macro)
 
 
 def _get_value_sphinx_unspecified_function(ctx: ItemGetValueContext) -> str:
-    return _get_value_sphinx_ref(ctx, _get_value_sphinx_function, "()")
-
-
-def _get_value_sphinx_unspecified_group(ctx: ItemGetValueContext) -> str:
-    for ref in ctx.item.get("references", []):
-        ref_type = ref["type"]
-        identifier = ref["identifier"]
-        if ref_type == "document" and ref["name"] == "c-user":
-            return f":ref:`{identifier}`"
-        if ref_type == "url":
-            return f"`{ctx.value[ctx.key]} <{identifier}>`_"
-    return ctx.value[ctx.key]
+    return _get_value_ref(ctx, _get_value_sphinx_function, "()")
 
 
 def _get_value_sphinx_unspecified_type(ctx: ItemGetValueContext) -> str:
-    return _get_value_sphinx_ref(ctx, _get_value_sphinx_type)
+    return _get_value_ref(ctx, _get_value_sphinx_type)
 
 
 def _get_value_sphinx_unspecified_compound(ctx: ItemGetValueContext) -> str:
-    return _get_value_sphinx_ref(ctx,
-                                 _get_value_sphinx_compound,
-                                 prefix=_compound_kind(ctx))
+    return _get_value_ref(ctx,
+                          _get_value_sphinx_compound,
+                          prefix=_compound_kind(ctx))
 
 
 def get_value_sphinx_param(ctx: ItemGetValueContext) -> str:
@@ -118,11 +194,22 @@ def get_value_sphinx_header_file(ctx: ItemGetValueContext) -> str:
 class SphinxInterfaceMapper(SphinxMapper):
     """ Sphinx item mapper for the interface documentation. """
 
-    def __init__(self, item: Item, group_uids: list[str],
-                 context: str | ContentContext):
+    def __init__(self,
+                 item: Item,
+                 group_uids: list[str],
+                 context: str | ContentContext,
+                 target_document_uid: Optional[str] = None):
         super().__init__(item, context)
         self._group_uids = set(group_uids)
+
+        #: The UID of the target document of the mapper.
+        self.target_document_uid = target_document_uid
+
+        self.format_reference_label: FormatLabel = _format_sphinx_label
+        self.format_reference_link: FormatLink = _format_sphinx_link
         BibTeXCitationProvider(self)
+        self.add_get_value("reference-location:/name",
+                           _get_value_reference_location)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",
                            _get_value_sphinx_appl_config_option)
         self.add_get_value("interface/appl-config-option/feature:/name",
@@ -156,7 +243,7 @@ class SphinxInterfaceMapper(SphinxMapper):
         self.add_get_value("interface/unspecified-function:/name",
                            _get_value_sphinx_unspecified_function)
         self.add_get_value("interface/unspecified-group:/name",
-                           _get_value_sphinx_unspecified_group)
+                           _get_value_unspecified_group)
         self.add_get_value("interface/unspecified-enum:/name",
                            _get_value_sphinx_unspecified_type)
         self.add_get_value("interface/unspecified-struct:/name",
@@ -215,48 +302,22 @@ def _get_value_markdown_compound(ctx: ItemGetValueContext) -> str:
     return f"{{c:type}}`{_compound_kind(ctx)}{ctx.value[ctx.key]}`"
 
 
-def _get_value_markdown_ref(ctx: ItemGetValueContext,
-                            get_value: ItemGetValue,
-                            postfix: str = "",
-                            prefix: str = "") -> str:
-    for ref in ctx.item.get("references", []):
-        ref_type = ref["type"]
-        identifier = ref["identifier"]
-        name = f"{prefix}{ctx.value[ctx.key]}{postfix}"
-        if ref_type == "document" and ref["name"] == "c-user":
-            return f"{{ref}}`{name} <{identifier}>`"
-        if ref_type == "url":
-            return f"[{name}]({identifier})"
-    return get_value(ctx)
-
-
 def _get_value_markdown_unspecified_define(ctx: ItemGetValueContext) -> str:
-    return _get_value_markdown_ref(ctx, _get_value_markdown_macro)
+    return _get_value_ref(ctx, _get_value_markdown_macro)
 
 
 def _get_value_markdown_unspecified_function(ctx: ItemGetValueContext) -> str:
-    return _get_value_markdown_ref(ctx, _get_value_markdown_function, "()")
-
-
-def _get_value_markdown_unspecified_group(ctx: ItemGetValueContext) -> str:
-    for ref in ctx.item.get("references", []):
-        ref_type = ref["type"]
-        identifier = ref["identifier"]
-        if ref_type == "document" and ref["name"] == "c-user":
-            return f"{{ref}}`{identifier}`"
-        if ref_type == "url":
-            return f"[{ctx.value[ctx.key]}]({identifier})"
-    return ctx.value[ctx.key]
+    return _get_value_ref(ctx, _get_value_markdown_function, "()")
 
 
 def _get_value_markdown_unspecified_type(ctx: ItemGetValueContext) -> str:
-    return _get_value_markdown_ref(ctx, _get_value_markdown_type)
+    return _get_value_ref(ctx, _get_value_markdown_type)
 
 
 def _get_value_markdown_unspecified_compound(ctx: ItemGetValueContext) -> str:
-    return _get_value_markdown_ref(ctx,
-                                   _get_value_markdown_compound,
-                                   prefix=_compound_kind(ctx))
+    return _get_value_ref(ctx,
+                          _get_value_markdown_compound,
+                          prefix=_compound_kind(ctx))
 
 
 def get_value_markdown_param(ctx: ItemGetValueContext) -> str:
@@ -267,11 +328,22 @@ def get_value_markdown_param(ctx: ItemGetValueContext) -> str:
 class MarkdownInterfaceMapper(MarkdownMapper):
     """ Markdown item mapper for the interface documentation. """
 
-    def __init__(self, item: Item, group_uids: list[str],
-                 context: str | ContentContext):
+    def __init__(self,
+                 item: Item,
+                 group_uids: list[str],
+                 context: str | ContentContext,
+                 target_document_uid: Optional[str] = None):
         super().__init__(item, context)
         self._group_uids = set(group_uids)
+
+        #: The UID of the target document of the mapper.
+        self.target_document_uid = target_document_uid
+
+        self.format_reference_label: FormatLabel = _format_markdown_label
+        self.format_reference_link: FormatLink = _format_markdown_link
         BibTeXCitationProvider(self)
+        self.add_get_value("reference-location:/name",
+                           _get_value_reference_location)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",
                            _get_value_markdown_appl_config_option)
         self.add_get_value("interface/appl-config-option/feature:/name",
@@ -305,7 +377,7 @@ class MarkdownInterfaceMapper(MarkdownMapper):
         self.add_get_value("interface/unspecified-function:/name",
                            _get_value_markdown_unspecified_function)
         self.add_get_value("interface/unspecified-group:/name",
-                           _get_value_markdown_unspecified_group)
+                           _get_value_unspecified_group)
         self.add_get_value("interface/unspecified-enum:/name",
                            _get_value_markdown_unspecified_type)
         self.add_get_value("interface/unspecified-struct:/name",
