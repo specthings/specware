@@ -1,0 +1,11 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+label: X
+links:
+- role: reference-location
+  uid: ../ref-pkg
+name: X
+path: /x.html
+type: reference-location

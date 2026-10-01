@@ -37,8 +37,8 @@ from typing import (Any, Callable, Iterator, NamedTuple, Optional, TypeVar,
 
 from specitems import (ClangFormatter, IsEnabled, Item, ItemCache,
                        ItemCacheConfig, ItemDataByUID, SpecTypeProvider,
-                       create_config, create_type_provider, find_config_file,
-                       load_config_item, monitor_logging,
+                       add_inline_items, create_config, create_type_provider,
+                       find_config_file, load_config_item, monitor_logging,
                        pickle_load_data_by_uid)
 
 
@@ -303,4 +303,5 @@ def open_tree(config_file: Optional[str],
             item_cache = ItemCache(item_cache_config,
                                    is_item_enabled=is_item_enabled,
                                    type_provider=type_provider)
+        add_inline_items(config, item_cache)
         yield Tree(config, item_cache, directory)

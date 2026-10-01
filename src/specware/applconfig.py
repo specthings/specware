@@ -38,7 +38,8 @@ from .contentc import (CContent, DEFAULT_ITEM_MARKER, add_item_marker,
                        get_value_double_colon, get_value_doxygen_function,
                        get_value_doxygen_group, get_value_doxygen_ref,
                        get_value_hash, get_value_header_file)
-from .interfacemapper import get_interface_reference, get_reference_url
+from .interfacemapper import (add_reference_transformers,
+                              get_interface_reference, get_reference_url)
 from .rtems import is_export_affected
 
 _GROUP_MEMBER_ROLES = ("appl-config-group-member", "interface-ingroup")
@@ -350,6 +351,7 @@ def _get_value_doxygen_unspecfied_type(ctx: ItemGetValueContext) -> Any:
 
 
 def _add_doxygen_get_values(mapper: ItemMapper) -> None:
+    add_reference_transformers(mapper)
     for opt in ["feature-enable", "feature", "initializer", "integer"]:
         name = f"interface/appl-config-option/{opt}:/name"
         mapper.add_get_value(name, get_value_doxygen_ref)

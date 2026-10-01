@@ -68,6 +68,20 @@ def get_reference_url(mapper: ItemMapper,
     return mapper.substitute(target.url, target.work)
 
 
+def _relpath(_ctx: ItemGetValueContext, value: str) -> str:
+    return value
+
+
+def add_reference_transformers(mapper: ItemMapper) -> None:
+    """
+    Add the value transformers which the URLs of references may use.
+
+    Outside a package build, the relpath transformer returns the path
+    unchanged.
+    """
+    mapper.add_value_transformer("relpath", _relpath)
+
+
 #: Formats a reference to a label with an optional name.
 FormatLabel = Callable[[Optional[str], str], str]
 
@@ -208,6 +222,7 @@ class SphinxInterfaceMapper(SphinxMapper):
         self.format_reference_label: FormatLabel = _format_sphinx_label
         self.format_reference_link: FormatLink = _format_sphinx_link
         BibTeXCitationProvider(self)
+        add_reference_transformers(self)
         self.add_get_value("reference-location:/name",
                            _get_value_reference_location)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",
@@ -342,6 +357,7 @@ class MarkdownInterfaceMapper(MarkdownMapper):
         self.format_reference_label: FormatLabel = _format_markdown_label
         self.format_reference_link: FormatLink = _format_markdown_link
         BibTeXCitationProvider(self)
+        add_reference_transformers(self)
         self.add_get_value("reference-location:/name",
                            _get_value_reference_location)
         self.add_get_value("interface/appl-config-option/feature-enable:/name",
