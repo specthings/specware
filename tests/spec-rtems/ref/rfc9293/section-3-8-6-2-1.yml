@@ -1,0 +1,10 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: reference-location
+  uid: ../rfc9293
+location: 3.8.6.2.1
+name: Sender's Algorithm -- When to Send Data
+type: reference-location

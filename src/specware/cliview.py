@@ -33,7 +33,8 @@ from typing import Any, Callable, Optional, Iterable
 
 from specitems import (COL_SPAN, CommonMarkContent, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, Link, MarkdownContent,
-                       ROW_SPAN, SphinxContent, TextContent, yield_tasks)
+                       ROW_SPAN, SphinxContent, TextContent,
+                       get_reference_work, yield_tasks)
 
 from specware import (exit_on_config_file_error, open_tree,
                       augment_with_test_case_links, augment_with_test_links,
@@ -165,7 +166,11 @@ def _view(item: Item, mapper: ItemMapper, level: int, link: Optional[Link],
     # The cited work appears under the requirement which references it.  A
     # refinement of the requirement places it in the tree.
     for link_2 in item.links_to_parents("reference"):
-        _visit_item(link_2.item, mapper, level + 1, link_2, validated_filter)
+        if _visit_item(link_2.item, mapper, level + 1, link_2,
+                       validated_filter):
+            for link_3 in link_2.item.links_to_parents("reference-location"):
+                _visit_item(link_3.item, mapper, level + 2, link_3,
+                            validated_filter)
     _view_interface_placment(item, mapper, level + 1, validated_filter)
     for link_2 in itertools.chain(
             item.links_to_children(_VIEW_CHILD_ROLES),
@@ -573,8 +578,9 @@ def _register_block(item: Item) -> tuple[int, int]:
     size = item["register-block-size"]
     if size is not None:
         parts.append(f"size {size}")
-    parts.extend(link.item["title"]
-                 for link in item.links_to_parents("reference", _any_link))
+    parts.extend(
+        get_reference_work(link.item)["title"]
+        for link in item.links_to_parents("reference", _any_link))
     print(" ".join(parts))
     layout = get_register_block_layout(item)
     includes = dict(
@@ -635,7 +641,8 @@ def _validate(_item: Item, validated: bool) -> bool:
 def _prepare_mapper(mapper: ItemMapper) -> None:
     for type_path_key in (
             "interface:/spec", "glossary/term:/plural", "reference:/cite",
-            "reference:/cite-long",
+            "reference:/cite-long", "reference-location:/cite",
+            "reference-location:/cite-long",
             "requirement/functional/action:/text-template",
             "requirement/non-functional/performance-runtime:/environment",
             "requirement/non-functional/performance-runtime:/limit-condition",
