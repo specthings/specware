@@ -1071,7 +1071,7 @@ description m
  *
  * * <a href="https://web/bar">unspec_type_2</a>
  *
- * * <a href="https://c-user/area.html#area-label">Area</a>
+ * * <a href="https://c-user/area.html#area-heading">Area</a>
  *
  * * <a href="https://web/page.html#page">Page</a>
  *
