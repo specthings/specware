@@ -56,6 +56,10 @@ def _create_specview_yml(tmpdir, domains: str = "{}"):
 copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
+inline-items:
+- data:
+    directory: https://doc
+  uid: /pkg/doc
 item-cache:
   cache-directory: cache
   paths:
