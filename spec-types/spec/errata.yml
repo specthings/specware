@@ -1,0 +1,46 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: errata
+  uid: root
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  copyrights:
+  - Copyright (C) 2026 embedded brains GmbH & Co. KG
+  enabled-by: true
+  identifier: '1'
+  links:
+  - role: reference
+    uid: /ref/soc/vendor/part/errata-1-0
+    location: section 2.1
+  title: Title of the erratum
+  type: errata
+spec-info:
+  dict:
+    attributes:
+      identifier:
+        description: |
+          It shall be the identifier which the errata document gives the
+          erratum.
+        spec-type: str
+      title:
+        description: |
+          It shall be the title which the errata document gives the erratum.
+        spec-type: str
+    description: |
+      This set of attributes specifies an erratum of a part.  The item
+      identifies the erratum and links to the errata document with the
+      `reference` role.  The errata document states the defect, the affected
+      parts and the workaround.  An item of a product links to the erratum
+      with the `errata-resolution` role and states the resolution.
+    mandatory-attributes: all
+spec-name: Errata Item Type
+spec-type: errata
+type: spec
