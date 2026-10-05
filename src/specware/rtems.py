@@ -51,10 +51,10 @@ _ENABLEMENT_ROLES = ("interface-function", "interface-ingroup",
                      "interface-ingroup-hidden", "requirement-refinement",
                      "validation")
 
-# An item is enabled through the items which link to it by these roles.
+# An item is enabled through the items which link to it by these roles.  A
+# header file which hosts a register block does not enable it.
 _ENABLEMENT_CHILD_ROLES = ("interface-host", "interface-group-member",
-                           "register-block-base", "register-block-host",
-                           "register-block-include")
+                           "register-block-base", "register-block-include")
 
 
 def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:

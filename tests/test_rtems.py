@@ -180,6 +180,20 @@ def test_recursive_is_enabled_register_block():
             },
             "/member":
             _block([]),
+            "/h-member": {
+                "enabled-by":
+                True,
+                "interface-type":
+                "header-file",
+                "links": [{
+                    "role": "interface-ingroup",
+                    "uid": "/member"
+                }, {
+                    "role": "register-block-host",
+                    "style": "default",
+                    "uid": "/member"
+                }]
+            },
             "/h-place": {
                 "enabled-by": True,
                 "interface-type": "header-file",
@@ -229,11 +243,12 @@ def test_recursive_is_enabled_register_block():
     enabled = {
         "alpha": [
             "/base", "/derived", "/g-alpha", "/g-place", "/h-alpha",
-            "/h-place", "/member", "/orphan", "/placed-hosted"
+            "/h-member", "/h-place", "/included", "/includer", "/member",
+            "/orphan", "/placed-hosted"
         ],
         "beta": [
-            "/g-place", "/h-beta", "/h-host", "/h-place", "/hosted",
-            "/included", "/includer", "/orphan", "/placed-hosted"
+            "/base", "/derived", "/g-place", "/h-beta", "/h-host", "/h-place",
+            "/hosted", "/included", "/includer", "/orphan", "/placed-hosted"
         ]
     }
     for config, uids in enabled.items():
