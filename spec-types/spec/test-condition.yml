@@ -1,0 +1,48 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: test-condition
+  uid: root
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  copyrights:
+  - Copyright (C) 2026 embedded brains GmbH & Co. KG
+  enabled-by: true
+  links:
+  - role: test-condition-procedure
+    uid: procedure
+  section: procedure-constraint
+  text: |
+    The test case passes the gates of the test procedure before it runs on
+    the device.
+  type: test-condition
+spec-info:
+  dict:
+    attributes:
+      section:
+        description: |
+          It shall be the section of the test case specification which
+          presents the text.
+        spec-type: test-condition-section
+      text:
+        description: |
+          It shall state the condition.
+        spec-type: myst
+    description: |
+      This set of attributes specifies a condition of one or more test cases.
+      A test case links to the condition with the `test-condition` role.
+      The test plan presents the text in the section of each linked test case
+      which the `section` attribute names.  A condition of the section
+      `procedure-constraint` may link to a test procedure with the
+      `test-condition-procedure` role.
+    mandatory-attributes: all
+spec-name: Test Condition Item Type
+spec-type: test-condition
+type: spec

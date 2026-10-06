@@ -1,0 +1,42 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: type
+  spec-value: test-procedure
+  uid: root
+spec-description: null
+spec-example: |
+  SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+  copyrights:
+  - Copyright (C) 2026 embedded brains GmbH & Co. KG
+  enabled-by: true
+  links: []
+  name: Name of the test procedure
+  text: |
+    The description of the test procedure.
+  type: test-procedure
+spec-info:
+  dict:
+    attributes:
+      name:
+        description: |
+          It shall be the name of the test procedure.
+        spec-type: str
+      text:
+        description: |
+          It shall describe the test procedure.
+        spec-type: myst
+    description: |
+      This set of attributes specifies a test procedure which a test runner
+      description does not cover.  The test plan presents it in the test
+      procedures chapter after the procedures of the test runners.  A test
+      condition links to it with the `test-condition-procedure` role.
+    mandatory-attributes: all
+spec-name: Test Procedure Item Type
+spec-type: test-procedure
+type: spec
