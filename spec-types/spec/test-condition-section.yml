@@ -1,0 +1,25 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  str:
+    assert:
+      in:
+      - environment
+      - input
+      - interface-dependency
+      - procedure-constraint
+    description: |
+      It shall be the section of a test case specification.  The value
+      `environment` selects the environmental needs, `input` the input
+      specifications, `interface-dependency` the interface dependencies and
+      `procedure-constraint` the special procedure constraints.
+spec-name: Test Condition Section
+spec-type: test-condition-section
+type: spec
