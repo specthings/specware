@@ -2255,3 +2255,31 @@ def test_interface_header_guard_format(tmpdir, caplog, guard, valid):
             f"/zh:/links[0]/header-guard: invalid value: "
             f"{guard}"
         ]
+
+
+@pytest.mark.parametrize("identifier, valid", [("RBForeignGroup", True),
+                                               ("clock_control_gr740", True),
+                                               ("sys-util", True),
+                                               ("2group", False),
+                                               ("_group", False),
+                                               ("group name", False)])
+def test_interface_group_identifier_format(tmpdir, caplog, identifier, valid):
+    spec_dir = Path(tmpdir) / "spec"
+    shutil.copytree(
+        Path(__file__).parent / "spec-interface-placed-host", spec_dir)
+    path = spec_dir / "cg.yml"
+    text = path.read_text(encoding="utf-8")
+    path.write_text(text.replace("identifier: RBForeignGroup",
+                                 f"identifier: {json.dumps(identifier)}"),
+                    encoding="utf-8")
+    item_cache = create_item_cache(tmpdir, ["spec-interface", str(spec_dir)])
+    caplog.set_level(logging.ERROR)
+    verify_specification_format(item_cache)
+    messages = [
+        record.getMessage() for record in caplog.records
+        if record.getMessage().startswith("/cg:/identifier")
+    ]
+    if valid:
+        assert not messages
+    else:
+        assert messages == [f"/cg:/identifier: invalid value: {identifier}"]
