@@ -3,8 +3,24 @@ brief: Enum B brief description.
 copyrights:
 - Copyright (C) 2020 embedded brains GmbH & Co. KG
 definition-kind: typedef-and-enum
-description: null
+description: |
+  Description of ${.:/enumerators[0]/name}.
 enabled-by: true
+enumerators:
+- name: ENUMERATOR_C
+- comment: The comment of one line.
+  name: ENUMERATOR_D
+  value: ${enumerator-a:/name}
+- enabled-by: false
+  name: ENUMERATOR_E
+- comment: |
+    The comment of more than one line.  It is long enough so that it needs a
+    comment block of its own.
+  enabled-by: true
+  name: ENUMERATOR_F
+  value: 1
+- name: ENUMERATOR_G
+  value: ${.:/enumerators[0]/name}
 index-entries: []
 interface-type: enum
 links:

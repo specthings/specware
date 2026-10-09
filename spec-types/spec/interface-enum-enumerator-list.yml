@@ -1,0 +1,20 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  list:
+    description: |
+      The order of the list is the order of the enumerators in the
+      definition of the enum.  The enumerators of the links with the
+      ${interface-enumerator-role:/spec-name} precede the enumerators of the
+      list.
+    spec-type: interface-enum-enumerator
+spec-name: Interface Enum Enumerator List
+spec-type: interface-enum-enumerator-list
+type: spec

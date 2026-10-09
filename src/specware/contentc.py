@@ -33,7 +33,8 @@ from typing import (Any, Callable, Iterable, Iterator, Match, NamedTuple,
                     Optional)
 
 from specitems import (ClangFormatter, Content, ContentContext, GenericContent,
-                       Item, ItemGetValueContext, ItemMapper, MARKDOWN_ROLES)
+                       is_enabled, Item, ItemGetValueContext, ItemMapper,
+                       MARKDOWN_ROLES)
 
 #: The item marker of a task which states none.
 DEFAULT_ITEM_MARKER = "Generated from spec:${.:/uid}"
@@ -238,6 +239,22 @@ class CContent(Content):
             self.ensure_blank_line()
         self.push_indent("/*", " * ", " *")
         self.append("")
+
+    def add_comment(self, text: str) -> None:
+        """
+        Add the text as a comment.
+
+        A text of one line which fits into the text width gives a comment of
+        one line.  Every other text gives a comment block.
+        """
+        text = text.strip()
+        line = f"/* {text} */"
+        if "\n" not in text and len(
+                self._line_indent) + len(line) <= self.text_width:
+            self.add(line)
+        else:
+            with self.comment_block():
+                self.wrap(text)
 
     def _open_doxygen_block(self, begin: list[str]) -> None:
         """ Open a Doxygen comment block. """
@@ -598,6 +615,21 @@ def forward_declaration(item: Item) -> str:
     target = item.parent("interface-target")
     kind = target["interface-type"].removeprefix("unspecified-")
     return f"{kind} {target['name']}"
+
+
+def get_inline_enumerators(item: Item) -> list[tuple[int, dict[str, Any]]]:
+    """
+    Get the enabled enumerators of the ``enumerators`` attribute of the enum
+    item.
+
+    Each entry is the index of the enumerator in the attribute and the
+    enumerator.  The enabled set of the item cache decides which enumerator
+    is enabled.
+    """
+    enabled_set = item.cache.enabled_set
+    return [(index, enumerator)
+            for index, enumerator in enumerate(item.get("enumerators", []))
+            if is_enabled(enabled_set, enumerator.get("enabled-by", True))]
 
 
 def get_value_forward_declaration(ctx: ItemGetValueContext) -> Any:

@@ -42,11 +42,11 @@ from specitems import (ClangFormatter, ContentContext, GenericContent, Item,
 from .contentc import (CContent, CInclude, DEFAULT_ITEM_MARKER,
                        add_item_marker, enabled_by_to_exp, ExpressionMapper,
                        OptionExpressionMapper, OptionExpressions,
-                       forward_declaration, get_value_compound,
-                       get_value_double_colon, get_value_doxygen_function,
-                       get_value_doxygen_group, get_value_doxygen_ref,
-                       get_value_forward_declaration, get_value_hash,
-                       get_value_header_file, get_value_params,
+                       forward_declaration, get_inline_enumerators,
+                       get_value_compound, get_value_double_colon,
+                       get_value_doxygen_function, get_value_doxygen_group,
+                       get_value_doxygen_ref, get_value_forward_declaration,
+                       get_value_hash, get_value_header_file, get_value_params,
                        get_value_unspecified_type)
 from .registerblock import (
     RegisterBlockPart, get_register_block_group, get_interface_groups,
@@ -120,6 +120,8 @@ class _InterfaceMapper(ItemMapper):
                            get_value_doxygen_ref)
         self.add_get_value("interface/define:/name", self._get_value_hash)
         self.add_get_value("interface/enum:/name", self._get_value_hash)
+        self.add_get_value("interface/enum:/enumerators/name",
+                           self._get_value_double_colon)
         self.add_get_value("interface/enumerator:/name",
                            self._get_value_double_colon)
         self.add_get_value("interface/forward-declaration:/name",
@@ -624,16 +626,23 @@ class _Node:
         """ Generate an enum. """
         with self._enum_struct_or_union():
             parents = list(self.item.parents("interface-enumerator"))
+            enumerators = get_inline_enumerators(self.item)
+            last = len(parents) + len(enumerators) - 1
             for index, parent in enumerate(parents):
                 if index > 0:
                     self.content.append("")
                 self.content.append(self._get_description(parent, {}))
                 get_lines = _Node._get_enumerator_definition
-                if index < len(parents) - 1:
+                if index < last:
                     get_lines = _Node._get_enumerator_definition_comma
                 self.content.append(
                     _add_definition(self, parent, "definition",
                                     parent["definition"], get_lines))
+            for position, entry in enumerate(enumerators, len(parents)):
+                gap = position > 0 and (position == len(parents)
+                                        or bool(entry[1].get("comment")))
+                comma = position < last
+                self._add_inline_enumerator(entry[0], entry[1], gap, comma)
 
     def generate_define(self) -> None:
         """ Generate a define. """
@@ -855,6 +864,24 @@ class _Node:
             name = definition["name"]
             content.append(f"}} {name};")
         return content
+
+    def _add_inline_enumerator(self, index: int, enumerator: dict[str, Any],
+                               gap: bool, comma: bool) -> None:
+        comment = enumerator.get("comment", None)
+        if comment:
+            self.content.gap = gap
+            self.content.add_comment(comment)
+        elif gap:
+            self.content.append("")
+        line = enumerator["name"]
+        value = enumerator.get("value", None)
+        if value is not None:
+            value = self.substitute_code(str(value),
+                                         f"enumerators[{index}]/value")
+            line = f"{line} = {value}"
+        if comma:
+            line = f"{line},"
+        self.content.append(line)
 
     def _get_enumerator_definition(self, item: Item, prefix: str,
                                    definition: Any) -> GenericContent:

@@ -235,6 +235,8 @@ class SphinxInterfaceMapper(SphinxMapper):
                            _get_value_sphinx_appl_config_option)
         self.add_get_value("interface/define:/name", _get_value_sphinx_macro)
         self.add_get_value("interface/enum:/name", self._get_type)
+        self.add_get_value("interface/enum:/enumerators/name",
+                           _get_value_sphinx_macro)
         self.add_get_value("interface/enumerator:/name",
                            _get_value_sphinx_macro)
         self.add_get_value("interface/function:/name", self._get_function)
@@ -370,6 +372,8 @@ class MarkdownInterfaceMapper(MarkdownMapper):
                            _get_value_markdown_appl_config_option)
         self.add_get_value("interface/define:/name", _get_value_markdown_macro)
         self.add_get_value("interface/enum:/name", self._get_type)
+        self.add_get_value("interface/enum:/enumerators/name",
+                           _get_value_markdown_macro)
         self.add_get_value("interface/enumerator:/name",
                            _get_value_markdown_macro)
         self.add_get_value("interface/function:/name", self._get_function)
