@@ -302,12 +302,26 @@ typedef enum {
  * @ingroup GroupB
  *
  * @brief Enum B brief description.
+ *
+ * Description of ::ENUMERATOR_C.
  */
 typedef enum EnumB {
   /**
    * @brief Enumerator B brief description.
    */
-  ENUMERATOR_B = ENUMERATOR_A
+  ENUMERATOR_B = ENUMERATOR_A,
+
+  ENUMERATOR_C,
+
+  /* The comment of one line. */
+  ENUMERATOR_D = ENUMERATOR_A,
+
+  /*
+   * The comment of more than one line.  It is long enough so that it needs a
+   * comment block of its own.
+   */
+  ENUMERATOR_F = 1,
+  ENUMERATOR_G = ENUMERATOR_C
 } EnumB;
 
 /* Generated from spec:/forward-decl */
@@ -1308,12 +1322,26 @@ typedef enum {
  * @ingroup GroupB
  *
  * @brief Enum B brief description.
+ *
+ * Description of ::ENUMERATOR_C.
  */
 typedef enum EnumB {
   /**
    * @brief Enumerator B brief description.
    */
-  ENUMERATOR_B = ENUMERATOR_A
+  ENUMERATOR_B = ENUMERATOR_A,
+
+  ENUMERATOR_C,
+
+  /* The comment of one line. */
+  ENUMERATOR_D = ENUMERATOR_A,
+
+  /*
+   * The comment of more than one line.  It is long enough so that it needs a
+   * comment block of its own.
+   */
+  ENUMERATOR_F = 1,
+  ENUMERATOR_G = ENUMERATOR_C
 } EnumB;
 
 /* Forward declaration */

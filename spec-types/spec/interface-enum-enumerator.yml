@@ -1,0 +1,45 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      comment:
+        description: |
+          It shall be a comment.  The header file places it before the
+          enumerator.  A blank line precedes the comment, except before the
+          first enumerator of the enum.
+        spec-type: str
+      enabled-by:
+        description: |
+          It shall define under which conditions the enum contains the
+          enumerator.  The enabled set of the item cache evaluates the
+          expression, as it evaluates the enabled-by attribute of an
+          enumerator item.  The header file contains no preprocessor
+          condition for the enumerator.
+        spec-type: enabled-by
+      name:
+        description: |
+          It shall be the name of the enumerator.
+        spec-type: str
+      value:
+        description: |
+          It shall be the value of the enumerator.  Without it, the
+          enumerator has no explicit value.
+        spec-type: int-or-str
+    description: |
+      This set of attributes specifies an enumerator inside the item of its
+      enum.  A substitution refers to the name of an enumerator through the
+      index of the enumerator in the list, for example
+      ``$${enum:/enumerators[3]/name}``.
+    mandatory-attributes:
+    - name
+spec-name: Interface Enum Enumerator
+spec-type: interface-enum-enumerator
+type: spec

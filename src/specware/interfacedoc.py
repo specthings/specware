@@ -32,7 +32,8 @@ from specitems import (EnabledSet, Item, ItemCache, ItemGetValueContext,
                        ItemMapper, make_label, TextContent)
 
 from .contentc import (CContent, DEFAULT_ITEM_MARKER, add_item_marker,
-                       get_value_compound, get_value_forward_declaration,
+                       get_inline_enumerators, get_value_compound,
+                       get_value_forward_declaration,
                        get_value_unspecified_type)
 from .interfacemapper import sanitize_name
 from .registerblock import get_interface_members
@@ -292,6 +293,10 @@ def _type_enum(content: TextContent, mapper: ItemMapper, item: Item) -> None:
     with content.topic("Enumerators"):
         for enumerator in item.parents("interface-enumerator"):
             _add_type_definition(content, mapper, item, enumerator)
+        content.add_list([
+            content.code(enumerator["name"])
+            for _, enumerator in get_inline_enumerators(item)
+        ])
     _add_text(content, mapper, item, "description")
 
 

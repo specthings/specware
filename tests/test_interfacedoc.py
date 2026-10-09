@@ -575,6 +575,18 @@ Enum B brief description.
 ENUMERATOR_B
     Enumerator B brief description.
 
+- ``ENUMERATOR_C``
+
+- ``ENUMERATOR_D``
+
+- ``ENUMERATOR_F``
+
+- ``ENUMERATOR_G``
+
+.. rubric:: DESCRIPTION:
+
+Description of :c:macro:`ENUMERATOR_C`.
+
 .. Generated from spec:/enum4
 
 .. index:: EnumC
@@ -1192,6 +1204,20 @@ Enum B brief description.
 
 ENUMERATOR_B
 : Enumerator B brief description.
+
+- `ENUMERATOR_C`
+
+- `ENUMERATOR_D`
+
+- `ENUMERATOR_F`
+
+- `ENUMERATOR_G`
+
+```{eval-rst}
+.. rubric:: DESCRIPTION:
+```
+
+Description of {c:macro}`ENUMERATOR_C`.
 
 % Generated from spec:/enum4
 
