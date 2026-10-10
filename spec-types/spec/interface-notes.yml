@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2020 embedded brains GmbH & Co. KG
+- Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -10,6 +10,8 @@ spec-example: null
 spec-info:
   none: null
   str:
+    format:
+      type: myst
     description: |
       It shall be the notes for the interface.
 spec-name: Interface Notes
