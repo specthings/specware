@@ -2745,14 +2745,14 @@ def _add_item(item_cache, uid, data, item_type):
     return item
 
 
-def _na_chain_state(name):
+def _condition_state(name):
     return {"name": name, "test-code": None, "text": None}
 
 
-def _na_chain_condition(name, state_names):
+def _condition(name, state_names):
     return {
         "name": name,
-        "states": [_na_chain_state(state_name) for state_name in state_names],
+        "states": [_condition_state(state_name) for state_name in state_names],
         "test-epilogue": None,
         "test-prologue": None,
     }
@@ -2770,15 +2770,15 @@ def test_transition_map_pre_cond_not_applicable_propagates_transitively():
             "post-conditions":
             [{
                 "name": "R",
-                "states": [_na_chain_state("R0"),
-                           _na_chain_state("R1")],
+                "states": [_condition_state("R0"),
+                           _condition_state("R1")],
                 "test-epilogue": None,
                 "test-prologue": None,
             }],
             "pre-conditions": [
-                _na_chain_condition("A", ["Empty", "NonEmpty"]),
-                _na_chain_condition("B", ["Found", "NotFound"]),
-                _na_chain_condition("C", ["First", "Second"]),
+                _condition("A", ["Empty", "NonEmpty"]),
+                _condition("B", ["Found", "NotFound"]),
+                _condition("C", ["First", "Second"]),
             ],
             "skip-reasons": {},
             "transition-map": [{
