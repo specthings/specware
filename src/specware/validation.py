@@ -78,6 +78,7 @@ class _Mapper(ItemMapper):
     def __init__(self, item: Item):
         super().__init__(item)
         self._step = 0
+        self.add_default_get_value("spec", _get_spec)
         self.add_get_value("glossary/term:/plural", get_value_plural)
         self.add_get_value("interface/function:/name",
                            get_value_doxygen_function)
@@ -117,8 +118,6 @@ class _Mapper(ItemMapper):
         self.add_get_value("test-case:/test-ident", _get_test_ident)
         self.add_get_value("test-case:/test-run", _get_test_run)
         self.add_get_value("test-suite:/test-suite-name", _get_test_suite_name)
-        for type_name in item.cache.items_by_type.keys():
-            self.add_get_value(f"{type_name}:/spec", _get_spec)
 
     @property
     def steps(self):
