@@ -35,7 +35,7 @@ from typing import Any, Iterable, Optional
 
 from specitems import (ClangFormatter, ContentContext, Item, ItemCache,
                        ItemGetValueContext, ItemMapper, create_unique_link,
-                       get_value_plural)
+                       get_value_plural, parse_attribute_path)
 
 from .build import get_build_base_directory
 from .contentc import (CContent, CInclude, enabled_by_to_exp,
@@ -1133,7 +1133,8 @@ class _ActionRequirementTestItem(_TestItem):
 
     def _skip_pre_condition(self, ctx: ItemGetValueContext) -> Any:
         """ Adds code to skip the current pre-condition state. """
-        index = int(ctx.path.split("]")[0].split("[")[1])
+        index = parse_attribute_path(ctx.path)[0].index
+        assert index is not None
         self._pre_co_skip[index] = True
         return "ctx->Map.skip = true;"
 
