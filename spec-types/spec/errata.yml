@@ -38,8 +38,10 @@ spec-info:
       This set of attributes specifies an erratum of a part.  The item
       identifies the erratum and links to the errata document with the
       `reference` role.  The errata document states the defect, the affected
-      parts and the workaround.  An item of a product links to the erratum
-      with the `errata-resolution` role and states the resolution.
+      parts and the workaround.  A validation of an errata group links to
+      the erratum with the `errata-resolution` role and states the
+      resolution.  The erratum is validated if each errata group which
+      answers for it has a validated resolution of it.
     mandatory-attributes: all
 spec-name: Errata Item Type
 spec-type: errata

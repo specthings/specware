@@ -26,7 +26,8 @@
 
 import pytest
 
-from specitems import EmptyItemCache, Item, ItemCache, ItemSelection
+from specitems import (EmptyItemCache, Item, ItemCache, ItemSelection,
+                       create_unique_link)
 
 from specware import (
     SpecWareTypeProvider, augment_with_test_case_links,
@@ -471,6 +472,178 @@ def test_validate(tmpdir):
                        match=("/if/header-empty container member "
                               "/orphan has no validated status")):
         validate(root, _validate)
+
+
+def _status(item_cache, uid):
+    item = item_cache[uid]
+    return (item.view["validated"], item.view["validation-dependencies"])
+
+
+def _create_errata_cache(tmpdir):
+    item_cache = create_item_cache(tmpdir, "spec-errata")
+    item_cache.set_selection(ItemSelection(item_cache, []))
+    return item_cache
+
+
+def _add_errata_link(item_cache, child, parent, role):
+    create_unique_link(item_cache[child], item_cache[parent], {
+        "role": role,
+        "uid": parent
+    })
+
+
+def test_validate_errata(tmpdir):
+    item_cache = _create_errata_cache(tmpdir)
+    root = item_cache["/req/root"]
+    related_items = validate(root, _validate)
+    assert _uids(sorted(related_items)) == [
+        "/errata/e1",
+        "/errata/e2",
+        "/errata/e4",
+        "/ref/sheet-1",
+        "/ref/sheet-2",
+        "/ref/sheet-3",
+        "/req/errata-a",
+        "/req/errata-b",
+        "/req/root",
+        "/val/a-e1",
+        "/val/a-e2",
+        "/val/b-e1",
+    ]
+    assert not root.view["validated"]
+    assert _status(item_cache, "/req/errata-a") == (True, [
+        ("/ref/sheet-1", "errata work"),
+        ("/ref/sheet-2", "errata work"),
+        ("/val/a-e1", "validation by analysis"),
+        ("/val/a-e2", "validation by analysis"),
+    ])
+    assert _status(item_cache, "/req/errata-b") == (False, [
+        ("/ref/sheet-1", "errata work"),
+        ("/ref/sheet-3", "errata work"),
+        ("/val/b-e1", "validation by analysis"),
+    ])
+
+    # The status of an erratum and of a work is not validated if one errata
+    # group which reaches it lacks a resolution.
+    assert _status(item_cache, "/ref/sheet-1") == (False, [
+        ("/errata/e1", "erratum"),
+        ("/errata/e2", "erratum"),
+    ])
+    assert _status(item_cache, "/ref/sheet-2") == (True, [
+        ("/errata/e4", "erratum"),
+    ])
+
+    # A disabled erratum needs no resolution.
+    assert _status(item_cache, "/ref/sheet-3") == (True, [])
+    assert _status(item_cache, "/errata/e1") == (True, [
+        ("/val/a-e1", "errata resolution"),
+        ("/val/b-e1", "errata resolution"),
+    ])
+    assert _status(item_cache, "/errata/e2") == (False, [
+        ("/val/a-e2", "errata resolution"),
+    ])
+    assert _status(item_cache, "/errata/e4") == (True, [
+        ("/val/a-e2", "errata resolution"),
+    ])
+    for uid in ("/errata/e1", "/errata/e2", "/ref/sheet-1"):
+        assert item_cache[uid].view["pre-qualified"]
+
+    # The first visit gives the order.
+    order = item_cache["/req/errata-a"].view["order"]
+    assert item_cache["/ref/sheet-1"].view["order"] == order[:-1] + (
+        order[-1] + 3, 0)
+    assert item_cache["/errata/e1"].view["order"] == order[:-1] + (order[-1] +
+                                                                   3, 1, 0)
+
+
+def _add_errata_group(item_cache, uid, works):
+    item_cache.add_item(
+        uid, {
+            "SPDX-License-Identifier":
+            "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            "enabled-by":
+            True,
+            "links": [{
+                "role": "requirement-refinement",
+                "uid": "/req/root"
+            }] + [{
+                "role": "reference",
+                "uid": work
+            } for work in works],
+            "non-functional-type":
+            "errata-group",
+            "rationale":
+            None,
+            "requirement-type":
+            "non-functional",
+            "text":
+            "The library shall take the errata into account.",
+            "type":
+            "requirement"
+        })
+
+
+def test_validate_errata_group_status(tmpdir):
+    item_cache = _create_errata_cache(tmpdir)
+
+    # This group lacks resolutions and the walk visits it first.
+    _add_errata_group(item_cache, "/req/errata-0", ["/ref/sheet-1"])
+
+    # This group references a document with disabled errata only.
+    _add_errata_group(item_cache, "/req/errata-d", ["/ref/sheet-3"])
+
+    validate(item_cache["/req/root"], _validate)
+    assert item_cache["/req/errata-0"].view["order"] < item_cache[
+        "/req/errata-a"].view["order"]
+    assert not item_cache["/req/errata-0"].view["validated"]
+    assert item_cache["/req/errata-a"].view["validated"]
+    assert not item_cache["/ref/sheet-1"].view["validated"]
+    assert _status(item_cache, "/req/errata-d") == (True, [
+        ("/ref/sheet-3", "errata work"),
+    ])
+
+
+def test_validate_errata_work_without_errata(tmpdir):
+    item_cache = _create_errata_cache(tmpdir)
+    item_cache.add_item(
+        "/ref/no-errata", {
+            "SPDX-License-Identifier": "CC-BY-SA-4.0 OR BSD-2-Clause",
+            "copyrights": ["Copyright (C) 2026 embedded brains GmbH & Co. KG"],
+            "enabled-by": True,
+            "links": [],
+            "reference-type": "manual",
+            "title": "No Errata",
+            "type": "reference",
+            "work-hash": None,
+            "work-url": None
+        })
+    _add_errata_link(item_cache, "/req/errata-b", "/ref/no-errata",
+                     "reference")
+    with pytest.raises(ValueError,
+                       match=("errata group /req/errata-b references "
+                              "/ref/no-errata which no erratum references")):
+        validate(item_cache["/req/root"], _validate)
+
+
+def test_validate_errata_resolution_outside_works(tmpdir):
+    item_cache = _create_errata_cache(tmpdir)
+    _add_errata_link(item_cache, "/val/b-e1", "/errata/e4",
+                     "errata-resolution")
+    with pytest.raises(ValueError,
+                       match=("/val/b-e1 resolves /errata/e4 which no work "
+                              "of /req/errata-b contains")):
+        validate(item_cache["/req/root"], _validate)
+
+
+def test_validate_errata_resolution_without_group(tmpdir):
+    item_cache = _create_errata_cache(tmpdir)
+    _add_errata_link(item_cache, "/req/root", "/errata/e1",
+                     "errata-resolution")
+    with pytest.raises(ValueError,
+                       match=("/req/root resolves an erratum and validates "
+                              "no errata group")):
+        validate(item_cache["/req/root"], _validate)
 
 
 def test_gather_export_related_items(tmpdir):

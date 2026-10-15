@@ -16,8 +16,9 @@ spec-info:
     attributes: {}
     description: |
       It defines the errata resolution role of links.  The link source shall
-      be a requirement which states the resolution of an erratum.  The link
-      target shall be an errata item.
+      be a validation of an errata group which states the resolution of an
+      erratum.  The link target shall be an errata item of a document which
+      the errata group references.
     mandatory-attributes: all
 spec-name: Errata Resolution Link Role
 spec-type: errata-resolution-role

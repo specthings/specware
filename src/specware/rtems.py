@@ -135,6 +135,8 @@ _PARENT_ROLES = ("function-implementation", "interface-enumerator",
 # Through this role, a group is the child of each of its members.
 _VALIDATION_PARENT_ROLES = _PARENT_ROLES + ("interface-group-member", )
 
+_ERRATA_GROUP = "requirement/non-functional/errata-group"
+
 # WARNING: These role sets work only with _visit_tree() which stops the
 # recursion once it sees an item the second time.  The appl-config-group-member
 # role supports older versions of the RTEMS specification which used this group
@@ -425,6 +427,81 @@ _VALIDATOR = {
 }
 
 
+def _visit_errata_node(item: Item, order: tuple[int, ...],
+                       related_items: set[Item]) -> None:
+    # The first visit gives the order.  A later visit keeps the status and
+    # adds its dependencies.
+    if item in related_items:
+        return
+    related_items.add(item)
+    item.view["order"] = order
+    item.view["pre-qualified"] = is_pre_qualified(item)
+    item.view["validated"] = True
+    item.view["validation-dependencies"] = []
+
+
+def _set_errata_status(item: Item, validated: bool,
+                       dependencies: Iterable[tuple[str, str]]) -> None:
+    item.view["validated"] = item.view["validated"] and validated
+    item.view["validation-dependencies"] = sorted(
+        set(item.view["validation-dependencies"]).union(dependencies))
+
+
+def _validate_errata_work(item: Item, work: Item, order: tuple[int, ...],
+                          resolutions: dict[Item, list[Item]],
+                          related_items: set[Item]) -> tuple[bool, list[Item]]:
+    errata = [
+        item_2 for item_2 in work.children("reference",
+                                           is_link_enabled=link_is_enabled)
+        if item_2.type == "errata"
+    ]
+    if not errata:
+        raise ValueError(f"errata group {item.uid} references {work.uid} "
+                         "which no erratum references")
+    _visit_errata_node(work, order, related_items)
+    enabled_errata = sorted(item_2 for item_2 in errata if item_2.enabled)
+    work_validated = True
+    for index, erratum in enumerate(enabled_errata):
+        _visit_errata_node(erratum, order[:-1] + (order[-1] + index + 1, 0),
+                           related_items)
+        validations = resolutions.get(erratum, [])
+        validated = bool(validations) and all(validation.view["validated"]
+                                              for validation in validations)
+        _set_errata_status(erratum, validated,
+                           ((validation.uid, "errata resolution")
+                            for validation in validations))
+        work_validated = work_validated and validated
+    _set_errata_status(work, work_validated, ((erratum.uid, "erratum")
+                                              for erratum in enabled_errata))
+    return work_validated, enabled_errata
+
+
+def _validate_errata_group(
+        item: Item, order: tuple[int,
+                                 ...], index: int, related_items: set[Item],
+        validation_dependencies: list[tuple[str, str]]) -> bool:
+    resolutions: dict[Item, list[Item]] = {}
+    for validation in item.children("validation"):
+        for erratum in validation.parents("errata-resolution"):
+            resolutions.setdefault(erratum, []).append(validation)
+    errata_of_works: set[Item] = set()
+    validated = True
+    for index_2, work in enumerate(item.parents("reference"), index):
+        # The status of the work covers all errata groups which reach it.  The
+        # status of this errata group depends on its own resolutions only.
+        work_validated, errata = _validate_errata_work(
+            item, work, order[:-1] + (order[-1] + index_2 + 1, 0), resolutions,
+            related_items)
+        errata_of_works.update(errata)
+        validation_dependencies.append((work.uid, "errata work"))
+        validated = validated and work_validated
+    for erratum, validations in sorted(resolutions.items()):
+        if erratum not in errata_of_works:
+            raise ValueError(f"{validations[0].uid} resolves {erratum.uid} "
+                             f"which no work of {item.uid} contains")
+    return validated
+
+
 def _validate_tree(item: Item, validator: Callable[[Item, bool], bool],
                    order: tuple[int, ...], related_items: set[Item]) -> bool:
     item.view["order"] = order
@@ -433,11 +510,10 @@ def _validate_tree(item: Item, validator: Callable[[Item, bool], bool],
     item.view["pre-qualified"] = pre_qualified
     validated = True
     validation_dependencies: list[tuple[str, str]] = []
-    for index, link in enumerate(
-            sorted(
-                itertools.chain(
-                    item.links_to_children(_CHILD_ROLES),
-                    item.links_to_parents(_VALIDATION_PARENT_ROLES)))):
+    links = sorted(
+        itertools.chain(item.links_to_children(_CHILD_ROLES),
+                        item.links_to_parents(_VALIDATION_PARENT_ROLES)))
+    for index, link in enumerate(links):
         item_2 = link.item
         validated = _validate_tree(item_2, validator, order[:-1] +
                                    (order[-1] + index + 1, 0),
@@ -453,6 +529,10 @@ def _validate_tree(item: Item, validator: Callable[[Item, bool], bool],
             role = link.role.replace("-", " ")
         validation_dependencies.append((item_2.uid, role))
     type_name = item.type
+    if type_name == _ERRATA_GROUP:
+        validated = _validate_errata_group(
+            item, order, len(links), related_items,
+            validation_dependencies) and validated
     if type_name in _SELF_VALIDATION:
         validation_dependencies.append((item.uid, _SELF_VALIDATION[type_name]))
     elif type_name in _VALIDATOR:
@@ -506,6 +586,15 @@ def _fixup_pre_qualified(
                 item_2.view["pre-qualified"] = False
 
 
+def _check_errata_resolutions(related_items: set[Item]) -> None:
+    for item in sorted(related_items):
+        if any(item.parents("errata-resolution")) and not any(
+                parent.type == _ERRATA_GROUP
+                for parent in item.parents("validation")):
+            raise ValueError(f"{item.uid} resolves an erratum and validates "
+                             "no errata group")
+
+
 def validate(root: Item, validator: Callable[[Item, bool], bool]) -> set[Item]:
     """
     Validate the item tree starting at the root item.
@@ -514,6 +603,7 @@ def validate(root: Item, validator: Callable[[Item, bool], bool]) -> set[Item]:
     """
     related_items: set[Item] = set()
     _validate_tree(root, validator, (0, ), related_items)
+    _check_errata_resolutions(related_items)
     _validate_containers(root)
     _fixup_pre_qualified(
         root, ["interface/appl-config-group", "interface/group"],
