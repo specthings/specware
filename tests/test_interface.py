@@ -161,6 +161,8 @@ def test_interface(tmpdir):
  * @ingroup GroupC
  *
  * @brief This header file defines x.
+ *
+ * This header file describes x.
  */
 
 /*

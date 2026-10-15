@@ -1438,8 +1438,11 @@ class _HeaderFile:
         self.content.prepend_spdx_license_identifier()
         with self.content.file_block():
             self.content.add_ingroup(_get_group_identifiers(self._ingroups))
+            node = _Node(self, self._item)
             self.content.add_brief_description(
-                _Node(self, self._item).substitute_text(self._item["brief"]))
+                node.substitute_text(self._item["brief"]))
+            self.content.wrap(
+                node.substitute_text(self._item.get("description")))
         self.content.add_copyrights_and_licenses()
         self.content.add_automatically_generated_warning()
         add_item_marker(self.content, self.item_marker, self._item)
