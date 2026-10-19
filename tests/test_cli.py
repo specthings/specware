@@ -26,6 +26,7 @@
 
 import contextlib
 import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -46,10 +47,13 @@ _FAKE_CLANG_FORMAT_FAIL = _FILES / "clang-format-fail"
 _FAKE_CLANG_FORMAT_UNAVAILABLE = _FILES / "clang-format-unavailable"
 
 
-def _create_specview_yml(tmpdir, domains: str = "{}"):
+def _create_specview_yml(tmpdir,
+                         domains: str = "{}",
+                         spec_rtems: Path | None = None):
     base = Path(__file__).parent.absolute()
     spec_build = base / "spec-build"
-    spec_rtems = base / "spec-rtems"
+    if spec_rtems is None:
+        spec_rtems = base / "spec-rtems"
     config_file = Path(tmpdir) / "specitems.yml"
     with open(config_file, "w", encoding="utf-8") as out:
         out.write(f"""SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
@@ -672,6 +676,43 @@ def test_cliexport_unknown_item(tmpdir, caplog):
         "ERROR no specification item is associated with the file "
         f"'{os.path.realpath(unknown)}'")
     assert not os.path.exists(os.path.join(tmpdir, "tc.c"))
+
+
+def test_cliexport_proxy_item(tmpdir):
+    spec = Path(tmpdir) / "spec"
+    shutil.copytree(Path(__file__).parent / "spec-rtems", spec)
+    for name in ("proxy", "proxy-empty"):
+        (spec / "val" / f"{name}.yml").write_text(
+            """SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: false
+links: []
+type: proxy
+""",
+            encoding="utf-8")
+    tc = spec / "val" / "tc.yml"
+    tc.write_text(tc.read_text(encoding="utf-8").replace(
+        "\nlinks: []\n", "\nlinks:\n- role: proxy-member\n  uid: proxy\n", 1),
+                  encoding="utf-8")
+    config_file = _create_specview_yml(tmpdir, spec_rtems=spec)
+
+    # A proxy item without a member is associated with no source file.
+    exit_code = cliexport([
+        "command", "--config-file", config_file,
+        str(spec / "val" / "proxy-empty.yml")
+    ])
+    assert exit_code == 0
+    assert not os.path.exists(os.path.join(tmpdir, "tc.c"))
+
+    # A proxy item selects the files of its members.
+    exit_code = cliexport([
+        "command", "--config-file", config_file,
+        str(spec / "val" / "proxy.yml")
+    ])
+    assert exit_code == 0
+    assert os.path.exists(os.path.join(tmpdir, "tc.c"))
+    assert not os.path.exists(os.path.join(tmpdir, "ts.c"))
 
 
 def test_cliexport_item_via_symlink(tmpdir):

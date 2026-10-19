@@ -29,6 +29,7 @@ documentation files.
 
 import argparse
 import functools
+import itertools
 import logging
 import os
 import sys
@@ -41,7 +42,7 @@ from specitems import (ClangFormatter, ContentContext, DocumentGlossaryConfig,
                        check_license_items, create_config,
                        create_content_context, generate_glossary,
                        generate_specification_documentation, item_is_enabled,
-                       yield_tasks)
+                       link_is_enabled, yield_tasks)
 
 from specware import (
     run_with_clang_formatter, open_tree, MarkdownInterfaceMapper,
@@ -188,17 +189,33 @@ def _split_targets(targets: list[str],
     return target_files, item_files
 
 
+_PROXY_MEMBER_ROLES = ("proxy-member", "proxy-member-default")
+
+
+def _add_uid(item_cache: ItemCache, uids: set[str], uid: str) -> None:
+    uids.add(uid)
+    proxy = item_cache.proxies.get(uid)
+    if proxy is not None:
+        # The members of a proxy provide the content which the export
+        # generates for the proxy.
+        uids.update(member.uid for member in proxy.children(
+            _PROXY_MEMBER_ROLES, is_link_enabled=link_is_enabled))
+
+
 def _resolve_item_files(item_cache: ItemCache,
                         item_files: list[str]) -> Optional[set[str]]:
     """
     Resolve the specification item files to the UIDs of the corresponding
     items.
 
-    Return None if a file is associated with no item.  Several files may
-    denote the same item, so the count of the UIDs tells nothing about the
+    A proxy item file resolves to the UID of the proxy and to the UIDs of its
+    members.  Return None if a file is associated with no item.  Several files
+    may denote the same item, so the count of the UIDs tells nothing about the
     success of the resolution.
     """
-    uid_by_file = dict((item.file, item.uid) for item in item_cache.values())
+    # The item cache holds the proxy items apart from the other items.
+    uid_by_file = dict((item.file, item.uid) for item in itertools.chain(
+        item_cache.values(), item_cache.proxies.values()))
     uids: set[str] = set()
     unresolved: list[str] = []
     for item_file in item_files:
@@ -206,7 +223,7 @@ def _resolve_item_files(item_cache: ItemCache,
         if uid is None:
             unresolved.append(item_file)
         else:
-            uids.add(uid)
+            _add_uid(item_cache, uids, uid)
     if not unresolved:
         return uids
     # The item files are absolute, however, they may denote a symbolic link or
@@ -223,7 +240,7 @@ def _resolve_item_files(item_cache: ItemCache,
                 "'%s'", item_file)
             resolved = False
         else:
-            uids.add(uid)
+            _add_uid(item_cache, uids, uid)
     return uids if resolved else None
 
 
