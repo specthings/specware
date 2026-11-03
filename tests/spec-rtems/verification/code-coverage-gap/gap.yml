@@ -16,6 +16,7 @@ copyrights:
 - Copyright (C) 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links: []
+may-be-covered: true
 text: |
   The code coverage gap verification text.
 type: verification
