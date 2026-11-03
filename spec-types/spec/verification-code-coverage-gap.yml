@@ -18,8 +18,14 @@ spec-info:
         description: |
           It shall be the description of applicable code areas.
         spec-type: verification-code-coverage-scope-by-name
+      may-be-covered:
+        description: |
+          If the value is present and true, then a test run may cover the
+          code areas, otherwise a test run does not cover the code areas.
+        spec-type: bool
     description: null
-    mandatory-attributes: all
+    mandatory-attributes:
+    - areas
 spec-name: Code Coverage Gap Verification
 spec-type: verification-code-coverage-gap
 type: spec
