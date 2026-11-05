@@ -1,0 +1,23 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes maps a key to a list of build rules.  The key
+      names the consumer of the rules.
+    generic-attributes:
+      description: null
+      key-spec-type: name
+      value-spec-type: build-rule-list
+    mandatory-attributes: all
+spec-name: Build Rules
+spec-type: build-rules
+type: spec
