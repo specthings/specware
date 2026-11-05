@@ -1,0 +1,28 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      enabled-by:
+        description: |
+          The rule applies if this expression evaluates to true.
+        spec-type: build-enabled-by
+    description: |
+      This set of attributes specifies a build rule.  The consumer of the rule
+      defines the meaning of the attributes other than ``enabled-by``.
+    generic-attributes:
+      description: null
+      key-spec-type: name
+      value-spec-type: any
+    mandatory-attributes:
+    - enabled-by
+spec-name: Build Rule
+spec-type: build-rule
+type: spec

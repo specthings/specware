@@ -24,6 +24,11 @@ spec-info:
           directory of the build.  The paths of the build items of the
           extension shall be relative to this directory.
         spec-type: str
+      build-rules:
+        description: |
+          It shall be the rule lists of the extension.  A consumer of the build
+          reads the rule lists of its key.
+        spec-type: build-rules
       build-spec-directories:
         description: |
           It shall be the list of directory paths containing the build
