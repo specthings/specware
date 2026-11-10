@@ -1209,7 +1209,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.7.16"
+version = "1.7.17"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "license-expression" },
@@ -1220,10 +1220,11 @@ dependencies = [
     { name = "mdformat-myst" },
     { name = "mdformat-tables" },
     { name = "pyyaml" },
+    { name = "ruamel-yaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/03/75/2c8f65045c1fc19675987bf1696eab9e903ecacf7f7f1209205a0910c87b/specitems-1.7.16.tar.gz", hash = "sha256:dd00757758afd1fc1288c4f79cbc001bdea9e4256beaf07c40a022763974b5b3", size = 89910, upload-time = "2026-11-05T11:47:10.924Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0b/c7/4fedc128bcb78d8180b75cfff4bf3d66561e55e907bb19fadf2cb8322389/specitems-1.7.17.tar.gz", hash = "sha256:180280f7e1021986c23cc9e1e67c043febe4ab9455063bba8e38854924b4c536", size = 91212, upload-time = "2026-11-10T02:02:07.757Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8a/d4/eecfb6cf047562169e95e783cd31ac25dbe0bf37468996542c88f11ae11c/specitems-1.7.16-py3-none-any.whl", hash = "sha256:bf33a5aa8873cbea0ab00223005ece91528b471793176d3958d6b806b1cdea51", size = 122225, upload-time = "2026-11-05T11:47:09.612Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/4a/036b8f9ec5b28003081978c57e9851b6fef963b2b9d9906922061837f8f1/specitems-1.7.17-py3-none-any.whl", hash = "sha256:d9ec953daa3620cae011d10325422a7c8ea21ae91cef45b5a491dbd97cd7532f", size = 124184, upload-time = "2026-11-10T02:02:09.128Z" },
 ]
 
 [[package]]
@@ -1254,7 +1255,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "specitems", specifier = ">=1.7.16" }]
+requires-dist = [{ name = "specitems", specifier = ">=1.7.17" }]
 
 [package.metadata.requires-dev]
 dev = [
