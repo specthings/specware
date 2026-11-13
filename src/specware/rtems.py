@@ -57,12 +57,25 @@ _ENABLEMENT_CHILD_ROLES = ("interface-host", "interface-group-member",
                            "register-block-base", "register-block-include")
 
 
+def _is_design_property_enabled(enabled_set: EnabledSet, item: Item) -> bool:
+    result = True
+    for design_property in item.parents("design-property",
+                                        is_link_enabled=link_is_enabled):
+        if recursive_is_enabled(enabled_set, design_property):
+            return True
+        result = False
+    return result
+
+
 def recursive_is_enabled(enabled_set: EnabledSet, item: Item) -> bool:
     """
-    Return true, if the item is enabled and there exists a path to the root
-    item where each item on the path is enabled, otherwise false.
+    Return true, if the item is enabled, at least one of its design properties
+    is enabled or it has no design property, and there exists a path to the
+    root item where each item on the path is enabled, otherwise false.
     """
     if not item.is_enabled(enabled_set):
+        return False
+    if not _is_design_property_enabled(enabled_set, item):
         return False
     result = True
     for parent in itertools.chain(
