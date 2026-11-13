@@ -1,0 +1,27 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: non-functional-type
+  spec-value: design-property
+  uid: requirement-non-functional
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes: {}
+    description: |
+      This set of attributes specifies a design property requirement.  A
+      design property states a fact of the design which holds for a subset of
+      the configurations, for example the instruction set architecture.  The
+      ``enabled-by`` attribute of the design property selects the
+      configurations.  An item which holds only under the design property
+      links to it through the design property role.
+    mandatory-attributes: all
+spec-name: Design Property Requirement Item Type
+spec-type: requirement-design-property
+type: spec
