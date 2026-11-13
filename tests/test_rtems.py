@@ -124,6 +124,53 @@ def test_recursive_is_enabled():
     assert not e.enabled
 
 
+def _property_item(enabled_by, properties, parent="/a"):
+    links = [{"role": "requirement-refinement", "uid": parent}]
+    links.extend({"role": "design-property", "uid": uid} for uid in properties)
+    return {"enabled-by": enabled_by, "links": links}
+
+
+def test_recursive_is_enabled_design_property():
+    item_cache = EmptyItemCache()
+    item_cache.add_item("/a", {"enabled-by": True, "links": []})
+    item_cache.add_item("/p", _property_item(True, []))
+    item_cache.add_item("/q", _property_item(False, []))
+    item_cache.add_item("/r", _property_item(False, []))
+    item_cache.add_item("/s-under-q", _property_item(True, ["/q"]))
+    item_cache.add_item("/s-under-p", _property_item(True, ["/p"]))
+    item_cache.add_item("/g", _property_item(False, []))
+    expected = {
+        "/none": [],
+        "/one-enabled": ["/p"],
+        "/one-disabled": ["/q"],
+        "/two-one-enabled": ["/q", "/p"],
+        "/two-disabled": ["/q", "/r"],
+        "/chain-enabled": ["/s-under-p"],
+        "/chain-disabled": ["/s-under-q"]
+    }
+    items = {
+        uid: item_cache.add_item(uid, _property_item(True, properties))
+        for uid, properties in expected.items()
+    }
+    no_path = item_cache.add_item("/no-path",
+                                  _property_item(True, ["/p"], parent="/g"))
+    not_enabled = item_cache.add_item("/not-enabled",
+                                      _property_item(False, ["/p"]))
+    item_cache.set_selection(
+        ItemSelection(item_cache, [], recursive_is_enabled))
+    assert items["/none"].enabled
+    assert items["/one-enabled"].enabled
+    assert not items["/one-disabled"].enabled
+    assert items["/two-one-enabled"].enabled
+    assert not items["/two-disabled"].enabled
+    assert items["/chain-enabled"].enabled
+    assert not items["/chain-disabled"].enabled
+    assert not no_path.enabled
+    assert not not_enabled.enabled
+    assert item_cache["/s-under-p"].enabled
+    assert not item_cache["/s-under-q"].enabled
+
+
 def _block(links):
     return {
         "enabled-by": True,
