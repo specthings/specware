@@ -870,6 +870,9 @@ class _ActionRequirementTestItem(_TestItem):
         content.add("};")
         with content.function("static void", f"{self.ident}_Skip",
                               [f"{self.context} *ctx", "size_t index"]):
+            if self._pre_co_count == 1:
+                content.append(["(void) ctx;", "(void) index;"])
+                return
             content.append("switch ( index + 1 ) {")
             fall_through = "/* Fall through */"
             with content.indent():
