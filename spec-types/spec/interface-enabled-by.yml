@@ -7,19 +7,18 @@ links:
   uid: root
 spec-description: |
   A value of this type shall be an expression which defines under which
-  conditions an interface definition is enabled.  In generated header files,
-  the expression is evaluated by the C preprocessor.
+  conditions an interface definition is enabled. In generated header files, the
+  expression is evaluated by the C preprocessor.
 spec-example: null
 spec-info:
   bool:
     description: |
-      It is converted to 0 or 1.  It defines a symbol in the expression.
+      It is converted to 0 or 1. It defines a symbol in the expression.
   dict:
     attributes:
       and:
         description: |
-          The *and* operator defines a *logical and* of the expressions in the
-          list.
+          The *and* operator defines a *logical and* of the expressions in the list.
         spec-type: interface-enabled-by-list
       not:
         description: |
@@ -27,8 +26,7 @@ spec-info:
         spec-type: interface-enabled-by
       or:
         description: |
-          The *or* operator defines a *logical or* of the expressions in the
-          list.
+          The *or* operator defines a *logical or* of the expressions in the list.
         spec-type: interface-enabled-by-list
     description: |
       Each attribute defines an operator.

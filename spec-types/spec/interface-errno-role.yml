@@ -20,8 +20,8 @@ spec-info:
         spec-type: interface-description
     description: |
       It defines the interface error number role of links.
-      ${interface-function:/spec-name} items may reference `errno` constants
-      used to indicate erroneous results with a description.
+      ${interface-function:/spec-name} items may reference `errno` constants used to
+      indicate erroneous results with a description.
     mandatory-attributes: all
 spec-name: Interface Error Number Link Role
 spec-type: interface-errno-role

@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies a set of runtime performance limits
-      through ${performance-runtime-limits-role:/spec-name} links to
+      This set of attributes specifies a set of runtime performance limits through
+      ${performance-runtime-limits-role:/spec-name} links to
       ${requirement-performance-runtime:/spec-name} items.
     mandatory-attributes: all
 spec-name: Runtime Performance Limits Provider Item Type

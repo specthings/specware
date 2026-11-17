@@ -9,12 +9,12 @@ spec-description: null
 spec-example: null
 spec-info:
   str:
-    format:
-      scope: function
-      type: clang
-      style: default
     description: |
       The text shall be C language source code at function scope.
+    format:
+      scope: function
+      style: default
+      type: clang
 spec-name: C Language Function Scope Format
 spec-type: clang-function-scope
 type: spec

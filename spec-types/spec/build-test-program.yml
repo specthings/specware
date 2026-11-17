@@ -45,7 +45,7 @@ spec-info:
         spec-type: build-cxxflags
       features:
         description: |
-          It shall be the ``waf`` build features for this test program.
+          It shall be the `waf` build features for this test program.
         spec-type: str
       includes:
         description: null
@@ -69,12 +69,12 @@ spec-info:
         description: null
         spec-type: build-use-before-list
     description: |
-      This set of attributes specifies a test program executable to build.
-      Test programs may use additional objects provided by
-      ${build-objects:/spec-name} items.  Test programs have an implicit
-      ``enabled-by`` attribute value which is controlled by the option action
-      {ref}`set-test-state <SpecTypeBuildOptionItemType>`.  If the test state
-      is set to ``exclude``, then the test program is not built.
+      This set of attributes specifies a test program executable to build. Test
+      programs may use additional objects provided by ${build-objects:/spec-name}
+      items. Test programs have an implicit `enabled-by` attribute value which is
+      controlled by the option action
+      {ref}`set-test-state <SpecTypeBuildOptionItemType>`. If the test state is set
+      to `exclude`, then the test program is not built.
     mandatory-attributes: all
 spec-name: Build Test Program Item Type
 spec-type: build-test-program

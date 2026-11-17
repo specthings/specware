@@ -44,7 +44,8 @@ spec-info:
         spec-type: str
       ada-object-directory:
         description: |
-          It shall be the path to the Ada object directory (``-D`` option value for ``gnatmake``).
+          It shall be the path to the Ada object directory (`-D` option value for
+          `gnatmake`).
         spec-type: str
       adaflags:
         description: |
@@ -85,12 +86,12 @@ spec-info:
         description: null
         spec-type: build-use-before-list
     description: |
-      This set of attributes specifies an Ada test program executable to build.
-      Test programs may use additional objects provided by
-      ${build-objects:/spec-name} items.  Test programs have an implicit
-      ``enabled-by`` attribute value which is controlled by the option action
-      {ref}`set-test-state <SpecTypeBuildOptionItemType>`.  If the test state
-      is set to ``exclude``, then the test program is not built.
+      This set of attributes specifies an Ada test program executable to build. Test
+      programs may use additional objects provided by ${build-objects:/spec-name}
+      items. Test programs have an implicit `enabled-by` attribute value which is
+      controlled by the option action
+      {ref}`set-test-state <SpecTypeBuildOptionItemType>`. If the test state is set
+      to `exclude`, then the test program is not built.
     mandatory-attributes: all
 spec-name: Build Ada Test Program Item Type
 spec-type: build-ada-test-program

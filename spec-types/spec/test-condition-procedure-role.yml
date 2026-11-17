@@ -15,9 +15,9 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the test condition procedure role of links.  The link source
-      shall be a test condition of the section `procedure-constraint`.  The
-      link target shall be a test procedure item.
+      It defines the test condition procedure role of links. The link source shall be
+      a test condition of the section `procedure-constraint`. The link target shall
+      be a test procedure item.
     mandatory-attributes: all
 spec-name: Test Condition Procedure Link Role
 spec-type: test-condition-procedure-role

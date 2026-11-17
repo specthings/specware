@@ -9,14 +9,14 @@ spec-description: null
 spec-example: null
 spec-info:
   str:
+    description: |
+      The text shall be a C language declaration on a single line. A parameter
+      declaration, a compound member declaration and a bare macro parameter name are
+      such a declaration.
     format:
       scope: declaration
-      type: clang
       style: default
-    description: |
-      The text shall be a C language declaration on a single line.  A
-      parameter declaration, a compound member declaration and a bare macro
-      parameter name are such a declaration.
+      type: clang
 spec-name: C Language Declaration Format
 spec-type: clang-declaration-scope
 type: spec

@@ -10,9 +10,9 @@ spec-example: null
 spec-info:
   list:
     description: |
-      It shall be the rules which state how a guard tests an option.  The
-      first rule whose pattern matches the name of the option provides the
-      expression.  An option which no rule matches is an error.
+      It shall be the rules which state how a guard tests an option. The first rule
+      whose pattern matches the name of the option provides the expression. An option
+      which no rule matches is an error.
     spec-type: tool-option-expression
 spec-name: Tool Option Expression List
 spec-type: tool-option-expression-list

@@ -15,11 +15,10 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the interface hidden group membership role of links.  This
-      role may be used to make an interface a group member and hide this
-      relationship in the documentation.  An example is an optimized macro
-      implementation of a directive which has the same name as the
-      corresponding directive.
+      It defines the interface hidden group membership role of links. This role may
+      be used to make an interface a group member and hide this relationship in the
+      documentation. An example is an optimized macro implementation of a directive
+      which has the same name as the corresponding directive.
     mandatory-attributes: all
 spec-name: Interface Hidden Group Membership Link Role
 spec-type: interface-ingroup-hidden

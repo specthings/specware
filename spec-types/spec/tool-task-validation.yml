@@ -16,13 +16,13 @@ spec-info:
     attributes:
       accepted-licenses:
         description: |
-          It shall be the licenses which a produced file accepts for a part
-          whose license expression permits not the license of the file.
+          It shall be the licenses which a produced file accepts for a part whose license
+          expression permits not the license of the file.
         spec-type: list-str
       automatically-generated-warning:
         description: |
-          It shall be the warning which every produced file carries.
-          An empty warning adds no comment block to a file.
+          It shall be the warning which every produced file carries. An empty warning
+          adds no comment block to a file.
         spec-type: str
       base-directory-map:
         description: |

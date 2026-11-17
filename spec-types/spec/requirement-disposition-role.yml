@@ -15,14 +15,13 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the requirement disposition role of links.  The link target
-      shall be the requirement which the disposition answers.
+      It defines the requirement disposition role of links. The link target shall be
+      the requirement which the disposition answers.
 
-      The role differs from the requirement validation role because the two
-      claims differ.  A validation states that the software product satisfies
-      the requirement.  A disposition states that it does not, and gives the
-      reason.  A report of the unsatisfied requirements is therefore a query
-      over one role.
+      The role differs from the requirement validation role because the two claims
+      differ. A validation states that the software product satisfies the
+      requirement. A disposition states that it does not, and gives the reason. A
+      report of the unsatisfied requirements is therefore a query over one role.
     mandatory-attributes: all
 spec-name: Requirement Disposition Link Role
 spec-type: requirement-disposition-role

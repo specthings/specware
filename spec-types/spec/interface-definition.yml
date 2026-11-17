@@ -11,8 +11,8 @@ spec-info:
   none: null
   str:
     description: |
-      It shall be the definition.  On the definition a context-sensitive
-      substitution of item variables is performed.
+      It shall be the definition. On the definition a context-sensitive substitution
+      of item variables is performed.
 spec-name: Interface Definition
 spec-type: interface-definition
 type: spec

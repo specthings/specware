@@ -22,21 +22,21 @@ spec-info:
         description: |
           If the value is present, then it shall thoroughly describe the target.
         spec-type: optional-myst
-      name:
-        description: |
-          It shall be the target name.
-        spec-type: str
       key:
         description: |
           It shall be the target key.
+        spec-type: str
+      name:
+        description: |
+          It shall be the target name.
         spec-type: str
       target-hash:
         description: |
           It shall be the target hash.
         spec-type: str-or-list-str
     description: |
-      This set of attributes specifies a design ${/glossary/target:/term}.
-      Targets shall provide
+      This set of attributes specifies a design ${/glossary/target:/term}. Targets
+      shall provide
 
       - runtime performance limits through
         ${performance-runtime-limits-provider-role:/spec-name} links to

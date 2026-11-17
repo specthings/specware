@@ -16,13 +16,12 @@ spec-info:
     attributes:
       enabled-by:
         description: |
-          It shall define under which conditions the interface container is
-          included.
+          It shall define under which conditions the interface container is included.
         spec-type: enabled-by
     description: |
-      It defines the interface include role of links and is used to indicate
-      that an interface container includes another interface container.  For
-      example, one header file includes another header file.
+      It defines the interface include role of links and is used to indicate that an
+      interface container includes another interface container. For example, one
+      header file includes another header file.
     mandatory-attributes: all
 spec-name: Interface Include Link Role
 spec-type: interface-include

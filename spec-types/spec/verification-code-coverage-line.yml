@@ -12,8 +12,8 @@ spec-info:
     attributes:
       line:
         description: |
-          It shall be the source code line number.  Line numbers start with the
-          number one.
+          It shall be the source code line number. Line numbers start with the number
+          one.
         spec-type: int
       md5:
         description: |

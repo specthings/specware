@@ -12,9 +12,9 @@ spec-info:
     assert:
     - re: ^[A-Za-z][A-Za-z0-9_-]*$
     description: |
-      It shall be the identifier of the interface group.  It is the name of
-      the Doxygen group, which starts with a letter and continues with
-      letters, digits, underscores and hyphens.
+      It shall be the identifier of the interface group. It is the name of the
+      Doxygen group, which starts with a letter and continues with letters, digits,
+      underscores and hyphens.
 spec-name: Interface Group Identifier
 spec-type: interface-group-identifier
 type: spec

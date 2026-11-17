@@ -10,10 +10,10 @@ spec-example: null
 spec-info:
   none: null
   str:
-    format:
-      type: myst
     description: |
       It shall be the notes for the interface.
+    format:
+      type: myst
 spec-name: Interface Notes
 spec-type: interface-notes
 type: spec

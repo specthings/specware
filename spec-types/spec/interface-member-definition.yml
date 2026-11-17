@@ -8,7 +8,6 @@ links:
 spec-description: null
 spec-example: null
 spec-info:
-  none: null
   dict:
     attributes:
       brief:
@@ -28,6 +27,7 @@ spec-info:
     description: |
       This set of attributes specifies an interface compound member definition.
     mandatory-attributes: all
+  none: null
 spec-name: Interface Compound Member Definition
 spec-type: interface-member-definition
 type: spec

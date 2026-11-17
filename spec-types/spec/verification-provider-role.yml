@@ -15,9 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the verification provider role of links.  Links of this role
-      shall reference ${verification:/spec-name} or
-      ${verification-group:/spec-name} items.
+      It defines the verification provider role of links. Links of this role shall
+      reference ${verification:/spec-name} or ${verification-group:/spec-name} items.
     mandatory-attributes: all
 spec-name: Verification Provider Link Role
 spec-type: verification-provider-role

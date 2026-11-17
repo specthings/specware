@@ -15,11 +15,10 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the design property role of links.  The link source shall be
-      an item which holds only under the design property.  The link target
-      shall be a design property requirement.  An item with at least one link
-      of this role is enabled only if at least one of the link targets is
-      enabled.
+      It defines the design property role of links. The link source shall be an item
+      which holds only under the design property. The link target shall be a design
+      property requirement. An item with at least one link of this role is enabled
+      only if at least one of the link targets is enabled.
     mandatory-attributes: all
 spec-name: Design Property Link Role
 spec-type: design-property-role

@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the test condition role of links.  The link source shall be
-      a test case.  The link target shall be a test condition item.
+      It defines the test condition role of links. The link source shall be a test
+      case. The link target shall be a test condition item.
     mandatory-attributes: all
 spec-name: Test Condition Link Role
 spec-type: test-condition-role

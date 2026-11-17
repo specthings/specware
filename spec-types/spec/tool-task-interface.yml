@@ -16,13 +16,13 @@ spec-info:
     attributes:
       accepted-licenses:
         description: |
-          It shall be the licenses which a produced file accepts for a part
-          whose license expression permits not the license of the file.
+          It shall be the licenses which a produced file accepts for a part whose license
+          expression permits not the license of the file.
         spec-type: list-str
       automatically-generated-warning:
         description: |
-          It shall be the warning which every produced file carries.
-          An empty warning adds no comment block to a file.
+          It shall be the warning which every produced file carries. An empty warning
+          adds no comment block to a file.
         spec-type: str
       domains:
         description: |
@@ -34,42 +34,40 @@ spec-info:
         spec-type: list-str
       item-level-interfaces:
         description: |
-          It shall be the UIDs of the interface items which produce a file of
-          their own.
+          It shall be the UIDs of the interface items which produce a file of their own.
         spec-type: list-uid
       item-marker:
         description: |
-          It shall be the line which marks the C content of an item.  A
-          variable substitution in the context of the item is performed on the
-          value.  ``$${.:/uid}`` yields the UID of the item.  An empty line
-          marks nothing.  The default is ``Generated from spec:$${.:/uid}``.
+          It shall be the line which marks the C content of an item. A variable
+          substitution in the context of the item is performed on the value. `$${.:/uid}`
+          yields the UID of the item. An empty line marks nothing. The default is
+          `Generated from spec:$${.:/uid}`.
         spec-type: str
       license:
         description: |
-          It shall be the license of a produced file which no rule of
-          ``license-by-target`` matches.
+          It shall be the license of a produced file which no rule of `license-by-target`
+          matches.
         spec-type: spdx-license-identifier
       license-by-target:
         description: |
-          It shall be the rules which state the license of a header file.  A
-          pattern matches the ``path`` attribute of the header file item.
+          It shall be the rules which state the license of a header file. A pattern
+          matches the `path` attribute of the header file item.
         spec-type: tool-target-license-list
       option-expressions:
         description: null
         spec-type: tool-option-expression-list
       register-bit-macros:
         description: |
-          It shall be the UID of the interface item which defines the
-          ``BIT()`` and ``GENMASK()`` macros.  A header file which hosts a
-          register block in the ``zephyr`` style includes the header file of
-          this item.  The default is ``/zephyr/kernel/sys-util/if/genmask``.
+          It shall be the UID of the interface item which defines the `BIT()` and
+          `GENMASK()` macros. A header file which hosts a register block in the `zephyr`
+          style includes the header file of this item. The default is
+          `/zephyr/kernel/sys-util/if/genmask`.
         spec-type: uid
       style:
         description: |
-          It shall be the style of the produced header files.  The default is
-          ``default``.  The ``style`` of a
-          ${interface-register-block-host-role:/spec-name} link selects the
-          style of a hosted register block.
+          It shall be the style of the produced header files. The default is `default`.
+          The `style` of a ${interface-register-block-host-role:/spec-name} link selects
+          the style of a hosted register block.
         spec-type: interface-header-file-style
     description: |
       This set of attributes specifies an interface generation task.

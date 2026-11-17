@@ -23,8 +23,8 @@ spec-info:
           It shall be the status of compliance offered by the supplier.
         spec-type: statement-of-compliance-status
     description: |
-      It defines the statement of compliance role of links.  The link target
-      shall be an ${requirement-ecss:/spec-name} item.
+      It defines the statement of compliance role of links. The link target shall be
+      an ${requirement-ecss:/spec-name} item.
     mandatory-attributes: all
 spec-name: Statement of Compliance Link Role
 spec-type: statement-of-compliance-role

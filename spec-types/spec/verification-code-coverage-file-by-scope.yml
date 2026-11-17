@@ -11,8 +11,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      For a code coverage gap verification, this set of attributes specifies
-      for each code coverage scope the applicable file areas.
+      For a code coverage gap verification, this set of attributes specifies for each
+      code coverage scope the applicable file areas.
     generic-attributes:
       description: null
       key-spec-type: str

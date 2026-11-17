@@ -15,8 +15,8 @@ spec-info:
       - typedef-and-enum
       - typedef-only
     description: |
-      It specifies how the enum is defined.  It may be a typedef only, the enum
-      only, or a typedef with an enum definition.
+      It specifies how the enum is defined. It may be a typedef only, the enum only,
+      or a typedef with an enum definition.
 spec-name: Interface Enum Definition Kind
 spec-type: interface-enum-definition-kind
 type: spec

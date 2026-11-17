@@ -40,18 +40,16 @@ spec-info:
     attributes:
       actions:
         description: |
-          Each action operates on the *action value* handed over by a previous
-          action and action-specific attribute values.  The actions pass the
-          processed action value to the next action in the list.  The first
-          action starts with an action value of ``None``.  The actions are
-          carried out during the configure command execution.
+          Each action operates on the *action value* handed over by a previous action and
+          action-specific attribute values. The actions pass the processed action value
+          to the next action in the list. The first action starts with an action value of
+          `None`. The actions are carried out during the configure command execution.
         spec-type: build-action-list
       default:
         description: |
-          It shall be the list of default values of the option.  When a default
-          value is needed, the first value on the list which is enabled
-          according to the enabled set is choosen.  If no value is enabled,
-          then the default value is ``null``.
+          It shall be the list of default values of the option. When a default value is
+          needed, the first value on the list which is enabled according to the enabled
+          set is choosen. If no value is enabled, then the default value is `null`.
         spec-type: build-default-value-list
       description:
         description: |
@@ -61,8 +59,7 @@ spec-info:
         description: |
           It shall be a
           [Python format string](https://docs.python.org/3/library/string.html#formatstrings),
-          for
-          example ``'{}'`` or ``'{:#010x}'``.
+          for example `'{}'` or `'{:#010x}'`.
         spec-type: optional-str
       name:
         description: null

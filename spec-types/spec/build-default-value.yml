@@ -10,14 +10,13 @@ spec-example: null
 spec-info:
   dict:
     attributes:
-      value:
-        description: |
-          Its value shall be the default value for the associated enabled-by
-          expression.
-        spec-type: build-option-value
       enabled-by:
         description: null
         spec-type: build-enabled-by
+      value:
+        description: |
+          Its value shall be the default value for the associated enabled-by expression.
+        spec-type: build-option-value
     description: |
       This set of attributes specifies a build option default value.
     mandatory-attributes: all

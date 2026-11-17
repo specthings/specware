@@ -11,8 +11,8 @@ spec-info:
   int:
     description: null
     format:
-      type: int-format-string
       format: '{:#x}'
+      type: int-format-string
 spec-name: Register Block Offset
 spec-type: interface-register-block-offset
 type: spec

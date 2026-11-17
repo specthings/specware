@@ -11,14 +11,14 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies skip reasons used to justify why
-      transitions in the transition map are skipped.
+      This set of attributes specifies skip reasons used to justify why transitions
+      in the transition map are skipped.
     generic-attributes:
       description: |
-        The key defines the name of a skip reason.  The name can be used in
+        The key defines the name of a skip reason. The name can be used in
         {ref}`SpecTypeActionRequirementTransitionPostConditions` to skip the
-        corresponding transitions.  The value shall give a reason why the
-        transitions are skipped.
+        corresponding transitions. The value shall give a reason why the transitions
+        are skipped.
       key-spec-type: requirement-action-name
       value-spec-type: myst
     mandatory-attributes: all

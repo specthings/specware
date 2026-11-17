@@ -11,8 +11,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies for each test executable name, the test
-      run timeout in seconds.
+      This set of attributes specifies for each test executable name, the test run
+      timeout in seconds.
     generic-attributes:
       description: null
       key-spec-type: str

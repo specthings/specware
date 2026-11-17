@@ -11,8 +11,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes provides a set of runtime measurement values each
-      of a specified kind.  The unit of the values shall be one second.
+      This set of attributes provides a set of runtime measurement values each of a
+      specified kind. The unit of the values shall be one second.
     generic-attributes:
       description: null
       key-spec-type: requirement-performance-runtime-kind

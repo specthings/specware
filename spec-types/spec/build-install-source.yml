@@ -8,11 +8,11 @@ links:
 spec-description: null
 spec-example: null
 spec-info:
-  str:
-    description: null
   list:
     description: null
     spec-type: str
+  str:
+    description: null
 spec-name: Build Installation Source
 spec-type: build-install-source
 type: spec

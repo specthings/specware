@@ -18,12 +18,12 @@ spec-info:
         description: null
         spec-type: requirement-design-group-identifier
     description: |
-      This set of attributes specifies a design group requirement.  Design group
+      This set of attributes specifies a design group requirement. Design group
       requirements have an explicit reference to the associated Doxygen group
-      specified by the ``identifier`` attribute.  Design group requirements
-      have an implicit validation by inspection method.  The qualification
-      toolchain shall perform the inspection and check that the specified
-      Doxygen group exists in the software source code.
+      specified by the `identifier` attribute. Design group requirements have an
+      implicit validation by inspection method. The qualification toolchain shall
+      perform the inspection and check that the specified Doxygen group exists in the
+      software source code.
     mandatory-attributes: all
 spec-name: Design Group Requirement Item Type
 spec-type: requirement-design-group

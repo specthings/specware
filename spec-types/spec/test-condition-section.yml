@@ -16,10 +16,10 @@ spec-info:
       - interface-dependency
       - procedure-constraint
     description: |
-      It shall be the section of a test case specification.  The value
-      `environment` selects the environmental needs, `input` the input
-      specifications, `interface-dependency` the interface dependencies and
-      `procedure-constraint` the special procedure constraints.
+      It shall be the section of a test case specification. The value `environment`
+      selects the environmental needs, `input` the input specifications,
+      `interface-dependency` the interface dependencies and `procedure-constraint`
+      the special procedure constraints.
 spec-name: Test Condition Section
 spec-type: test-condition-section
 type: spec

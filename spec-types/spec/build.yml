@@ -20,8 +20,8 @@ spec-info:
         spec-type: name
       extra-files:
         description: |
-          If the attribute is present, it shall be the list of extra files
-          associated with the item.
+          If the attribute is present, it shall be the list of extra files associated
+          with the item.
         spec-type: list-str
     description: |
       This set of attributes specifies a build item.

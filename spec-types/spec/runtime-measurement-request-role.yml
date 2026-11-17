@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the runtime measurement request role of links.  The link
-      target shall be a ${runtime-measurement-test:/spec-name} item.
+      It defines the runtime measurement request role of links. The link target shall
+      be a ${runtime-measurement-test:/spec-name} item.
     mandatory-attributes: all
 spec-name: Runtime Measurement Request Link Role
 spec-type: runtime-measurement-request-role

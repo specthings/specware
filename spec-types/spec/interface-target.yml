@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the interface target role of links.  It is used for interface
-      forward declarations.
+      It defines the interface target role of links. It is used for interface forward
+      declarations.
     mandatory-attributes: all
 spec-name: Interface Target Link Role
 spec-type: interface-target

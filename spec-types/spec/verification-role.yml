@@ -19,10 +19,10 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the verification role of links.  The `verification` role is
-      intended for links from a ${verification:/spec-name} item to a verified
-      item.  The `verification-by` role is intended for links from a verified
-      item to a ${verification:/spec-name} item.
+      It defines the verification role of links. The `verification` role is intended
+      for links from a ${verification:/spec-name} item to a verified item. The
+      `verification-by` role is intended for links from a verified item to a
+      ${verification:/spec-name} item.
     mandatory-attributes: all
 spec-name: Verification Link Role
 spec-type: verification-role

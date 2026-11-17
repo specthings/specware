@@ -19,9 +19,8 @@ spec-info:
           It shall be the name of the tested software unit.
         spec-type: str
     description: |
-      It defines the unit test role of links.  For unit tests the link target
-      should be the ${interface-domain:/spec-name} containing the software
-      unit.
+      It defines the unit test role of links. For unit tests the link target should
+      be the ${interface-domain:/spec-name} containing the software unit.
     mandatory-attributes: all
 spec-name: Unit Test Link Role
 spec-type: test-unit-role

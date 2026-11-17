@@ -14,13 +14,13 @@ spec-example: null
 spec-info:
   dict:
     attributes:
-      timeouts:
-        description: null
-        spec-type: test-timeouts-by-build-config
       time-of-last-update:
         description: |
           It shall be the time of the last update in ISO 8601 format.
         spec-type: str
+      timeouts:
+        description: null
+        spec-type: test-timeouts-by-build-config
     description: |
       This set of attributes specifies a set of test timeouts.
     mandatory-attributes: all

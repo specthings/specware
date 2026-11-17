@@ -12,8 +12,8 @@ spec-info:
     attributes:
       default:
         description: |
-          The default definition will be used if no variant-specific definition
-          is enabled.
+          The default definition will be used if no variant-specific definition is
+          enabled.
         spec-type: interface-member-definition
       variants:
         description: null

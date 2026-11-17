@@ -8,34 +8,33 @@ links:
 spec-description: null
 spec-example: null
 spec-info:
-  none: null
   dict:
     attributes:
       attributes:
         description: |
-          If the value is present, then it shall be the function attributes.
-          On the attributes a context-sensitive substitution of item variables
-          is performed.  A function attribute is for example the indication
-          that the function does not return to the caller.
+          If the value is present, then it shall be the function attributes. On the
+          attributes a context-sensitive substitution of item variables is performed. A
+          function attribute is for example the indication that the function does not
+          return to the caller.
         spec-type: optional-str
       body:
         description: null
         spec-type: interface-function-body
       params:
         description: |
-          It shall be the list of parameter declarations of the function.  On
-          the function parameter declarations a context-sensitive substitution
-          of item variables is performed.  A macro parameter is a bare name.
+          It shall be the list of parameter declarations of the function. On the function
+          parameter declarations a context-sensitive substitution of item variables is
+          performed. A macro parameter is a bare name.
         spec-type: list-clang-declaration-scope
       return:
         description: |
-          If the value is present, then it shall be the function return type.
-          On the return type a context-sensitive substitution of item variables
-          is performed.
+          If the value is present, then it shall be the function return type. On the
+          return type a context-sensitive substitution of item variables is performed.
         spec-type: optional-str
     description: |
       This set of attributes specifies a function definition.
     mandatory-attributes: all
+  none: null
 spec-name: Interface Function or Macro Definition
 spec-type: interface-function-definition
 type: spec

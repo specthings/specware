@@ -8,7 +8,6 @@ links:
 spec-description: null
 spec-example: null
 spec-info:
-  none: null
   dict:
     attributes:
       count:
@@ -21,6 +20,7 @@ spec-info:
     description: |
       This set of attributes specifies a register block member definition.
     mandatory-attributes: all
+  none: null
 spec-name: Register Block Member Definition
 spec-type: interface-register-block-member
 type: spec
