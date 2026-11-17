@@ -1209,7 +1209,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.7.22"
+version = "1.7.23"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "license-expression" },
@@ -1222,9 +1222,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "ruamel-yaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b4/67/50697f212c4957adae66fccd931706891901c596d9e94244a38bc00b415e/specitems-1.7.22.tar.gz", hash = "sha256:09cff7cefa76b0698101f4e5ab0a4481b406a57228a097646a34959cbc32cfe8", size = 95850, upload-time = "2026-11-17T02:47:40.113Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/7d/98c31ce35e346c5f954b79cbcf62d18b2d04e17d0167f1eb3fab08f164c2/specitems-1.7.23.tar.gz", hash = "sha256:ac05fe4dbb7e51c53e5e4fe50ce7568ff10a48f8b3d7933491d7f1220e874f9d", size = 95830, upload-time = "2026-11-17T05:00:08.118Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/3a/ab5e387e4391f299d3d5de17e16151f1cbb777ad92df0eebac2be6f0a625/specitems-1.7.22-py3-none-any.whl", hash = "sha256:e7ade4bd3c0cc80e126df42e8fa83e236246bd407b195de7f2206cdc22917d60", size = 128711, upload-time = "2026-11-17T02:47:38.9Z" },
+    { url = "https://files.pythonhosted.org/packages/c0/2c/4a0e35dc3d02a2405b80663359ec673b83c2b1deda4621523d88f773fad1/specitems-1.7.23-py3-none-any.whl", hash = "sha256:928b7006692890b8588b29ee7b0f8ee9f84b292e47dc6e23fa70278050146a60", size = 128667, upload-time = "2026-11-17T05:00:09.837Z" },
 ]
 
 [[package]]
@@ -1255,7 +1255,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "specitems", specifier = ">=1.7.22" }]
+requires-dist = [{ name = "specitems", specifier = ">=1.7.23" }]
 
 [package.metadata.requires-dev]
 dev = [
