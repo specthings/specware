@@ -148,23 +148,21 @@ spec-info:
         spec-type: str
       test-brief:
         description: |
-          If the value is present, then it shall be the test case brief
-          description.
+          If the value is present, then it shall be the test case brief description.
         spec-type: optional-myst
       test-cleanup:
         description: |
-          If the value is present, then it shall be the test cleanup code.  The
-          code is placed in the test action loop body after the test
-          post-condition checks.
+          If the value is present, then it shall be the test cleanup code. The code is
+          placed in the test action loop body after the test post-condition checks.
         spec-type: optional-clang-function-scope
       test-context:
         description: null
         spec-type: test-context-list
       test-context-support:
         description: |
-          If the value is present, then it shall be the test context support
-          code.  The context support code is placed at file scope before the
-          test context definition.
+          If the value is present, then it shall be the test context support code. The
+          context support code is placed at file scope before the test context
+          definition.
         spec-type: optional-clang-file-scope
       test-description:
         description: |
@@ -175,17 +173,17 @@ spec-info:
         spec-type: test-header
       test-includes:
         description: |
-          It shall be a list of header files included via ``#include <...>``.
+          It shall be a list of header files included via `#include <...>`.
         spec-type: list-str
       test-local-includes:
         description: |
-          It shall be a list of header files included via ``#include "..."``.
+          It shall be a list of header files included via `#include "..."`.
         spec-type: list-str
       test-prepare:
         description: |
-          If the value is present, then it shall be the early test preparation
-          code.  The code is placed in the test action loop body before the
-          test pre-condition preparations.
+          If the value is present, then it shall be the early test preparation code. The
+          code is placed in the test action loop body before the test pre-condition
+          preparations.
         spec-type: optional-clang-function-scope
       test-setup:
         description: null
@@ -195,8 +193,8 @@ spec-info:
         spec-type: test-support-method
       test-support:
         description: |
-          If the value is present, then it shall be the test case support code.
-          The support code is placed at file scope before the test case code.
+          If the value is present, then it shall be the test case support code. The
+          support code is placed at file scope before the test case code.
         spec-type: optional-clang-file-scope
       test-target:
         description: |
@@ -209,32 +207,30 @@ spec-info:
         description: null
         spec-type: requirement-action-transition-list
     description: |
-      This set of attributes specifies functional requirements and
-      corresponding validation test code.  The functional requirements of an
-      action are specified.  An action performs a step in a finite state
-      machine.  An action is implemented through a function or a macro.  The
-      action is performed through a call of the function or an execution of the
-      code of a macro expansion by an actor.  The actor is for example a task
-      or an interrupt service routine.
+      This set of attributes specifies functional requirements and corresponding
+      validation test code. The functional requirements of an action are specified.
+      An action performs a step in a finite state machine. An action is implemented
+      through a function or a macro. The action is performed through a call of the
+      function or an execution of the code of a macro expansion by an actor. The
+      actor is for example a task or an interrupt service routine.
 
-      For action requirements which specify the function of an interface, there
-      shall be exactly one link with the ${interface-function-role:/spec-name}
-      to the interface of the action.
+      For action requirements which specify the function of an interface, there shall
+      be exactly one link with the ${interface-function-role:/spec-name} to the
+      interface of the action.
 
       The action requirements are specified by
 
-      * a list of pre-conditions, each with a set of states,
+      - a list of pre-conditions, each with a set of states,
 
-      * a list of post-conditions, each with a set of states,
+      - a list of post-conditions, each with a set of states,
 
-      * the transition of pre-condition states to post-condition states through
-        the action.
+      - the transition of pre-condition states to post-condition states through the
+        action.
 
-      Along with the requirements, the test code to generate a validation test
-      is specified.  For an action requirement it is verified that all
-      variations of pre-condition states have a set of post-condition states
-      specified in the transition map.  All transitions are covered by the
-      generated test code.
+      Along with the requirements, the test code to generate a validation test is
+      specified. For an action requirement it is verified that all variations of
+      pre-condition states have a set of post-condition states specified in the
+      transition map. All transitions are covered by the generated test code.
     mandatory-attributes: all
 spec-name: Action Requirement Item Type
 spec-type: requirement-action

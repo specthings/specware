@@ -15,9 +15,9 @@ spec-info:
         spec-type: build-cflags
       fragment:
         description: |
-          It shall be a code fragment used to check the availability of a
-          certain feature through compilation with the C compiler.  The
-          resulting object is not linked to an executable.
+          It shall be a code fragment used to check the availability of a certain feature
+          through compilation with the C compiler. The resulting object is not linked to
+          an executable.
         spec-type: str
       message:
         description: |

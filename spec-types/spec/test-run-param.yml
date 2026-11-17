@@ -23,15 +23,14 @@ spec-info:
         spec-type: str
       specifier:
         description: |
-          It shall be the complete function parameter specifier.  Use
-          ``$${.:name}`` for the parameter name, for example
-          ``"int $${.:name}"``.
+          It shall be the complete function parameter specifier. Use `$${.:name}` for the
+          parameter name, for example `"int $${.:name}"`.
         spec-type: str
     description: |
-      This set of attributes specifies a parameter for the test run function.
-      In case this parameter is used in an ${requirement-action:/spec-name}
-      item, then the parameter is also added as a member to the test context,
-      see ${test-context:/spec-name}.
+      This set of attributes specifies a parameter for the test run function. In case
+      this parameter is used in an ${requirement-action:/spec-name} item, then the
+      parameter is also added as a member to the test context, see
+      ${test-context:/spec-name}.
     mandatory-attributes: all
 spec-name: Test Run Parameter
 spec-type: test-run-param

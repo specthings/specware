@@ -58,13 +58,12 @@ spec-info:
         spec-type: build-source-list
       target:
         description: |
-          It shall be the name of the static library, e.g. ``z`` for
-          ``libz.a``.
+          It shall be the name of the static library, e.g. `z` for `libz.a`.
         spec-type: build-target
     description: |
-      This set of attributes specifies a static library.  Library items may use
-      additional objects provided by ${build-objects:/spec-name} items through
-      the build dependency links of the item.
+      This set of attributes specifies a static library. Library items may use
+      additional objects provided by ${build-objects:/spec-name} items through the
+      build dependency links of the item.
     mandatory-attributes: all
 spec-name: Build Library Item Type
 spec-type: build-library

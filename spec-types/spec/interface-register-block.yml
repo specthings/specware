@@ -25,10 +25,10 @@ spec-info:
         spec-type: interface-description
       identifier:
         description: |
-          If the value is present, then it shall be the identifier of the
-          interface group of the register block.  A link with the
-          ${interface-register-block-host-role:/spec-name} may state the
-          identifier instead.
+          If the value is present, then it shall be the identifier of the interface group
+          of the register block. A link with the
+          ${interface-register-block-host-role:/spec-name} may state the identifier
+          instead.
         spec-type: interface-group-identifier
       name:
         description: |
@@ -39,52 +39,48 @@ spec-info:
         spec-type: interface-notes
       offset-prefix:
         description: |
-          If the value is present, then it will be used to prefix register
-          offset defines, otherwise the value of the ``name`` attribute will be
-          used.
+          If the value is present, then it will be used to prefix register offset
+          defines, otherwise the value of the `name` attribute will be used.
+        spec-type: optional-str
+      register-block-group:
+        description: |
+          If the value is present, then it shall be the name of the interface group
+          defined for the register block. For the group identifier see the `identifier`
+          attribute. A link with the ${interface-register-block-host-role:/spec-name} may
+          state the name instead.
+        spec-type: str
+      register-block-size:
+        description: |
+          If the value is present, then it shall be the size of the register block in
+          units of the address space granule. The value shall be present if the
+          `register-domain` attribute value is `memory`.
+        spec-type: optional-int
+      register-domain:
+        description: |
+          If the value is present, then it shall be the address domain of the register
+          block, otherwise the address domain is `device`.
+        spec-type: interface-register-domain
+      register-prefix:
+        description: |
+          If the value is present, then it will be used to prefix register bit field
+          names, otherwise the value of the `name` attribute will be used.
         spec-type: optional-str
       registers:
         description: null
         spec-type: interface-register-list
-      register-block-group:
-        description: |
-          If the value is present, then it shall be the name of the interface
-          group defined for the register block.  For the group identifier see
-          the ``identifier`` attribute.  A link with the
-          ${interface-register-block-host-role:/spec-name} may state the name
-          instead.
-        spec-type: str
-      register-block-size:
-        description: |
-          If the value is present, then it shall be the size of the register
-          block in units of the address space granule.  The value shall be
-          present if the ``register-domain`` attribute value is ``memory``.
-        spec-type: optional-int
-      register-domain:
-        description: |
-          If the value is present, then it shall be the address domain of the
-          register block, otherwise the address domain is ``device``.
-        spec-type: interface-register-domain
-      register-prefix:
-        description: |
-          If the value is present, then it will be used to prefix register bit
-          field names, otherwise the value of the ``name`` attribute will be
-          used.
-        spec-type: optional-str
     description: |
-      This set of attributes specifies a register block.  A register block may
-      be used to specify the interface of devices.  Register blocks consist of
-      register block members specified by the ``definition`` attribute.
-      Register block members are either instances of registers specified by the
-      ``registers`` attribute or instances of other register blocks specified
-      by links with the ${interface-register-block-include-role:/spec-name}.
-      A link with the ${interface-register-block-base-role:/spec-name} derives
-      the register block from a base register block.
-      Registers consists of bit fields (see
-      ${interface-register-bits:/spec-name}.  The register block members are
-      placed into the address space of the device relative to the base address
-      of the register block.  Register member offsets and the register block
-      size are specified in units of the address space granule.
+      This set of attributes specifies a register block. A register block may be used
+      to specify the interface of devices. Register blocks consist of register block
+      members specified by the `definition` attribute. Register block members are
+      either instances of registers specified by the `registers` attribute or
+      instances of other register blocks specified by links with the
+      ${interface-register-block-include-role:/spec-name}. A link with the
+      ${interface-register-block-base-role:/spec-name} derives the register block
+      from a base register block. Registers consists of bit fields (see
+      ${interface-register-bits:/spec-name}. The register block members are placed
+      into the address space of the device relative to the base address of the
+      register block. Register member offsets and the register block size are
+      specified in units of the address space granule.
     mandatory-attributes:
     - brief
     - definition

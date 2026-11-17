@@ -12,17 +12,16 @@ spec-info:
     attributes:
       expression:
         description: |
-          It shall be the C preprocessor expression which tests an option of a
-          matching name.  A variable substitution in the context of the item
-          of the guarded content is performed on the value.
-          ``$${.:/option-name}`` yields the name of the option.
-          ``$${.:/option-group:<group>}`` yields a group of the match, where
-          ``<group>`` is the number or the name of the group.
+          It shall be the C preprocessor expression which tests an option of a matching
+          name. A variable substitution in the context of the item of the guarded content
+          is performed on the value. `$${.:/option-name}` yields the name of the option.
+          `$${.:/option-group:<group>}` yields a group of the match, where `<group>` is
+          the number or the name of the group.
         spec-type: str
       pattern:
         description: |
-          It shall be a Python regular expression which matches the whole name
-          of an option.
+          It shall be a Python regular expression which matches the whole name of an
+          option.
         spec-type: str
     description: |
       This set of attributes specifies how a guard tests an option.

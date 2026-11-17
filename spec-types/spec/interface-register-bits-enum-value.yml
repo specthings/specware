@@ -13,9 +13,9 @@ spec-info:
       It shall be the field value of the enumerator.
   list:
     description: |
-      It shall be the list of field values of the enumerator.  A list gives
-      more than one field value for one enumerator.  The first element of the
-      list is the value of the generated define.
+      It shall be the list of field values of the enumerator. A list gives more than
+      one field value for one enumerator. The first element of the list is the value
+      of the generated define.
     spec-type: int
 spec-name: Register Bit Field Enumerator Value
 spec-type: interface-register-bits-enum-value

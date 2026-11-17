@@ -14,11 +14,10 @@ spec-info:
       - default
       - zephyr
     description: |
-      It specifies the style in which a header file presents a register block.
-      The value ``default`` denotes a structure of the register block and a
-      Doxygen group of each register.  The value ``zephyr`` denotes register
-      offset defines and bit field defines of the ``BIT()`` and ``GENMASK()``
-      form.
+      It specifies the style in which a header file presents a register block. The
+      value `default` denotes a structure of the register block and a Doxygen group
+      of each register. The value `zephyr` denotes register offset defines and bit
+      field defines of the `BIT()` and `GENMASK()` form.
 spec-name: Interface Register Block Style
 spec-type: interface-register-block-style
 type: spec

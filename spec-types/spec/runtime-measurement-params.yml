@@ -15,8 +15,7 @@ spec-info:
           It shall be the sample count of the runtime measurement context.
         spec-type: int
     description: |
-      This set of attributes defines parameters of the runtime measurement test
-      case.
+      This set of attributes defines parameters of the runtime measurement test case.
     generic-attributes:
       description: null
       key-spec-type: name

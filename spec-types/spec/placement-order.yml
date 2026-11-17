@@ -15,9 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This link role defines the placement order of items in a container item
-      (for example an interface function in a header file or a documentation
-      section).
+      This link role defines the placement order of items in a container item (for
+      example an interface function in a header file or a documentation section).
     mandatory-attributes: all
 spec-name: Placement Order Link Role
 spec-type: placement-order-role

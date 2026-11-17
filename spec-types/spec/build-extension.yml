@@ -20,25 +20,25 @@ spec-info:
         spec-type: list-str
       build-path-prefix:
         description: |
-          It shall be the path of a directory relative to the top-level
-          directory of the build.  The paths of the build items of the
-          extension shall be relative to this directory.
+          It shall be the path of a directory relative to the top-level directory of the
+          build. The paths of the build items of the extension shall be relative to this
+          directory.
         spec-type: str
       build-rules:
         description: |
-          It shall be the rule lists of the extension.  A consumer of the build
-          reads the rule lists of its key.
+          It shall be the rule lists of the extension. A consumer of the build reads the
+          rule lists of its key.
         spec-type: build-rules
       build-spec-directories:
         description: |
-          It shall be the list of directory paths containing the build
-          specification items of the extension.  The directory paths shall be
-          relative to the directory of the build extension item file.
+          It shall be the list of directory paths containing the build specification
+          items of the extension. The directory paths shall be relative to the directory
+          of the build extension item file.
         spec-type: list-str
     description: |
-      This set of attributes specifies a build extension.  The build items
-      provided by the extension are only loaded and accessed if the build
-      extension item is enabled.
+      This set of attributes specifies a build extension. The build items provided by
+      the extension are only loaded and accessed if the build extension item is
+      enabled.
     mandatory-attributes:
     - build-extension-points
     - build-spec-directories

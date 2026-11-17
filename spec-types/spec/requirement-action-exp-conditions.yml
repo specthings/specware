@@ -11,13 +11,12 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes defines for the specified conditions a set of
-      states.
+      This set of attributes defines for the specified conditions a set of states.
     generic-attributes:
       description: |
-        There shall be at most one generic attribute key for each condition.
-        The key name shall be the condition name.  The value of each generic
-        attribute shall be a set of states of the condition.
+        There shall be at most one generic attribute key for each condition. The key
+        name shall be the condition name. The value of each generic attribute shall be
+        a set of states of the condition.
       key-spec-type: requirement-action-name
       value-spec-type: requirement-action-exp-states
     mandatory-attributes: all

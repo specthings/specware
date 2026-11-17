@@ -27,20 +27,18 @@ spec-info:
     attributes:
       identifier:
         description: |
-          It shall be the identifier which the errata document gives the
-          erratum.
+          It shall be the identifier which the errata document gives the erratum.
         spec-type: str
       title:
         description: |
           It shall be the title which the errata document gives the erratum.
         spec-type: str
     description: |
-      This set of attributes specifies an erratum of a part.  The item
-      identifies the erratum and links to the errata document with the
-      `reference` role.  The errata document states the defect, the affected
-      parts and the workaround.  A validation of an errata group links to
-      the erratum with the `errata-resolution` role and states the
-      resolution.  The erratum is validated if each errata group which
+      This set of attributes specifies an erratum of a part. The item identifies the
+      erratum and links to the errata document with the `reference` role. The errata
+      document states the defect, the affected parts and the workaround. A validation
+      of an errata group links to the erratum with the `errata-resolution` role and
+      states the resolution. The erratum is validated if each errata group which
       answers for it has a validated resolution of it.
     mandatory-attributes: all
 spec-name: Errata Item Type

@@ -16,7 +16,7 @@ spec-info:
     attributes:
       path:
         description: |
-          It shall be the path used to include the header file.  For example
+          It shall be the path used to include the header file. For example
           {file}`rtems/confdefs.h`.
         spec-type: str
       references:

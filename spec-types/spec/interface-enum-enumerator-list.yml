@@ -10,10 +10,9 @@ spec-example: null
 spec-info:
   list:
     description: |
-      The order of the list is the order of the enumerators in the
-      definition of the enum.  The enumerators of the links with the
-      ${interface-enumerator-role:/spec-name} precede the enumerators of the
-      list.
+      The order of the list is the order of the enumerators in the definition of the
+      enum. The enumerators of the links with the
+      ${interface-enumerator-role:/spec-name} precede the enumerators of the list.
     spec-type: interface-enum-enumerator
 spec-name: Interface Enum Enumerator List
 spec-type: interface-enum-enumerator-list

@@ -12,17 +12,17 @@ spec-info:
     attributes:
       identifier:
         description: |
-          It shall be the type-specific identifier of the referenced object.
-          For *group* references use the Doxygen group identifier.  For *file*
-          references use a file system path to the file.
+          It shall be the type-specific identifier of the referenced object. For *group*
+          references use the Doxygen group identifier. For *file* references use a file
+          system path to the file.
         spec-type: str
       type:
         description: |
           It shall be the type of the referenced object.
         spec-type: name
     description: |
-      This set of attributes specifies a reference to some object external to
-      the specification.
+      This set of attributes specifies a reference to some object external to the
+      specification.
     mandatory-attributes: all
 spec-name: External Reference
 spec-type: external-reference

@@ -25,10 +25,9 @@ spec-info:
         spec-type: interface-description
       enumerators:
         description: |
-          It shall be the list of the enumerators which the enum specifies
-          inside its item.  The enumerators of the links with the
-          ${interface-enumerator-role:/spec-name} precede them in the
-          definition.
+          It shall be the list of the enumerators which the enum specifies inside its
+          item. The enumerators of the links with the
+          ${interface-enumerator-role:/spec-name} precede them in the definition.
         spec-type: interface-enum-enumerator-list
       name:
         description: |

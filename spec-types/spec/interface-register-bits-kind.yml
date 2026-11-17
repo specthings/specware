@@ -18,22 +18,21 @@ spec-info:
       - bits
       - reserved
     description: |
-      It specifies what the bits of a register bit field encode.  The
-      following values are defined:
+      It specifies what the bits of a register bit field encode. The following values
+      are defined:
 
-      * ``uint``: The field encodes an unsigned integer.
+      - `uint`: The field encodes an unsigned integer.
 
-      * ``int``: The field encodes a signed integer in two's complement
-        representation.
+      - `int`: The field encodes a signed integer in two's complement representation.
 
-      * ``enum``: The field encodes a fixed set of codes.  The
+      - `enum`: The field encodes a fixed set of codes. The
         ${interface-register-bits-enum:/spec-name} names the codes.
 
-      * ``bool``: The field is a flag of one bit.
+      - `bool`: The field is a flag of one bit.
 
-      * ``bits``: The bits of the field are independent of each other.
+      - `bits`: The bits of the field are independent of each other.
 
-      * ``reserved``: The field has no domain.
+      - `reserved`: The field has no domain.
 spec-name: Register Bit Field Kind
 spec-type: interface-register-bits-kind
 type: spec

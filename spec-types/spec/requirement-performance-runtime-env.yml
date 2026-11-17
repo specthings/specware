@@ -16,7 +16,7 @@ spec-info:
     attributes:
       name:
         description: |
-          It shall be the runtime measurement environment name.  See also
+          It shall be the runtime measurement environment name. See also
           ${requirement-performance-runtime-env-name:/spec-name}.
         spec-type: str
     description: |

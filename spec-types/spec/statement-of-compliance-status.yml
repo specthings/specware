@@ -11,8 +11,8 @@ spec-info:
   str:
     assert:
       in:
-      - 'N'
-      - 'Y'
+      - N
+      - Y
       - N/A
       - US
       - Ye

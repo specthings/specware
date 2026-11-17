@@ -19,8 +19,8 @@ spec-info:
           It shall be the name of a skip reason.
         spec-type: requirement-action-name
     description: |
-      This set of attributes defines the condition and reason why a transition
-      shall be skipped.
+      This set of attributes defines the condition and reason why a transition shall
+      be skipped.
     mandatory-attributes: all
 spec-name: Action Requirement Pre-Condition States Skip Definition
 spec-type: requirement-action-pre-states-skip

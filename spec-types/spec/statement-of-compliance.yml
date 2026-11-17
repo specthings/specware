@@ -16,8 +16,7 @@ spec-info:
     attributes:
       text:
         description: |
-          It shall provide the statement of compliance with respect to a
-          requirement.
+          It shall provide the statement of compliance with respect to a requirement.
         spec-type: myst
     description: |
       This set of attributes provides a statement of compliance.

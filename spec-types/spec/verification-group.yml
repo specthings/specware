@@ -15,9 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies a group of verifications.  The group
-      members are the child items using ${verification-member-role:/spec-name}
-      links.
+      This set of attributes specifies a group of verifications. The group members
+      are the child items using ${verification-member-role:/spec-name} links.
     mandatory-attributes: all
 spec-name: Verification Group
 spec-type: verification-group

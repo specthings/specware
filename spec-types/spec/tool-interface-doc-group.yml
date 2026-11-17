@@ -23,8 +23,7 @@ spec-info:
           It shall be the target file of the introduction.
         spec-type: str
     description: |
-      This set of attributes specifies the documentation of one interface
-      group.
+      This set of attributes specifies the documentation of one interface group.
     mandatory-attributes: all
 spec-name: Tool Interface Documentation Group
 spec-type: tool-interface-doc-group

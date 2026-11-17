@@ -16,20 +16,19 @@ spec-info:
     attributes:
       index-entries:
         description: |
-          It shall be a list of additional document index entries.  A document
-          index entry derived from the interface name is added automatically.
+          It shall be a list of additional document index entries. A document index entry
+          derived from the interface name is added automatically.
         spec-type: list-str
       interface-type:
         description: |
           It shall be the interface item type.
         spec-type: name
     description: |
-      This set of attributes specifies an interface specification item.
-      Interface items shall specify the interface of the software product to
-      other software products and the hardware.  Use
-      ${interface-domain:/spec-name} items to specify interface domains, for
-      example the ${/glossary/api:/term}, C language, compiler, interfaces to
-      the implementation, and the hardware.
+      This set of attributes specifies an interface specification item. Interface
+      items shall specify the interface of the software product to other software
+      products and the hardware. Use ${interface-domain:/spec-name} items to specify
+      interface domains, for example the ${/glossary/api:/term}, C language,
+      compiler, interfaces to the implementation, and the hardware.
     mandatory-attributes: all
 spec-name: Interface Item Type
 spec-type: interface

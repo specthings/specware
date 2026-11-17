@@ -12,17 +12,16 @@ spec-info:
     attributes:
       license:
         description: |
-          It shall be the license of a produced file whose path matches the
-          pattern.
+          It shall be the license of a produced file whose path matches the pattern.
         spec-type: spdx-license-identifier
       pattern:
         description: |
-          It shall be a Python regular expression which matches the whole path
-          of a produced file.
+          It shall be a Python regular expression which matches the whole path of a
+          produced file.
         spec-type: str
     description: |
-      This set of attributes states the license of the produced files whose
-      path matches a pattern.
+      This set of attributes states the license of the produced files whose path
+      matches a pattern.
     mandatory-attributes: all
 spec-name: Tool Target License
 spec-type: tool-target-license

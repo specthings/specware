@@ -15,8 +15,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the standard tailoring role of links.  The link target shall
-      be a ${requirement-standard:/spec-name} item.
+      It defines the standard tailoring role of links. The link target shall be a
+      ${requirement-standard:/spec-name} item.
     mandatory-attributes: all
 spec-name: Standard Tailoring Link Role
 spec-type: requirement-standard-tailoring-role

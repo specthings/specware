@@ -50,19 +50,18 @@ spec-info:
         spec-type: build-cxxflags
       do-build:
         description: |
-          If this script shall execute, then it shall be Python code which is
-          executed via ``exec()`` in the context of the ``do_build()`` method
-          of the {file}`wscript`.  A local variable ``bld`` is available with
-          the ``waf`` build context.  A local variable ``bic`` is available
-          with the build item context.
+          If this script shall execute, then it shall be Python code which is executed
+          via `exec()` in the context of the `do_build()` method of the {file}`wscript`.
+          A local variable `bld` is available with the `waf` build context. A local
+          variable `bic` is available with the build item context.
         spec-type: optional-str
       do-configure:
         description: |
-          If this script shall execute, then it shall be Python code which is
-          executed via ``exec()`` in the context of the ``do_configure()``
-          method of the {file}`wscript`.  A local variable ``conf`` is
-          available with the ``waf`` configuration context.  A local variable
-          ``cic`` is available with the configuration item context.
+          If this script shall execute, then it shall be Python code which is executed
+          via `exec()` in the context of the `do_configure()` method of the
+          {file}`wscript`. A local variable `conf` is available with the `waf`
+          configuration context. A local variable `cic` is available with the
+          configuration item context.
         spec-type: optional-str
       includes:
         description: null
@@ -72,19 +71,18 @@ spec-info:
         spec-type: build-ldflags
       prepare-build:
         description: |
-          If this script shall execute, then it shall be Python code which is
-          executed via ``exec()`` in the context of the ``prepare_build()``
-          method of the {file}`wscript`.  A local variable ``bld`` is available
-          with the ``waf`` build context.  A local variable ``bic`` is
-          available with the build item context.
+          If this script shall execute, then it shall be Python code which is executed
+          via `exec()` in the context of the `prepare_build()` method of the
+          {file}`wscript`. A local variable `bld` is available with the `waf` build
+          context. A local variable `bic` is available with the build item context.
         spec-type: optional-str
       prepare-configure:
         description: |
-          If this script shall execute, then it shall be Python code which is
-          executed via ``exec()`` in the context of the ``prepare_configure()``
-          method of the {file}`wscript`.  A local variable ``conf`` is
-          available with the ``waf`` configuration context.  A local variable
-          ``cic`` is available with the configuration item context.
+          If this script shall execute, then it shall be Python code which is executed
+          via `exec()` in the context of the `prepare_configure()` method of the
+          {file}`wscript`. A local variable `conf` is available with the `waf`
+          configuration context. A local variable `cic` is available with the
+          configuration item context.
         spec-type: optional-str
       stlib:
         description: null
@@ -99,8 +97,8 @@ spec-info:
         description: null
         spec-type: build-use-before-list
     description: |
-      This set of attributes specifies a build script.  The optional attributes
-      may be required by commands executed through the scripts.
+      This set of attributes specifies a build script. The optional attributes may be
+      required by commands executed through the scripts.
     mandatory-attributes:
     - do-build
     - do-configure

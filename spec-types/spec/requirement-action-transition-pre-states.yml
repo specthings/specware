@@ -12,16 +12,16 @@ spec-info:
     attributes:
       applicable:
         description: |
-          If the state is not already defined as not applicable by the
-          ``not-applicable`` attribute, then the expression defines if a
-          pre-condition state is applicable for a transition.  If the
-          expression evaluates to true, then the state is applicable.
+          If the state is not already defined as not applicable by the `not-applicable`
+          attribute, then the expression defines if a pre-condition state is applicable
+          for a transition. If the expression evaluates to true, then the state is
+          applicable.
         spec-type: requirement-action-pre-states-exp
       not-applicable:
         description: |
-          This expression defines if a pre-condition state is not applicable
-          for a transition.  If the expression evaluates to true, then the
-          state is not applicable.
+          This expression defines if a pre-condition state is not applicable for a
+          transition. If the expression evaluates to true, then the state is not
+          applicable.
         spec-type: requirement-action-pre-states-exp
       skip:
         description: |
@@ -29,14 +29,13 @@ spec-info:
         spec-type: requirement-action-pre-states-skip
     description: |
       This set of attributes represents all states of the pre-condition in the
-      transition descriptor through pre-condition state expressions.  If none
-      of the expressions evaluate to true, then the state is defined as not
-      applicable in the transition.
+      transition descriptor through pre-condition state expressions. If none of the
+      expressions evaluate to true, then the state is defined as not applicable in
+      the transition.
     mandatory-attributes: none
   list:
     description: |
-      The list defines the set of states of the pre-condition in the
-      transition.
+      The list defines the set of states of the pre-condition in the transition.
     spec-type: requirement-action-name
   str:
     assert:
@@ -44,9 +43,9 @@ spec-info:
       - all
       - N/A
     description: |
-      The value ``all`` represents all states of the pre-condition in the
-      transition descriptor.  The value ``N/A`` marks the pre-condition as not
-      applicable in the transition descriptor.
+      The value `all` represents all states of the pre-condition in the transition
+      descriptor. The value `N/A` marks the pre-condition as not applicable in the
+      transition descriptor.
 spec-name: Action Requirement Transition Pre-Condition State Set
 spec-type: requirement-action-transition-pre-states
 type: spec

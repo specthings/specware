@@ -11,8 +11,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes maps a key to a list of build rules.  The key
-      names the consumer of the rules.
+      This set of attributes maps a key to a list of build rules. The key names the
+      consumer of the rules.
     generic-attributes:
       description: null
       key-spec-type: name

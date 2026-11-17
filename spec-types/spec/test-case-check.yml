@@ -20,9 +20,8 @@ spec-info:
         spec-type: clang-function-scope
       links:
         description: |
-          The links should use the ${requirement-validation-role:/spec-name}
-          for validation tests and the ${test-unit-role:/spec-name} for unit
-          tests.
+          The links should use the ${requirement-validation-role:/spec-name} for
+          validation tests and the ${test-unit-role:/spec-name} for unit tests.
         spec-type: links
     description: |
       This set of attributes specifies a test case check.

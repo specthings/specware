@@ -13,11 +13,11 @@ spec-info:
     assert:
       not:
         re: \n\n
+    description: |
+      It shall be the brief description of the interface. It should be a single
+      sentence.
     format:
       type: myst
-    description: |
-      It shall be the brief description of the interface.  It should be a
-      single sentence.
 spec-name: Interface Brief Description
 spec-type: interface-brief
 type: spec

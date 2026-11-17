@@ -35,8 +35,8 @@ spec-info:
           It shall be the enabled set of the build.
         spec-type: list-str
     description: |
-      This set of attributes specifies a build task.  The task produces no
-      file, so it states no license.
+      This set of attributes specifies a build task. The task produces no file, so it
+      states no license.
     mandatory-attributes: all
 spec-name: Tool Build Task
 spec-type: tool-task-build

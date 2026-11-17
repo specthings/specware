@@ -18,14 +18,14 @@ spec-info:
       - external
       - undefined
     description: |
-      It specifies the state of a register bit field after a reset.  The
-      following values are defined:
+      It specifies the state of a register bit field after a reset. The following
+      values are defined:
 
-      * ``not-reset``: A reset does not change the field.
+      - `not-reset`: A reset does not change the field.
 
-      * ``external``: The field takes its value from outside the device.
+      - `external`: The field takes its value from outside the device.
 
-      * ``undefined``: The value of the field after a reset is not defined.
+      - `undefined`: The value of the field after a reset is not defined.
 spec-name: Register Bit Field Reset Value
 spec-type: interface-register-bits-reset
 type: spec

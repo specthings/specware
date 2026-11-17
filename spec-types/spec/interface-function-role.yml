@@ -15,9 +15,9 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      It defines the interface function role of links.  It is used to indicate
-      that a ${requirement-action:/spec-name} item specifies functional
-      requirements of an ${interface-function:/spec-name} item.
+      It defines the interface function role of links. It is used to indicate that a
+      ${requirement-action:/spec-name} item specifies functional requirements of an
+      ${interface-function:/spec-name} item.
     mandatory-attributes: all
 spec-name: Interface Function Link Role
 spec-type: interface-function-role

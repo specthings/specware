@@ -17,8 +17,7 @@ spec-info:
     attributes:
       hash:
         description: |
-          It shall be the SHA256 hash value of the content of the referenced
-          file.
+          It shall be the SHA256 hash value of the content of the referenced file.
         spec-type: sha256
     description: null
     mandatory-attributes: all

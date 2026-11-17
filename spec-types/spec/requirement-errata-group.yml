@@ -15,11 +15,10 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies an errata group requirement.  The item
-      links to each errata document which it answers for with the `reference`
-      role.  Each enabled erratum of these documents needs a validation of
-      the item which resolves the erratum.  The documents shall have at least
-      one erratum each.
+      This set of attributes specifies an errata group requirement. The item links to
+      each errata document which it answers for with the `reference` role. Each
+      enabled erratum of these documents needs a validation of the item which
+      resolves the erratum. The documents shall have at least one erratum each.
     mandatory-attributes: all
 spec-name: Errata Group Requirement Item Type
 spec-type: requirement-errata-group

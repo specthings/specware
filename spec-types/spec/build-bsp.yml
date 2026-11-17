@@ -68,8 +68,8 @@ spec-info:
         spec-type: build-cppflags
       family:
         description: |
-          It shall be the BSP family name.  The name shall be the last
-          directory of the path to the BSP sources.
+          It shall be the BSP family name. The name shall be the last directory of the
+          path to the BSP sources.
         spec-type: str
       includes:
         description: null

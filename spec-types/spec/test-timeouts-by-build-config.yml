@@ -11,8 +11,8 @@ spec-info:
   dict:
     attributes: {}
     description: |
-      This set of attributes specifies for each build configuration, the test
-      run timeouts.
+      This set of attributes specifies for each build configuration, the test run
+      timeouts.
     generic-attributes:
       description: null
       key-spec-type: str

@@ -12,9 +12,9 @@ spec-info:
     attributes:
       definition:
         description: |
-          The definition will be used if the expression defined by the
-          ``enabled-by`` attribute evaluates to true.  In generated header
-          files, the expression is evaluated by the C preprocessor.
+          The definition will be used if the expression defined by the `enabled-by`
+          attribute evaluates to true. In generated header files, the expression is
+          evaluated by the C preprocessor.
         spec-type: interface-function-definition
       enabled-by:
         description: null

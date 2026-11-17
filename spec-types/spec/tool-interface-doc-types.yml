@@ -23,8 +23,7 @@ spec-info:
           It shall be the target file of the type documentation.
         spec-type: str
     description: |
-      This set of attributes specifies the documentation of the interface
-      types.
+      This set of attributes specifies the documentation of the interface types.
     mandatory-attributes: all
 spec-name: Tool Interface Documentation Types
 spec-type: tool-interface-doc-types

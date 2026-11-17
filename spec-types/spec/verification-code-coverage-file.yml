@@ -23,8 +23,8 @@ spec-info:
           It shall be the list of applicable line numbers.
         spec-type: verification-code-coverage-line-list
     description: |
-      For a code coverage gap verification, this set of attributes specifies
-      the applicable branches, function names, and lines of a file.
+      For a code coverage gap verification, this set of attributes specifies the
+      applicable branches, function names, and lines of a file.
     mandatory-attributes: all
 spec-name: Code Coverage File
 spec-type: verification-code-coverage-file
