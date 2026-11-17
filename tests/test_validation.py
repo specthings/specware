@@ -3467,3 +3467,56 @@ def test_get_affected_targets(tmpdir):
     # A disabled item contributes to no test source file, in particular its
     # test target is unknown to generate_validation().
     assert get_affected_targets(item_cache, {"/tc-disabled"}) == set()
+
+
+def _skip_function(state_names_by_condition):
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item_cache = EmptyItemCache(SpecWareTypeProvider({}))
+    item = _add_item(
+        item_cache, "/skip", {
+            "post-conditions": [_condition("R", ["R0"])],
+            "pre-conditions": [
+                _condition(name, state_names)
+                for name, state_names in state_names_by_condition
+            ],
+            "skip-reasons": {},
+            "test-context": [],
+            "test-header":
+            None,
+            "transition-map": [],
+        }, "requirement/functional/action")
+    content = CContent(code_context())
+    _ActionRequirementTestItem(item)._add_skip(content)
+    return str(content)
+
+
+def test_skip_function_with_one_pre_condition():
+    assert _skip_function([("A", ["A0", "A1"])
+                           ]) == """static const uint8_t Skip_Weights[] = {
+  1
+};
+
+static void Skip_Skip( Skip_Context *ctx, size_t index )
+{
+  (void) ctx;
+  (void) index;
+}
+"""
+
+
+def test_skip_function_with_two_pre_conditions():
+    assert _skip_function([("A", ["A0", "A1"]), ("B", ["B0", "B1"])
+                           ]) == """static const uint8_t Skip_Weights[] = {
+  2, 1
+};
+
+static void Skip_Skip( Skip_Context *ctx, size_t index )
+{
+  switch ( index + 1 ) {
+    case 1:
+      ctx->Map.pcs[ 1 ] = Skip_Pre_B_NA - 1;
+      break;
+  }
+}
+"""
