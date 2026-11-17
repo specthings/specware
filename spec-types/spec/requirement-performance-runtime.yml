@@ -12,37 +12,37 @@ links:
 spec-description: |
   The item shall have exactly one link with the
   ${runtime-measurement-request-role:/spec-name}.  A requirement text processor
-  shall support a substitution of $${.:/limit-kind}:
+  shall support a substitution of ``$${.:/limit-kind}``:
 
   * For a ${requirement-performance-runtime-kind:/spec-name} of
     ``min-lower-bound`` or ``min-upper-bound``, the substitution of
-    $${.:/limit-kind} shall be ``"minimum"``.
+    ``$${.:/limit-kind}`` shall be ``"minimum"``.
 
   * For a ${requirement-performance-runtime-kind:/spec-name} of
     ``mean-lower-bound`` or ``mean-upper-bound``, the substitution of
-    $${.:/limit-kind} shall be ``"mean"``.
+    ``$${.:/limit-kind}`` shall be ``"mean"``.
 
   * For a ${requirement-performance-runtime-kind:/spec-name} of
     ``max-lower-bound`` or ``max-upper-bound``, the substitution of
-    $${.:/limit-kind} shall be ``"maximum"``.
+    ``$${.:/limit-kind}`` shall be ``"maximum"``.
 
   A requirement text processor shall support a substitution of
-  $${.:/limit-condition}:
+  ``$${.:/limit-condition}``:
 
   * For a ${requirement-performance-runtime-kind:/spec-name} of
     ``min-lower-bound``, ``mean-lower-bound``, or ``max-lower-bound``, the
-    substitution of $${.:/limit-condition} shall be ``"greater than or equal to
+    substitution of ``$${.:/limit-condition}`` shall be ``"greater than or equal to
     <value>"`` with <value> being the value of the corresponding entry in the
     ${requirement-performance-runtime-values:/spec-name}.
 
   * For a ${requirement-performance-runtime-kind:/spec-name} of
     ``min-upper-bound``, ``mean-upper-bound``, or ``max-upper-bound``, the
-    substitution of $${.:/limit-condition} shall be ``"less than or equal to
+    substitution of ``$${.:/limit-condition}`` shall be ``"less than or equal to
     <value>"`` with <value> being the value of the corresponding entry in the
     ${requirement-performance-runtime-values:/spec-name}.
 
   A requirement text processor shall support a substitution of
-  $${.:/environment}.  The value of the substitution shall be ``"<environment>
+  ``$${.:/environment}``.  The value of the substitution shall be ``"<environment>
   environment"`` with <environment> being the environment of the corresponding
   entry in the ${requirement-performance-runtime-envs:/spec-name}.
 spec-example: |

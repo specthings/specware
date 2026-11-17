@@ -23,12 +23,12 @@ spec-info:
       path:
         description: |
           It shall be the path used to include the header file.  For example
-          :file:`rtems/confdefs.h`.
+          {file}`rtems/confdefs.h`.
         spec-type: str
       prefix:
         description: |
           It shall be the prefix directory path to the header file in the
-          interface domain.  For example :file:`cpukit/include`.
+          interface domain.  For example {file}`cpukit/include`.
         spec-type: str
     description: |
       This set of attributes specifies a header file.  The item shall have

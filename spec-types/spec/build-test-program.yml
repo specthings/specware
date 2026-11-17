@@ -73,7 +73,7 @@ spec-info:
       Test programs may use additional objects provided by
       ${build-objects:/spec-name} items.  Test programs have an implicit
       ``enabled-by`` attribute value which is controlled by the option action
-      :ref:`set-test-state <SpecTypeBuildOptionItemType>`.  If the test state
+      {ref}`set-test-state <SpecTypeBuildOptionItemType>`.  If the test state
       is set to ``exclude``, then the test program is not built.
     mandatory-attributes: all
 spec-name: Build Test Program Item Type

@@ -16,7 +16,7 @@ spec-info:
     generic-attributes:
       description: |
         The key defines the name of a skip reason.  The name can be used in
-        :ref:`SpecTypeActionRequirementTransitionPostConditions` to skip the
+        {ref}`SpecTypeActionRequirementTransitionPostConditions` to skip the
         corresponding transitions.  The value shall give a reason why the
         transitions are skipped.
       key-spec-type: requirement-action-name
