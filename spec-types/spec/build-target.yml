@@ -11,7 +11,7 @@ spec-info:
   str:
     description: |
       It shall be the target file path.  The path to the target file shall be
-      relative to the directory of the :file:`wscript`.  The target file is
+      relative to the directory of the {file}`wscript`.  The target file is
       located in the build tree.
 spec-name: Build Target
 spec-type: build-target

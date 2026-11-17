@@ -52,7 +52,7 @@ spec-info:
         description: |
           If this script shall execute, then it shall be Python code which is
           executed via ``exec()`` in the context of the ``do_build()`` method
-          of the :file:`wscript`.  A local variable ``bld`` is available with
+          of the {file}`wscript`.  A local variable ``bld`` is available with
           the ``waf`` build context.  A local variable ``bic`` is available
           with the build item context.
         spec-type: optional-str
@@ -60,7 +60,7 @@ spec-info:
         description: |
           If this script shall execute, then it shall be Python code which is
           executed via ``exec()`` in the context of the ``do_configure()``
-          method of the :file:`wscript`.  A local variable ``conf`` is
+          method of the {file}`wscript`.  A local variable ``conf`` is
           available with the ``waf`` configuration context.  A local variable
           ``cic`` is available with the configuration item context.
         spec-type: optional-str
@@ -74,7 +74,7 @@ spec-info:
         description: |
           If this script shall execute, then it shall be Python code which is
           executed via ``exec()`` in the context of the ``prepare_build()``
-          method of the :file:`wscript`.  A local variable ``bld`` is available
+          method of the {file}`wscript`.  A local variable ``bld`` is available
           with the ``waf`` build context.  A local variable ``bic`` is
           available with the build item context.
         spec-type: optional-str
@@ -82,7 +82,7 @@ spec-info:
         description: |
           If this script shall execute, then it shall be Python code which is
           executed via ``exec()`` in the context of the ``prepare_configure()``
-          method of the :file:`wscript`.  A local variable ``conf`` is
+          method of the {file}`wscript`.  A local variable ``conf`` is
           available with the ``waf`` configuration context.  A local variable
           ``cic`` is available with the configuration item context.
         spec-type: optional-str

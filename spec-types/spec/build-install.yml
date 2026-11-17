@@ -21,7 +21,7 @@ spec-info:
           destination directory, otherwise it shall be the list of source files
           to be installed in the destination directory.  The path to the base
           source directory or a source file shall be relative to the directory
-          of the :file:`wscript`.
+          of the {file}`wscript`.
         spec-type: build-install-source
       glob:
         description: |

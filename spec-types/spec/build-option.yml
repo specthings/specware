@@ -59,8 +59,9 @@ spec-info:
         spec-type: optional-str
       format:
         description: |
-          It shall be a `Python format string
-          <https://docs.python.org/3/library/string.html#formatstrings>`_, for
+          It shall be a
+          [Python format string](https://docs.python.org/3/library/string.html#formatstrings),
+          for
           example ``'{}'`` or ``'{:#010x}'``.
         spec-type: optional-str
       name:
