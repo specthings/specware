@@ -52,6 +52,35 @@ publish: all
 src/$(PACKAGE)/spec.pickle: spec-types/spec/* | prepare
 	uv run specpickle spec-types src/$(PACKAGE)/spec.pickle
 
+COMMIT_BASE ?= main
+
+COMMITLINT_ARGS ?= --from $(COMMIT_BASE) --to HEAD
+
+COMMITLINT_PREFIX = .commitlint
+
+COMMITLINT_BIN = $(COMMITLINT_PREFIX)/bin/commitlint
+
+commitlint: | $(COMMITLINT_BIN)
+	NPM_CONFIG_PREFIX=$(COMMITLINT_PREFIX) $(COMMITLINT_BIN) \
+		--config commitlint.yml $(COMMITLINT_ARGS)
+
+# The resolver of commitlint finds the extended configuration in the global
+# prefix of npm.
+$(COMMITLINT_BIN):
+	npm install --silent --global --prefix $(COMMITLINT_PREFIX) \
+		@commitlint/cli@19 @commitlint/config-conventional@19
+	printf '*\n' >$(COMMITLINT_PREFIX)/.gitignore
+
+COMMIT_MSG_HOOK = $(shell git rev-parse --git-path hooks)/commit-msg
+
+# The hook skips the check on a branch which has no commitlint target.
+hooks:
+	printf '#!/bin/sh\ngrep -q "^commitlint:" Makefile || exit 0\nexec make -s commitlint COMMITLINT_ARGS="--edit $$1"\n' \
+		>$(COMMIT_MSG_HOOK)
+	chmod +x $(COMMIT_MSG_HOOK)
+
+.PHONY: commitlint hooks
+
 VENV_MARKER = $(VENV)/uv-sync-marker
 
 prepare: $(VENV_MARKER)
