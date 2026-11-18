@@ -157,7 +157,9 @@ class CContent(Content):
 
     def prepend_spdx_license_identifier(self):
         """ Add an SPDX License Identifier according to the license. """
+        # REUSE-IgnoreStart
         self.prepend([f"/* SPDX-License-Identifier: {self.license} */", ""])
+        # REUSE-IgnoreEnd
 
     def add_copyrights_and_licenses(self):
         """

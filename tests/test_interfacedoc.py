@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import functools
 import os
 import pytest
@@ -1387,3 +1389,6 @@ def test_interfacedoc_types_of_placed_and_hosted_interface(tmpdir):
     with open(target, "r", encoding="utf-8") as src:
         text = src.read()
     assert text.count("This type is placed and hosted.") == 1
+
+
+# REUSE-IgnoreEnd

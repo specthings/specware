@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
+# Copyright (C) 2026 embedded brains GmbH & Co. KG
+
+version = 1
+
+[[annotations]]
+path = [".python-version", "uv.lock"]
+SPDX-FileCopyrightText = "Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG"
+SPDX-License-Identifier = "BSD-2-Clause"
+
+[[annotations]]
+path = "src/specware/spec.pickle"
+SPDX-FileCopyrightText = "Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG"
+SPDX-License-Identifier = "CC-BY-SA-4.0 OR BSD-2-Clause"
+
+[[annotations]]
+path = "tests/**"
+SPDX-FileCopyrightText = "Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG"
+SPDX-License-Identifier = "CC-BY-SA-4.0 OR BSD-2-Clause"
+
+[[annotations]]
+path = "CODE_OF_CONDUCT.md"
+SPDX-FileCopyrightText = "Organization for Ethical Source"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "DCO.txt"
+SPDX-FileCopyrightText = "Copyright (C) 2004, 2006 The Linux Foundation and its contributors."
+SPDX-License-Identifier = "LicenseRef-DCO"

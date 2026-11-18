@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import json
 import logging
 import os
@@ -2313,3 +2315,6 @@ def test_interface_group_identifier_format(tmpdir, caplog, identifier, valid):
         assert not messages
     else:
         assert messages == [f"/cg:/identifier: invalid value: {identifier}"]
+
+
+# REUSE-IgnoreEnd

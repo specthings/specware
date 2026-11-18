@@ -1505,8 +1505,10 @@ class _ZephyrHeaderFile(_HeaderFile):
         with self.content.comment_block():
             self.content.add(
                 self.content.context.licenses.copyrights().get_statements())
+            # REUSE-IgnoreStart
             self.content.add(
                 f"SPDX-License-Identifier: {self.content.license}")
+            # REUSE-IgnoreEnd
 
     def add_node(self, item: Item) -> None:
         self._nodes[item.uid] = _ZephyrNode(self, item)

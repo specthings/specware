@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import functools
 import os
 
@@ -1369,3 +1371,6 @@ def test_reference_url_of_inline_item(tmpdir):
     _add_doxygen_get_values(doxygen_mapper)
     assert doxygen_mapper.substitute("${/ref-pkg/x:/name}") == (
         "<a href=\"https://doc/pkg/x.html#x\">X</a>")
+
+
+# REUSE-IgnoreEnd
