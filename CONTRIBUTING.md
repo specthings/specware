@@ -60,3 +60,22 @@ Signed-off-by: Erika Mustermann <erika.mustermann@example.com>
 ```
 
 Use your real name for contributions to this project.
+
+### Disclose assistance
+
+A commit which a coding assistant helped to write carries an `Assisted-by:`
+line immediately before `Signed-off-by:`.  Use the form
+`AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]` of the Linux kernel document
+[Documentation/process/coding-assistants.rst](https://docs.kernel.org/process/coding-assistants.html):
+
+```
+Assisted-by: Claude:claude-opus-5-5 claude-code
+Signed-off-by: Erika Mustermann <erika.mustermann@example.com>
+```
+
+Take the model version from the assistant session.  Drop a deployment suffix
+such as `[1m]`.  List only coding assistants and specialised analysis tools.
+Git, the compiler and the editor are not tools in this sense.
+
+The person who certifies the DCO signs off.  An assistant never signs off and
+never appears in a `Co-authored-by:` line.
