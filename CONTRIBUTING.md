@@ -47,6 +47,12 @@ messages.
 feat(items): Add foobar support
 ```
 
+The CI checks each commit message against `commitlint.yml`.  To run the same
+check before a push, run `make commitlint`.  It checks the commits since `main`
+and needs `npm`.  Set `COMMIT_BASE` to check against another branch.  To check
+each message at commit time, run `make hooks` once.  It installs a `commit-msg`
+hook.
+
 ### Sign your work
 
 We use the
