@@ -145,7 +145,7 @@ spec-info:
       test-action:
         description: |
           It shall be the test action code.
-        spec-type: str
+        spec-type: clang-function-scope
       test-brief:
         description: |
           If the value is present, then it shall be the test case brief description.
