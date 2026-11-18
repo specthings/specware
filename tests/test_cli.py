@@ -24,6 +24,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# REUSE-IgnoreStart
+
 import contextlib
 import os
 import shutil
@@ -844,3 +846,6 @@ def test_clifind_reports_a_missing_config_file(tmpdir):
     with pytest.raises(SystemExit) as err:
         clifind(["command", "--config-file", config_file, "th"])
     assert "missing.yml" in str(err.value)
+
+
+# REUSE-IgnoreEnd

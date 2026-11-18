@@ -21,6 +21,7 @@ analyse: $(PY_SRC_FILES) | prepare
 	uv run flake8 $^
 	uv run mypy $^
 	uv run pylint --disable=duplicate-code $^
+	uv run reuse lint
 
 check: src/$(PACKAGE)/spec.pickle | prepare
 	uv run pytest -vv

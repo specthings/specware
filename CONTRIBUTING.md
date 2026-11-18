@@ -34,6 +34,18 @@ by the project.
 
 Type annotations and the use of analysis tools is not required for test code.
 
+### Licensing information
+
+The project follows the [REUSE Specification](https://reuse.software/spec/).
+Each file names its license and its copyright holders.  A file which can carry
+a comment starts with an `SPDX-License-Identifier` line and a copyright line.
+For a file which cannot carry a comment, add an entry to `REUSE.toml`.  The
+`LICENSES` directory holds the text of each license.  `make analyse` runs
+`reuse lint` to check this.
+
+A file which contains license identifiers as data, such as a test, encloses
+them in `REUSE-IgnoreStart` and `REUSE-IgnoreEnd` comments.
+
 ### Tests
 
 Use `pytest` for tests.  Run `make check` to run the tests.  Make sure the code

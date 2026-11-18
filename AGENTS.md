@@ -21,6 +21,10 @@ uv run pytest --no-cov tests/test_interface.py::test_interface_item_marker
 Git tracks `src/specware/spec.pickle`. Regenerate it with `make` after each
 edit of `spec-types/spec/`.
 
+`make analyse` runs `reuse lint`. A new file needs an SPDX header or an entry
+in `REUSE.toml`. Enclose license identifiers which a file holds as data in
+`REUSE-IgnoreStart` and `REUSE-IgnoreEnd` comments.
+
 ## Architecture
 
 specware builds on the item model of
