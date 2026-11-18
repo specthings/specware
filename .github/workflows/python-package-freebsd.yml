@@ -27,6 +27,7 @@ jobs:
       with:
         run: |
           pkg update -f
-          pkg install -y python3 py311-sqlite3 uv gmake rust
+          pkg install -y python3 py311-sqlite3 uv gmake git rust
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           export UV_CACHE_DIR="$GITHUB_WORKSPACE/.freebsd/uv"
           gmake
