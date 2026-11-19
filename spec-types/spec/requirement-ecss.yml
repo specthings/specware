@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2025 embedded brains GmbH & Co. KG
+- Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -18,10 +18,20 @@ spec-info:
         description: |
           If the value is present, it shall be the aim.
         spec-type: optional-str
+      annex-section:
+        description: |
+          It shall be the section number within the annex, such as ``4.1``
+          in the clause ``B.2.1<4.1>a``.
+        spec-type: str
       bullet:
         description: |
           It shall be the requirement clause bullet.
         spec-type: str
+      ecss-type:
+        description: |
+          It shall be the type of the clause.  If the attribute is absent, the
+          clause is a requirement.
+        spec-type: requirement-ecss-type
       expected-output:
         description: |
           If the value is present, it shall be the expected output.
@@ -36,11 +46,19 @@ spec-info:
         spec-type: list-str
       section:
         description: |
-          It shall be the requirement section number.
+          It shall be the requirement section number.  In an annex, it shall
+          be the section number without the annex section, such as
+          ``B.2.1`` in the clause ``B.2.1<4.1>a``.
         spec-type: str
     description: |
       This set of attributes specifies an ${/glossary/ecss:/term} requirement.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - aim
+    - bullet
+    - expected-output
+    - name
+    - notes
+    - section
 spec-name: ECSS Requirement Item Type
 spec-type: requirement-ecss
 type: spec
