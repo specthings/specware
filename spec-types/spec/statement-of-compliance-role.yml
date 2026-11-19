@@ -1,6 +1,6 @@
 SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
 copyrights:
-- Copyright (C) 2025 embedded brains GmbH & Co. KG
+- Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 enabled-by: true
 links:
 - role: spec-member
@@ -24,7 +24,11 @@ spec-info:
         spec-type: statement-of-compliance-status
     description: |
       It defines the statement of compliance role of links. The link target shall be
-      an ${requirement-ecss:/spec-name} item.
+      an ${requirement-ecss:/spec-name} item, an ${requirement-ecss-annex:/spec-name}
+      item, or a ${requirement-standard:/spec-name} item. The statement of
+      compliance of an annex or a standard applies to each of its
+      ${requirement-ecss:/spec-name} items which has no statement of compliance of
+      its own.
     mandatory-attributes: all
 spec-name: Statement of Compliance Link Role
 spec-type: statement-of-compliance-role
