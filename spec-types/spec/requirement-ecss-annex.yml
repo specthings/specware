@@ -1,0 +1,34 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: non-functional-type
+  spec-value: ecss-annex
+  uid: requirement-non-functional
+spec-description: |
+  An annex item refines the standard item.  The clauses of the annex refine
+  the annex item.
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      annex:
+        description: |
+          It shall be the letter of the annex.
+        spec-type: str
+      name:
+        description: |
+          It shall be the title of the annex without its letter, such as
+          ``Software system specification (SSS) - DRD``.
+        spec-type: str
+    description: |
+      This set of attributes specifies an annex of an ${/glossary/ecss:/term}
+      standard, such as a document requirements definition.
+    mandatory-attributes: all
+spec-name: ECSS Annex Item Type
+spec-type: requirement-ecss-annex
+type: spec
