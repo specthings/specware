@@ -1289,7 +1289,7 @@ wheels = [
 
 [[package]]
 name = "specitems"
-version = "1.7.24"
+version = "1.7.25"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "license-expression" },
@@ -1302,9 +1302,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "ruamel-yaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/80/71/6156ef472ea1dceee837f7946d60f6cc11f63777466b678b367ebfe540b5/specitems-1.7.24.tar.gz", hash = "sha256:ef52ff59708150afc805fc3409d62ed50713d961a9d074063f657190f774de62", size = 95888, upload-time = "2026-11-18T12:10:45.428Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/93/eae2614f5a72b502090a87d7211b019038bbfa853d09f7ea4198227b7b6d/specitems-1.7.25.tar.gz", hash = "sha256:e17ff4fae75d71a5ba4bb1641db0754fe5949545cd5a25b98de39d59749d03de", size = 95913, upload-time = "2026-11-24T07:44:52.797Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/1d/24672daef9dff0202d2cbbfdcebbf9d4b861769b14758624ca1422a626fd/specitems-1.7.24-py3-none-any.whl", hash = "sha256:31017c76313b758d529fec2fad484c4b5d5499c3caa5fc4403aa58fffa8f734d", size = 128687, upload-time = "2026-11-18T12:10:46.54Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/7e/e2009a2cf888630f7089cf79cb23820323d722d71fb16a1494ce2f5a2106/specitems-1.7.25-py3-none-any.whl", hash = "sha256:0641d2bda030a198da74470adbf34920611b43a4085b9372aef5a98f2c656bed", size = 128716, upload-time = "2026-11-24T07:44:51.541Z" },
 ]
 
 [[package]]
@@ -1336,7 +1336,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "specitems", specifier = ">=1.7.24" }]
+requires-dist = [{ name = "specitems", specifier = ">=1.7.25" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -1609,11 +1609,11 @@ wheels = [
 
 [[package]]
 name = "tomlkit"
-version = "0.15.2"
+version = "0.15.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/08/72/fc01563df95c189a9f65850096bdc205bc2fe37da6c740cd64afaf18d07e/tomlkit-0.15.2.tar.gz", hash = "sha256:83e32755ba1d20d9340bd069ee97e9f6232ba2346b63ffcba425de01f7e327a6", size = 190522, upload-time = "2026-10-16T04:07:08.166Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/85/4a7c68111c057a6498f5bc721ef93b388b420bb31d7020759f18a5f0c2ec/tomlkit-0.15.3.tar.gz", hash = "sha256:b3c3020ec1a4bd469d12e31fb4da938e7f6ba758cdbec3fd9047db63120eaf81", size = 204435, upload-time = "2026-11-24T07:21:10.422Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/da/46/7d84138a60a8bd796825b2d38ebe92d0d16501ca57d501b7c5d677401bbc/tomlkit-0.15.2-py3-none-any.whl", hash = "sha256:05562412163a3037b94497385fb7f9204c637bc605af7a48199e41cf2272f437", size = 52225, upload-time = "2026-10-16T04:07:09.216Z" },
+    { url = "https://files.pythonhosted.org/packages/c3/49/6b0a22e69c844c0b18cb66c206bdd791693d0cf845badc5f84e6448f2192/tomlkit-0.15.3-py3-none-any.whl", hash = "sha256:a83ce6de3b648e68dd9b50aabadad749ba823eb58b1d026f3c0a283c4767a9c1", size = 55467, upload-time = "2026-11-24T07:21:11.239Z" },
 ]
 
 [[package]]
