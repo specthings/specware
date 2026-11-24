@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: DIR
+install: []
+links: []
+source:
+- dir.c
+type: build

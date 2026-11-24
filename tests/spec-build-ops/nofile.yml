@@ -1,0 +1,12 @@
+actions:
+- get-boolean: null
+- env-enable: null
+build-type: option
+default:
+- enabled-by:
+    is-file: spec-build-ops
+  value: true
+enabled-by: true
+links: []
+name: NOFILE
+type: build

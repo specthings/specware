@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: NODIR
+install: []
+links: []
+source:
+- nodir.c
+type: build

@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: FILE
+install: []
+links: []
+source:
+- file.c
+type: build

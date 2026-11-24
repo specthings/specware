@@ -1,0 +1,12 @@
+actions:
+- get-boolean: null
+- env-enable: null
+build-type: option
+default:
+- enabled-by:
+    is-directory: spec-build-ops
+  value: true
+enabled-by: true
+links: []
+name: DIR
+type: build

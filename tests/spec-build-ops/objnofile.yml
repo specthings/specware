@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: NOFILE
+install: []
+links: []
+source:
+- nofile.c
+type: build

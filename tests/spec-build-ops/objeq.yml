@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: EQ
+install: []
+links: []
+source:
+- eq.c
+type: build

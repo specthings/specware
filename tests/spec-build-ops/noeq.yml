@@ -1,0 +1,15 @@
+actions:
+- get-boolean: null
+- env-enable: null
+build-type: option
+default:
+- enabled-by:
+    eq:
+    - ${STR}
+    - abc
+    - x
+  value: true
+enabled-by: true
+links: []
+name: NOEQ
+type: build

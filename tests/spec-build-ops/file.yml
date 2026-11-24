@@ -1,0 +1,14 @@
+actions:
+- get-boolean: null
+- env-enable: null
+build-type: option
+default:
+- enabled-by:
+    and:
+    - is-file: spec-build-ops/g.yml
+    - not: Z
+  value: true
+enabled-by: true
+links: []
+name: FILE
+type: build

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides methods to gather the files used for a build. """
 
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -24,11 +24,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+from collections.abc import Iterator, Mapping
 import glob
 import os
+import string
 from typing import Any
 
-from specitems import is_enabled, Item, ItemCache, Link
+from specitems import (EnabledSet, IS_ENABLED_OPS, Item, ItemCache, Link,
+                       is_enabled_with_ops)
 
 BaseDirectoryMap = list[dict[str, str]]
 
@@ -96,20 +99,93 @@ _EXTEND_SOURCE_FILES = {
 _BUILD_ROLES = ["build-dependency", "build-dependency-conditional"]
 
 
-def _build_dependencies(item: Item, enabled_set: list[str]) -> list[Item]:
+class _Template(string.Template):
+    idpattern = "[_A-Za-z][_A-Za-z0-9:#]*"
+
+
+class _Variables(Mapping[str, str]):
+    """
+    Maps a variable name to the value of the option of this name.
+
+    A name without a value maps to 1 if it is a member of the enabled set,
+    otherwise to 0.  A colon separates a format specification from the name.
+    """
+
+    def __init__(self, values: dict[str, Any], enabled_set: list[str]) -> None:
+        self._values = values
+        self._enabled_set = enabled_set
+
+    def __getitem__(self, name: str) -> str:
+        key, colon, spec = name.partition(":")
+        if key in self._values:
+            value = self._values[key]
+        else:
+            value = int(key in self._enabled_set)
+        fmt = "{" + colon + spec + "}"
+        if isinstance(value, list):
+            return " ".join(fmt.format(element) for element in value)
+        return fmt.format(value)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._values)
+
+    def __len__(self) -> int:
+        return len(self._values)
+
+
+class _BuildContext:  # pylint: disable=too-few-public-methods
+    """
+    Evaluates the enabled-by expressions of build items with the operators of
+    the build system.
+
+    The operators is-directory and is-file take a path relative to the top
+    directory.
+    """
+
+    def __init__(self, enabled_set: list[str], top_directory: str) -> None:
+        self.enabled_set = enabled_set
+        self.values: dict[str, Any] = {}
+        variables = _Variables(self.values, enabled_set)
+
+        def _eq(_ops: dict, _enabled_set: EnabledSet, enabled_by: Any) -> bool:
+            first = _Template(enabled_by[0]).substitute(variables)
+            return all(
+                _Template(value).substitute(variables) == first
+                for value in enabled_by[1:])
+
+        def _is_directory(_ops: dict, _enabled_set: EnabledSet,
+                          enabled_by: Any) -> bool:
+            return os.path.isdir(os.path.join(top_directory, enabled_by))
+
+        def _is_file(_ops: dict, _enabled_set: EnabledSet,
+                     enabled_by: Any) -> bool:
+            return os.path.isfile(os.path.join(top_directory, enabled_by))
+
+        self._ops = IS_ENABLED_OPS | {
+            "eq": _eq,
+            "is-directory": _is_directory,
+            "is-file": _is_file,
+        }
+
+    def is_enabled(self, enabled_by: Any) -> bool:
+        """ Evaluate the enabled-by expression. """
+        return is_enabled_with_ops(self._ops, self.enabled_set, enabled_by)
+
+
+def _build_dependencies(item: Item, context: _BuildContext) -> list[Item]:
 
     def _is_enabled(link: Link) -> bool:
-        if not link.item.is_enabled(enabled_set):
+        if not context.is_enabled(link.item["enabled-by"]):
             return False
         if link.role == "build-dependency":
             return True
-        return is_enabled(enabled_set, link["enabled-by"])
+        return context.is_enabled(link["enabled-by"])
 
     dependencies = list(item.parents(_BUILD_ROLES,
                                      is_link_enabled=_is_enabled))
     for uid in item.get("build-extension-points", []):
         extension_point = item.map(uid)
-        if extension_point.is_enabled(enabled_set):
+        if context.is_enabled(extension_point["enabled-by"]):
             dependencies.append(extension_point)
     return dependencies
 
@@ -121,34 +197,37 @@ def _build_dependencies(item: Item, enabled_set: list[str]) -> list[Item]:
 _GET_ACTIONS = ("get-boolean", "get-integer", "get-string")
 
 
-def _default_value(item: Item, enabled_set: list[str]) -> Any:
+def _default_value(item: Item, context: _BuildContext) -> Any:
     for default in item.get("default", []):
-        if is_enabled(enabled_set, default["enabled-by"]):
+        if context.is_enabled(default["enabled-by"]):
             return default["value"]
     return None
 
 
-def _enable_by_options(item: Item, enabled_set: list[str]) -> None:
-    for dependency in _build_dependencies(item, enabled_set):
-        _enable_by_options(dependency, enabled_set)
+def _enable_by_options(item: Item, context: _BuildContext) -> None:
+    for dependency in _build_dependencies(item, context):
+        _enable_by_options(dependency, context)
     if item["build-type"] != "option":
         return
     actions = item.get("actions", [])
     if not actions or next(iter(actions[0])) not in _GET_ACTIONS:
         return
-    value = _default_value(item, enabled_set)
+    value = _default_value(item, context)
+    name = item["name"]
+    if name not in context.enabled_set:
+        context.values[name] = value
     for action in actions:
         if "env-enable" in action and value:
-            name = action["env-enable"] or item["name"]
-            if name not in enabled_set:
-                enabled_set.append(name)
+            enable = action["env-enable"] or name
+            if enable not in context.enabled_set:
+                context.enabled_set.append(enable)
 
 
-def _gather_source_files(item: Item, enabled_set: list[str],
+def _gather_source_files(item: Item, context: _BuildContext,
                          base_directory_map: BaseDirectoryMap,
                          source_files: list[str]) -> None:
-    for dependency in _build_dependencies(item, enabled_set):
-        _gather_source_files(dependency, enabled_set, base_directory_map,
+    for dependency in _build_dependencies(item, context):
+        _gather_source_files(dependency, context, base_directory_map,
                              source_files)
     source_files.extend(item.get("extra-files", []))
     _EXTEND_SOURCE_FILES[item["build-type"]](item, base_directory_map,
@@ -186,13 +265,16 @@ def gather_build_files(config: dict,
 
     The enabled set of the configuration contains each option which the build
     configuration enables.  The options which their default values enable
-    extend the enabled set, as the configure step of the build does.
+    extend the enabled set, as the configure step of the build does.  The
+    optional top directory of the configuration is the directory in which the
+    build runs.  It defaults to the current working directory.
     """
     source_files: list[str] = []
     arch = config["arch"]
     bsp = config["bsp"]
     base_directory_map = config["base-directory-map"]
-    enabled_set = list(config["enabled-set"])
+    context = _BuildContext(list(config["enabled-set"]),
+                            config.get("top-directory", os.getcwd()))
     roots = [item_cache[uid] for uid in config["build-uids"]]
     if arch is not None and bsp is not None:
         bsps: dict[str, dict[str, Item]] = {}
@@ -202,10 +284,9 @@ def gather_build_files(config: dict,
                 arch_bsps[item["bsp"].strip()] = item
         roots.insert(0, bsps[arch][bsp])
     for root in roots:
-        _enable_by_options(root, enabled_set)
+        _enable_by_options(root, context)
     for root in roots:
-        _gather_source_files(root, enabled_set, base_directory_map,
-                             source_files)
+        _gather_source_files(root, context, base_directory_map, source_files)
     if test_header:
-        _gather_test_header(item_cache, enabled_set, source_files)
+        _gather_test_header(item_cache, context.enabled_set, source_files)
     return source_files

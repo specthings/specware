@@ -1,0 +1,14 @@
+actions:
+- get-boolean: null
+- env-enable: null
+build-type: option
+default:
+- enabled-by:
+    is-directory: missing
+  value: true
+- enabled-by: true
+  value: false
+enabled-by: true
+links: []
+name: NODIR
+type: build
