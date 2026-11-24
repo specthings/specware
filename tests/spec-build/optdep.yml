@@ -1,0 +1,13 @@
+actions:
+- get-boolean: null
+- env-enable: OPTDEPX
+build-type: option
+default:
+- enabled-by: OPTDEF
+  value: true
+- enabled-by: true
+  value: false
+enabled-by: true
+links: []
+name: OPTDEP
+type: build

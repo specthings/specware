@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: OPTNODEF
+install: []
+links: []
+source:
+- objoptnodef.c
+type: build

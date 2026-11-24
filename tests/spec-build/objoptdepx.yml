@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: OPTDEPX
+install: []
+links: []
+source:
+- objoptdepx.c
+type: build
