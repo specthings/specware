@@ -50,15 +50,17 @@ def test_build(tmpdir):
     build_config["build-uids"] = ["/g"]
     files = gather_build_files(build_config, item_cache)
     assert files == [
-        "stu", "jkl", "a/b/c/d.h", "mno", "o2i", "o2s", "abc", "def", "ts.c",
-        "tc.c", "tc-b.c", "tc-clock-gettime.c", "tc-clock-nanosleep.c",
-        "tc-barrier-performance.c", "a", "b", "ghi", "th"
+        "stu", "jkl", "a/b/c/d.h", "mno", "objoptdepx.c", "o2i", "o2s", "abc",
+        "def", "ts.c", "tc.c", "tc-b.c", "tc-clock-gettime.c",
+        "tc-clock-nanosleep.c", "tc-barrier-performance.c", "a", "b", "ghi",
+        "th"
     ]
+    assert build_config["enabled-set"] == ["A"]
     files = gather_build_files(build_config, item_cache, test_header=False)
     assert files == [
-        "stu", "jkl", "a/b/c/d.h", "mno", "o2i", "o2s", "abc", "def", "ts.c",
-        "tc.c", "tc-b.c", "tc-clock-gettime.c", "tc-clock-nanosleep.c",
-        "tc-barrier-performance.c", "a", "b", "ghi"
+        "stu", "jkl", "a/b/c/d.h", "mno", "objoptdepx.c", "o2i", "o2s", "abc",
+        "def", "ts.c", "tc.c", "tc-b.c", "tc-clock-gettime.c",
+        "tc-clock-nanosleep.c", "tc-barrier-performance.c", "a", "b", "ghi"
     ]
     build_config["arch"] = None
     build_config["bsp"] = None

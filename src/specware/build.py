@@ -26,6 +26,7 @@
 
 import glob
 import os
+from typing import Any
 
 from specitems import is_enabled, Item, ItemCache, Link
 
@@ -95,9 +96,7 @@ _EXTEND_SOURCE_FILES = {
 _BUILD_ROLES = ["build-dependency", "build-dependency-conditional"]
 
 
-def _gather_source_files(item: Item, enabled_set: list[str],
-                         base_directory_map: BaseDirectoryMap,
-                         source_files: list[str]) -> None:
+def _build_dependencies(item: Item, enabled_set: list[str]) -> list[Item]:
 
     def _is_enabled(link: Link) -> bool:
         if not link.item.is_enabled(enabled_set):
@@ -106,14 +105,51 @@ def _gather_source_files(item: Item, enabled_set: list[str],
             return True
         return is_enabled(enabled_set, link["enabled-by"])
 
-    for parent in item.parents(_BUILD_ROLES, is_link_enabled=_is_enabled):
-        _gather_source_files(parent, enabled_set, base_directory_map,
-                             source_files)
+    dependencies = list(item.parents(_BUILD_ROLES,
+                                     is_link_enabled=_is_enabled))
     for uid in item.get("build-extension-points", []):
         extension_point = item.map(uid)
         if extension_point.is_enabled(enabled_set):
-            _gather_source_files(extension_point, enabled_set,
-                                 base_directory_map, source_files)
+            dependencies.append(extension_point)
+    return dependencies
+
+
+# The value of an option with one of these first actions is its configured
+# value or its default value.  The build configuration of the package
+# provides each configured value which enables something as a member of the
+# enabled set.
+_GET_ACTIONS = ("get-boolean", "get-integer", "get-string")
+
+
+def _default_value(item: Item, enabled_set: list[str]) -> Any:
+    for default in item.get("default", []):
+        if is_enabled(enabled_set, default["enabled-by"]):
+            return default["value"]
+    return None
+
+
+def _enable_by_options(item: Item, enabled_set: list[str]) -> None:
+    for dependency in _build_dependencies(item, enabled_set):
+        _enable_by_options(dependency, enabled_set)
+    if item["build-type"] != "option":
+        return
+    actions = item.get("actions", [])
+    if not actions or next(iter(actions[0])) not in _GET_ACTIONS:
+        return
+    value = _default_value(item, enabled_set)
+    for action in actions:
+        if "env-enable" in action and value:
+            name = action["env-enable"] or item["name"]
+            if name not in enabled_set:
+                enabled_set.append(name)
+
+
+def _gather_source_files(item: Item, enabled_set: list[str],
+                         base_directory_map: BaseDirectoryMap,
+                         source_files: list[str]) -> None:
+    for dependency in _build_dependencies(item, enabled_set):
+        _gather_source_files(dependency, enabled_set, base_directory_map,
+                             source_files)
     source_files.extend(item.get("extra-files", []))
     _EXTEND_SOURCE_FILES[item["build-type"]](item, base_directory_map,
                                              source_files)
@@ -145,22 +181,30 @@ def _gather_test_header(item_cache: ItemCache, enabled_set: list[str],
 def gather_build_files(config: dict,
                        item_cache: ItemCache,
                        test_header: bool = True) -> list[str]:
-    """ Generate a list of files form the build specification. """
+    """
+    Generate a list of files form the build specification.
+
+    The enabled set of the configuration contains each option which the build
+    configuration enables.  The options which their default values enable
+    extend the enabled set, as the configure step of the build does.
+    """
     source_files: list[str] = []
     arch = config["arch"]
     bsp = config["bsp"]
     base_directory_map = config["base-directory-map"]
-    enabled_set = config["enabled-set"]
+    enabled_set = list(config["enabled-set"])
+    roots = [item_cache[uid] for uid in config["build-uids"]]
     if arch is not None and bsp is not None:
         bsps: dict[str, dict[str, Item]] = {}
         for item in item_cache.values():
             if item["type"] == "build" and item["build-type"] == "bsp":
                 arch_bsps = bsps.setdefault(item["arch"].strip(), {})
                 arch_bsps[item["bsp"].strip()] = item
-        _gather_source_files(bsps[arch][bsp], enabled_set, base_directory_map,
-                             source_files)
-    for uid in config["build-uids"]:
-        _gather_source_files(item_cache[uid], enabled_set, base_directory_map,
+        roots.insert(0, bsps[arch][bsp])
+    for root in roots:
+        _enable_by_options(root, enabled_set)
+    for root in roots:
+        _gather_source_files(root, enabled_set, base_directory_map,
                              source_files)
     if test_header:
         _gather_test_header(item_cache, enabled_set, source_files)

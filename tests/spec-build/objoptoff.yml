@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: OPTOFF
+install: []
+links: []
+source:
+- objoptoff.c
+type: build

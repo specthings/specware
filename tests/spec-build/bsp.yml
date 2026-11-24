@@ -17,6 +17,26 @@ links:
 - role: build-dependency
   uid: op
 - role: build-dependency
+  uid: objoptdepx
+- role: build-dependency
+  uid: objoptoff
+- role: build-dependency
+  uid: objoptenv
+- role: build-dependency
+  uid: objoptnodef
+- role: build-dependency
+  uid: optdef
+- role: build-dependency
+  uid: optdep
+- role: build-dependency
+  uid: optoff
+- role: build-dependency
+  uid: optenv
+- role: build-dependency
+  uid: opta
+- role: build-dependency
+  uid: optnodef
+- role: build-dependency
   uid: d
 - role: build-dependency
   uid: extension
