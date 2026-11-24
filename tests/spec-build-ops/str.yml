@@ -1,0 +1,10 @@
+actions:
+- get-string: null
+build-type: option
+default:
+- enabled-by: true
+  value: abc
+enabled-by: true
+links: []
+name: STR
+type: build

@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: true
+install: []
+links: []
+source:
+- cond.c
+type: build

@@ -30,6 +30,7 @@ from pathlib import Path
 from specitems import (ItemCache, SpecYAMLFormatter, item_is_enabled,
                        verify_specification_format)
 from specware import gather_build_files
+from specware.build import _Variables
 
 from .util import create_item_cache
 
@@ -69,6 +70,36 @@ def test_build(tmpdir):
         "ts.c", "tc.c", "tc-b.c", "tc-clock-gettime.c", "tc-clock-nanosleep.c",
         "tc-barrier-performance.c", "a", "b", "ghi"
     ]
+
+
+def test_build_operators(tmpdir, monkeypatch):
+    item_cache = create_item_cache(tmpdir, "spec-build-ops")
+    build_config = {
+        "arch": None,
+        "bsp": None,
+        "base-directory-map": [],
+        "build-uids": ["/g"],
+        "enabled-set": ["A"],
+        "top-directory": str(Path(__file__).parent.absolute())
+    }
+    files = gather_build_files(build_config, item_cache, test_header=False)
+    assert files == ["dir.c", "file.c", "eq.c", "eqlist.c", "cond.c"]
+    build_config["top-directory"] = str(tmpdir)
+    files = gather_build_files(build_config, item_cache, test_header=False)
+    assert files == ["eq.c", "eqlist.c", "cond.c"]
+    del build_config["top-directory"]
+    monkeypatch.chdir(Path(__file__).parent)
+    files = gather_build_files(build_config, item_cache, test_header=False)
+    assert files == ["dir.c", "file.c", "eq.c", "eqlist.c", "cond.c"]
+
+
+def test_build_variables():
+    variables = _Variables({"B": "b"}, ["A"])
+    assert list(variables) == ["B"]
+    assert len(variables) == 1
+    assert variables["A"] == "1"
+    assert variables["B"] == "b"
+    assert variables["C"] == "0"
 
 
 def test_build_action_format(tmpdir):

@@ -1,0 +1,14 @@
+actions:
+- get-boolean: null
+- env-enable: null
+build-type: option
+default:
+- enabled-by:
+    eq:
+    - ${STR}${INT:#x}${A}${Z}
+    - abc0x1010
+  value: true
+enabled-by: true
+links: []
+name: EQ
+type: build

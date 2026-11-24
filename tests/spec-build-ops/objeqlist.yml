@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: EQLIST
+install: []
+links: []
+source:
+- eqlist.c
+type: build

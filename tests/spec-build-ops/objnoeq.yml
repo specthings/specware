@@ -1,0 +1,7 @@
+build-type: objects
+enabled-by: NOEQ
+install: []
+links: []
+source:
+- noeq.c
+type: build

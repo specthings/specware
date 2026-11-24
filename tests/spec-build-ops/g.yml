@@ -1,0 +1,44 @@
+build-type: group
+enabled-by: true
+install: []
+links:
+- role: build-dependency
+  uid: dir
+- role: build-dependency
+  uid: nodir
+- role: build-dependency
+  uid: file
+- role: build-dependency
+  uid: nofile
+- role: build-dependency
+  uid: str
+- role: build-dependency
+  uid: int
+- role: build-dependency
+  uid: list
+- role: build-dependency
+  uid: eq
+- role: build-dependency
+  uid: noeq
+- role: build-dependency
+  uid: eqlist
+- role: build-dependency
+  uid: objdir
+- role: build-dependency
+  uid: objnodir
+- role: build-dependency
+  uid: objfile
+- role: build-dependency
+  uid: objnofile
+- role: build-dependency
+  uid: objeq
+- role: build-dependency
+  uid: objnoeq
+- role: build-dependency
+  uid: objeqlist
+- enabled-by:
+    not:
+      is-file: missing
+  role: build-dependency-conditional
+  uid: objcond
+type: build
