@@ -1,0 +1,15 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+glossary-type: term
+links:
+- role: glossary-member
+  uid: sub
+term: body
+text: |
+  The body uses an ${api:/term}, two ${api:/plural}, an ${outside:/term} and
+  two ${outside:/plural}.
+
+  The standard ${../ref/doc:/cite-long}.
+type: glossary

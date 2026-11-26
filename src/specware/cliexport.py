@@ -46,11 +46,11 @@ from specitems import (ClangFormatter, ContentContext, DocumentGlossaryConfig,
 
 from specware import (
     run_with_clang_formatter, open_tree, MarkdownInterfaceMapper,
-    SphinxInterfaceMapper, add_clang_format_arguments,
+    SphinxInterfaceMapper, DoxygenGlossaryConfig, add_clang_format_arguments,
     generate_application_configuration, generate_interface_documentation,
-    gather_referencing_items, generate_interfaces, generate_validation,
-    get_affected_header_files, get_affected_targets,
-    is_application_configuration_affected)
+    gather_referencing_items, generate_doxygen_glossary, generate_interfaces,
+    generate_validation, get_affected_header_files, get_affected_targets,
+    is_application_configuration_affected, is_doxygen_glossary_affected)
 
 _DOC_FORMAT = {
     "myst": (MarkdownContent, MarkdownMapper, MarkdownInterfaceMapper),
@@ -260,6 +260,13 @@ def _generate_selected(item_cache: ItemCache, config: Item,
                 generate_interfaces(task, item_cache,
                                     create_content_context(task, provider),
                                     formatter, header_file_uids)
+    for task in yield_tasks(config, "doxygen-glossary"):
+        glossary_config = create_config(_task_config(task),
+                                        DoxygenGlossaryConfig)
+        if is_doxygen_glossary_affected(glossary_config, item_cache, uids):
+            generate_doxygen_glossary(glossary_config, item_cache,
+                                      create_content_context(task, provider),
+                                      formatter)
     if not args.no_application_configuration_code:
         for task in yield_tasks(config, "appl-config"):
             if not is_application_configuration_affected(
@@ -304,6 +311,10 @@ def _generate_code(item_cache: ItemCache, config: Item,
             generate_interfaces(task, item_cache,
                                 create_content_context(task, provider),
                                 formatter)
+    for task in yield_tasks(config, "doxygen-glossary"):
+        generate_doxygen_glossary(
+            create_config(_task_config(task), DoxygenGlossaryConfig),
+            item_cache, create_content_context(task, provider), formatter)
     if args.no_application_configuration_code:
         return
     for task in yield_tasks(config, "appl-config"):
