@@ -37,7 +37,7 @@ from specware import (document_option, generate_application_configuration,
                       is_application_configuration_affected,
                       MarkdownInterfaceMapper, SphinxInterfaceMapper)
 
-from specware.applconfig import _add_doxygen_get_values
+from specware.applconfig import add_doxygen_get_values
 from specware.interfacemapper import get_interface_reference
 
 from .conftest import code_context, doc_context
@@ -1368,7 +1368,7 @@ def test_reference_url_of_inline_item(tmpdir):
     assert mapper.substitute("${/ref-pkg/x:/name}") == (
         "`X <https://doc/pkg/x.html#x>`_")
     doxygen_mapper = ItemMapper(item)
-    _add_doxygen_get_values(doxygen_mapper)
+    add_doxygen_get_values(doxygen_mapper)
     assert doxygen_mapper.substitute("${/ref-pkg/x:/name}") == (
         "<a href=\"https://doc/pkg/x.html#x\">X</a>")
 
