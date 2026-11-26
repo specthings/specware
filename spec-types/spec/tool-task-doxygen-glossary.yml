@@ -1,0 +1,66 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+- role: spec-refinement
+  spec-key: task-type
+  spec-value: doxygen-glossary
+  uid: tool-task
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      accepted-licenses:
+        description: |
+          It shall be the licenses which the produced file accepts for a part whose
+          license expression permits not the license of the file.
+        spec-type: list-str
+      automatically-generated-warning:
+        description: |
+          It shall be the warning which the produced file carries. An empty warning
+          adds no comment block to the file.
+        spec-type: str
+      file-ingroups:
+        description: |
+          It shall be the Doxygen groups which the file block of the produced file
+          names in an `@ingroup` command.
+        spec-type: list-str
+      groups:
+        description: |
+          It shall be the glossary groups whose terms the page defines. The terms of
+          a group include the terms of the groups which refine it.
+        spec-type: list-uid
+      license:
+        description: |
+          It shall be the license of the produced file.
+        spec-type: spdx-license-identifier
+      page-name:
+        description: |
+          It shall be the name of the Doxygen page. The name prefixes the anchor of
+          each term.
+        spec-type: str
+      page-title:
+        description: |
+          It shall be the title of the Doxygen page.
+        spec-type: str
+      target:
+        description: |
+          It shall be the path of the produced Doxygen source.
+        spec-type: str
+    description: |
+      This set of attributes specifies a Doxygen glossary task. The task produces
+      a Doxygen source with a page which defines the terms of glossary groups in a
+      definition list.
+    mandatory-attributes:
+    - groups
+    - license
+    - page-name
+    - page-title
+    - target
+spec-name: Tool Doxygen Glossary Task
+spec-type: tool-task-doxygen-glossary
+type: spec

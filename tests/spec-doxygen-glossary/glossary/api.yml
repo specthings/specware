@@ -1,0 +1,13 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+glossary-type: term
+links:
+- role: glossary-member
+  uid: general
+term: API
+text: |
+  This term is an acronym for Application Programming Interface, see
+  ${../ref/doc:/cite}.
+type: glossary

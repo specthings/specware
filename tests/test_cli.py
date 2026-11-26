@@ -140,6 +140,16 @@ tasks:
   project-target: project-glossary.md
   task-name: glossary
   task-type: glossary
+- accepted-licenses:
+  - CC-BY-SA-4.0
+  groups:
+  - /glossary-general
+  license: BSD-2-Clause
+  page-name: Glossary
+  page-title: Glossary
+  target: glossary.h
+  task-name: doxygen-glossary
+  task-type: doxygen-glossary
 - accepted-licenses: []
   hierarchy-subsection-name: Specification Item Hierarchy
   hierarchy-text: 'The specification item types have the following hierarchy:
@@ -208,9 +218,10 @@ def test_cliexport_format_code(tmpdir, caplog):
         target = Path(tmpdir) / name
         assert target.read_text(encoding="utf-8").splitlines()[0] == (
             f"/* fake clang-format: style=llvm filename={target} */")
-    appl_config = Path(tmpdir) / "appl-config.h"
-    assert appl_config.read_text(encoding="utf-8").splitlines()[0] == (
-        "/* fake clang-format: style=llvm filename=appl-config.h */")
+    for name in ["appl-config.h", "glossary.h"]:
+        target = Path(tmpdir) / name
+        assert target.read_text(encoding="utf-8").splitlines()[0] == (
+            f"/* fake clang-format: style=llvm filename={name} */")
 
     # The documentation files are not formatted
     for name in ["directives.rst", "acfg.rst", "glossary.md"]:
@@ -640,6 +651,13 @@ def test_cliexport_items(tmpdir):
     assert exit_code == 0
     assert os.path.exists(os.path.join(tmpdir, "appl-config.h"))
     assert not os.path.exists(os.path.join(tmpdir, "acfg.rst"))
+    assert not os.path.exists(os.path.join(tmpdir, "glossary.h"))
+
+    # A glossary term regenerates the Doxygen glossary page.
+    exit_code = cliexport(["command", "--config-file", config_file] +
+                          _spec_rtems("glossary/api.yml"))
+    assert exit_code == 0
+    assert os.path.exists(os.path.join(tmpdir, "glossary.h"))
 
 
 def test_cliexport_items_without_association(tmpdir):

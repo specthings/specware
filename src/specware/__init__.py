@@ -27,6 +27,7 @@
 from .applconfig import *  # noqa: F401, F403
 from .build import *  # noqa: F401, F403
 from .contentc import *  # noqa: F401, F403
+from .doxygenglossary import *  # noqa: F401, F403
 from .interface import *  # noqa: F401, F403
 from .interfacedoc import *  # noqa: F401, F403
 from .interfacemapper import *  # noqa: F401, F403

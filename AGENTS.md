@@ -42,6 +42,7 @@ software specification and generates C code and documentation from the items.
 | `interface` | `interface.py`, C headers in the RTEMS or the Zephyr style |
 | `interface-documentation` | `interfacedoc.py` |
 | `appl-config` | `applconfig.py` |
+| `doxygen-glossary` | `doxygenglossary.py`, a Doxygen page of the glossary terms |
 | `validation` | `validation.py`, C test code, with `transitionmap.py` for action requirements |
 
 `contentc.py` holds `CContent`, the C variant of the specitems `Content`.
