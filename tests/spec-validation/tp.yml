@@ -8,5 +8,6 @@ source:
 - ts.c
 - action2.c
 - action3.c
+- action4.c
 - other.c
 type: build

@@ -27,6 +27,7 @@
 # pylint: disable=too-many-lines
 
 import itertools
+import math
 import functools
 import os
 import logging
@@ -767,12 +768,103 @@ def _to_enum(prefix: str, conditions: list[Any]) -> _IdxToX:
         ] + [f"{prefix}_{condition['name']}_NA"]) for condition in conditions)
 
 
+def _get_representatives(state: dict[str, Any]) -> list[dict[str, Any]]:
+    return state.get("representatives") or []
+
+
+def _get_representative_count(state: dict[str, Any]) -> int:
+    return max(1, len(_get_representatives(state)))
+
+
+def _check_state(item: Item, kind: str, condition: dict[str, Any],
+                 state: dict[str, Any]) -> None:
+    name = (f"{kind}-condition state '{condition['name']}/{state['name']}' "
+            f"of item '{item.uid}'")
+    representatives = _get_representatives(state)
+    if kind == "post" and representatives:
+        raise ValueError(f"{name} shall have no representatives")
+    if state["test-code"] is None and not representatives:
+        raise ValueError(f"{name} shall have test code or representatives")
+
+
+def _get_state_descriptions(state: dict[str, Any]) -> list[str]:
+    representatives = _get_representatives(state)
+    if not representatives:
+        return [state["name"]]
+    return [
+        f"{state['name']}:{representative['name']}"
+        for representative in representatives
+    ]
+
+
 def _add_condition_enum(content: CContent, co_idx_to_enum: _IdxToX) -> None:
     for enum in co_idx_to_enum:
         content.add("typedef enum {")
         with content.indent():
             content.add(",\n".join(enum[1:]))
         content.add(f"}} {enum[0]};")
+
+
+_MAX_REPRESENTATIVE_COUNT = 1024
+
+_MAX_SCOPE_LENGTH = 128
+
+
+def _skip_representative(_ctx: ItemGetValueContext) -> Any:
+    """ Adds code to skip the current run of a representative. """
+    return "ctx->Map.skip_rep = true;"
+
+
+def _get_products(item: Item) -> list[list[int]]:
+    names = [condition["name"] for condition in item["pre-conditions"]]
+    groups = []
+    seen: set[str] = set()
+    for group_index, group in enumerate(
+            item.get("representative-products") or []):
+        prefix = f"representative product {group_index} of item '{item.uid}'"
+        if len(group) < 2:
+            raise ValueError(f"{prefix} shall name at least two "
+                             "pre-conditions")
+        for name in group:
+            if name not in names:
+                raise ValueError(
+                    f"{prefix} names the unknown pre-condition '{name}'")
+            if name in seen:
+                raise ValueError(f"pre-condition '{name}' of item "
+                                 f"'{item.uid}' is in more than one "
+                                 "representative product")
+            seen.add(name)
+        groups.append([names.index(name) for name in group])
+    return groups
+
+
+def _check_limits(item: Item) -> None:
+    for group_index, group in enumerate(_get_products(item)):
+        count = math.prod(
+            max(
+                _get_representative_count(state)
+                for state in item["pre-conditions"][member]["states"])
+            for member in group)
+        if count > _MAX_REPRESENTATIVE_COUNT:
+            raise ValueError(
+                f"representative product {group_index} of item "
+                f"'{item.uid}' has up to {count} combinations, the limit is "
+                f"{_MAX_REPRESENTATIVE_COUNT}")
+    length = 0
+    for condition in item["pre-conditions"]:
+        for state in condition["states"]:
+            count = _get_representative_count(state)
+            if count > _MAX_REPRESENTATIVE_COUNT:
+                raise ValueError(f"pre-condition state '{condition['name']}/"
+                                 f"{state['name']}' of item '{item.uid}' has "
+                                 f"{count} representatives, the limit is "
+                                 f"{_MAX_REPRESENTATIVE_COUNT}")
+        length += 1 + max(
+            len(description) for state in condition["states"]
+            for description in _get_state_descriptions(state))
+    if length > _MAX_SCOPE_LENGTH:
+        raise ValueError(f"the scope of item '{item.uid}' has up to {length} "
+                         f"characters, the limit is {_MAX_SCOPE_LENGTH}")
 
 
 class _ActionRequirementTestItem(_TestItem):
@@ -783,6 +875,9 @@ class _ActionRequirementTestItem(_TestItem):
         self._mapper.add_get_value(("requirement/functional/action:"
                                     "/pre-conditions/states/test-code/skip"),
                                    self._skip_pre_condition)
+        self._mapper.add_get_value(
+            ("requirement/functional/action:/pre-conditions/states"
+             "/representatives/test-code/skip"), _skip_representative)
         self._pre_co_skip: dict[int, bool] = {}
         self._pre_co_count = len(item["pre-conditions"])
         self._pre_co_idx_to_enum = _to_enum(f"{self.ident}_Pre",
@@ -790,6 +885,19 @@ class _ActionRequirementTestItem(_TestItem):
         self._post_co_idx_to_enum = _to_enum(f"{self.ident}_Post",
                                              item["post-conditions"])
         self._pci = "pcs"
+        self._pre_co_rep_counts = [[
+            _get_representative_count(state) for state in condition["states"]
+        ] for condition in item["pre-conditions"]]
+        self._has_reps = any(
+            _get_representatives(state) for condition in item["pre-conditions"]
+            for state in condition["states"])
+        _get_products(item)
+        if self._has_reps:
+            _check_limits(item)
+        for kind in ["pre", "post"]:
+            for condition in item[f"{kind}-conditions"]:
+                for state in condition["states"]:
+                    _check_state(item, kind, condition, state)
 
     def _add_pre_condition_descriptions(self, content: CContent) -> None:
         for condition in self["pre-conditions"]:
@@ -797,9 +905,10 @@ class _ActionRequirementTestItem(_TestItem):
                         f"{self.ident}_PreDesc_{condition['name']}[] = {{")
             with content.indent():
                 content.add(",\n".join(
-                    itertools.chain((f"\"{state['name']}\""
-                                     for state in condition["states"]),
-                                    ["\"NA\""])))
+                    itertools.chain(
+                        (f"\"{name}\"" for state in condition["states"]
+                         for name in _get_state_descriptions(state)),
+                        ["\"NA\""])))
             content.add("};")
         content.add("static const char * const * const "
                     f"{self.ident}_PreDesc[] = {{")
@@ -809,6 +918,235 @@ class _ActionRequirementTestItem(_TestItem):
                 for condition in self["pre-conditions"]
             ] + ["NULL"]))
         content.add("};")
+        if self._has_reps:
+            self._add_representative_support(content)
+
+    @property
+    def _rep_total(self) -> int:
+        return sum(sum(counts) + 1 for counts in self._pre_co_rep_counts)
+
+    def _add_representative_enums(self, content: CContent) -> None:
+        for co_idx, condition in enumerate(self["pre-conditions"]):
+            for state_index, state in enumerate(condition["states"]):
+                representatives = _get_representatives(state)
+                if not representatives:
+                    continue
+                prefix = self._pre_co_idx_to_enum[co_idx][state_index + 1]
+                content.add("typedef enum {")
+                with content.indent():
+                    content.add(",\n".join(
+                        f"{prefix}_{representative['name']}"
+                        for representative in representatives))
+                content.add(f"}} {prefix}_Rep;")
+
+    def _add_representative_accessors(self, content: CContent) -> None:
+        for co_idx, condition in enumerate(self["pre-conditions"]):
+            for state_index, state in enumerate(condition["states"]):
+                if not _get_representatives(state):
+                    continue
+                prefix = self._pre_co_idx_to_enum[co_idx][state_index + 1]
+                with content.function(f"static {prefix}_Rep",
+                                      f"{prefix}_GetRepresentative",
+                                      [f"const {self.context} *ctx"]):
+                    content.add([
+                        f"return ( {prefix}_Rep ) "
+                        f"{self.ident}_GetRepresentative( ctx, {co_idx} );"
+                    ])
+
+    def _add_representative_support(self, content: CContent) -> None:
+        self._add_representative_enums(content)
+        offsets_of_conditions = []
+        for counts in self._pre_co_rep_counts:
+            offsets = list(itertools.accumulate(counts, initial=0))
+            offsets.append(offsets[-1] + 1)
+            offsets_of_conditions.append(offsets)
+        integer_type = get_integer_type(
+            max(offsets[-1] for offsets in offsets_of_conditions))
+        for condition, offsets in zip(self["pre-conditions"],
+                                      offsets_of_conditions):
+            content.add(
+                f"static const {integer_type} "
+                f"{self.ident}_PreRepOffset_{condition['name']}[] = {{")
+            with content.indent():
+                content.wrap(", ".join(str(offset) for offset in offsets))
+            content.add("};")
+        content.add(f"static const {integer_type} * const "
+                    f"{self.ident}_PreRepOffset[] = {{")
+        with content.indent():
+            content.add(",\n".join(
+                f"{self.ident}_PreRepOffset_{condition['name']}"
+                for condition in self["pre-conditions"]))
+        content.add("};")
+        with content.function("static size_t",
+                              f"{self.ident}_GetRepresentativeCountOf",
+                              [f"const {self.context} *ctx", "size_t index"]):
+            content.add([
+                f"const {integer_type} *offsets;",
+                "size_t state;",
+                "",
+                f"offsets = {self.ident}_PreRepOffset[ index ];",
+                "state = ctx->Map.pcs[ index ];",
+                "",
+                "return offsets[ state + 1 ] - offsets[ state ];",
+            ])
+        self._add_representative_selection(content)
+        self._add_representative_accessors(content)
+        self._add_representative_record(content, integer_type)
+
+    def _add_representative_selection(self, content: CContent) -> None:
+        groups = _get_products(self.item)
+        count_of = f"{self.ident}_GetRepresentativeCountOf"
+        for group_index, group in enumerate(groups):
+            name = f"{self.ident}_GetProductCount_{group_index}"
+            params = [f"const {self.context} *ctx"]
+            with content.function("static size_t", name, params):
+                content.add("return " +
+                            " *\n  ".join(f"{count_of}( ctx, {member} )"
+                                          for member in group) + ";")
+        with content.function("static size_t",
+                              f"{self.ident}_GetRepresentative",
+                              [f"const {self.context} *ctx", "size_t index"]):
+            if groups:
+                content.add([
+                    "size_t rep;", "size_t count;", "", "rep = ctx->Map.rep;"
+                ])
+                content.add_blank_line()
+                content.add("switch ( index ) {")
+                with content.indent():
+                    for group_index, group in enumerate(groups):
+                        for position, member in enumerate(group):
+                            self._add_product_case(content, group_index, group,
+                                                   position, member)
+                    content.add("default:")
+                    with content.indent():
+                        content.append("break;")
+                content.add("}")
+                content.add_blank_line()
+                content.call_function("count =", count_of, ["ctx", "index"])
+                with content.condition("rep < count"):
+                    content.add("return rep;")
+            else:
+                content.add("size_t count;")
+                content.call_function("count =", count_of, ["ctx", "index"])
+                with content.condition("ctx->Map.rep < count"):
+                    content.add("return ctx->Map.rep;")
+            content.add("return count - 1;")
+        with content.function("static size_t",
+                              f"{self.ident}_GetRepresentativeCount",
+                              [f"const {self.context} *ctx"]):
+            content.add(["size_t count;", "size_t i;", "", "count = 1;"])
+            with content.for_loop("i = 0", f"i < {self._pre_co_count}", "++i"):
+                content.add("size_t count_of_condition;")
+                content.call_function("count_of_condition =", count_of,
+                                      ["ctx", "i"])
+                with content.condition("count_of_condition > count"):
+                    content.add("count = count_of_condition;")
+            for group_index in range(len(groups)):
+                content.add_blank_line()
+                with content.condition(
+                        f"{self.ident}_GetProductCount_{group_index}( ctx ) "
+                        "> count"):
+                    content.add(f"count = {self.ident}_GetProductCount_"
+                                f"{group_index}( ctx );")
+            content.add("return count;")
+
+    def _add_product_case(self, content: CContent, group_index: int,
+                          group: list[int], position: int,
+                          member: int) -> None:
+        count_of = f"{self.ident}_GetRepresentativeCountOf"
+        content.add(f"case {member}:")
+        with content.indent():
+            content.call_function(
+                "count =", f"{self.ident}_GetProductCount_{group_index}",
+                ["ctx"])
+            content.add_blank_line()
+            with content.condition("rep >= count"):
+                content.add("rep = count - 1;")
+            content.add_blank_line()
+            later = group[position + 1:]
+            divisor = " * ".join(f"{count_of}( ctx, {j} )" for j in later)
+            if len(later) > 1:
+                divisor = f"( {divisor} )"
+            if position == 0:
+                content.add(f"return rep / {divisor};")
+            elif later:
+                content.add(f"return ( rep / {divisor} ) % "
+                            f"{count_of}( ctx, {member} );")
+            else:
+                content.add(f"return rep % {count_of}( ctx, {member} );")
+        content.add_blank_line()
+
+    def _add_representative_record(self, content: CContent,
+                                   integer_type: str) -> None:
+        bases = list(
+            itertools.accumulate(
+                (sum(counts) + 1 for counts in self._pre_co_rep_counts),
+                initial=0))[:-1]
+        base_type = get_integer_type(self._rep_total)
+        content.add(f"static const {base_type} {self.ident}_PreRepBase[] = {{")
+        with content.indent():
+            content.wrap(", ".join(str(base) for base in bases))
+        content.add("};")
+        state_type = get_integer_type(
+            max(len(counts) for counts in self._pre_co_rep_counts))
+        content.add(
+            f"static const {state_type} {self.ident}_PreRepStates[] = {{")
+        with content.indent():
+            content.wrap(", ".join(
+                str(len(counts)) for counts in self._pre_co_rep_counts))
+        content.add("};")
+        with content.function("static void",
+                              f"{self.ident}_ResetRepresentatives",
+                              [f"{self.context} *ctx"]):
+            content.add(["size_t i;", ""])
+            with content.for_loop("i = 0", f"i < {self._rep_total}", "++i"):
+                content.add("ctx->Map.rep_ran[ i ] = false;")
+        with content.function("static void",
+                              f"{self.ident}_MarkRepresentatives",
+                              [f"{self.context} *ctx"]):
+            content.add("size_t i;")
+            content.add_blank_line()
+            with content.condition("ctx->Map.skip_rep"):
+                content.add("return;")
+            content.add_blank_line()
+            with content.for_loop("i = 0", f"i < {self._pre_co_count}", "++i"):
+                content.add([
+                    "size_t rep;", "", f"rep = {self.ident}_PreRepBase[ i ] + "
+                    f"{self.ident}_PreRepOffset[ i ][ ctx->Map.pcs[ i ] ] + "
+                    f"{self.ident}_GetRepresentative( ctx, i );",
+                    "ctx->Map.rep_ran[ rep ] = true;"
+                ])
+        with content.function("static void",
+                              f"{self.ident}_CheckRepresentatives",
+                              [f"const {self.context} *ctx"]):
+            content.add("size_t i;")
+            content.add_blank_line()
+            with content.for_loop("i = 0", f"i < {self._pre_co_count}", "++i"):
+                content.add([
+                    f"const {integer_type} *offsets;", "const bool *ran;",
+                    "size_t state;", "",
+                    f"offsets = {self.ident}_PreRepOffset[ i ];",
+                    f"ran = &ctx->Map.rep_ran[ {self.ident}_PreRepBase[ i ] ];"
+                ])
+                content.add_blank_line()
+                with content.for_loop(
+                        "state = 0", f"state < {self.ident}_PreRepStates[ i ]",
+                        "++state"):
+                    content.add(["size_t k;", "bool any;", "", "any = false;"])
+                    content.add_blank_line()
+                    with content.for_loop("k = offsets[ state ]",
+                                          "k < offsets[ state + 1 ]", "++k"):
+                        content.add("any = any || ran[ k ];")
+                    content.add_blank_line()
+                    with content.condition("any"):
+                        with content.for_loop("k = offsets[ state ]",
+                                              "k < offsets[ state + 1 ]",
+                                              "++k"):
+                            content.call_function(None, "T_quiet_true", [
+                                "ran[ k ]",
+                                "\"representative %s did not run\"",
+                                f"{self.ident}_PreDesc[ i ][ k ]"
+                            ])
 
     def add_default_context_members(self, content: CContent) -> None:
         super().add_default_context_members(content)
@@ -823,6 +1161,18 @@ class _ActionRequirementTestItem(_TestItem):
                 "This member defines the pre-condition states "
                 "for the next action.", None)
             content.add(f"size_t pcs[ {self._pre_co_count} ];")
+            if self._has_reps:
+                content.add_description_block(
+                    "This member defines the representative index "
+                    "for the next action.", None)
+                content.add("size_t rep;")
+                content.add_description_block(
+                    "If this member is true, then the current run of the "
+                    "representatives should be skipped.", None)
+                content.add("bool skip_rep;")
+                content.add_description_block(
+                    "This member records the representatives which ran.", None)
+                content.add(f"bool rep_ran[ {self._rep_total} ];")
             content.add_description_block(
                 "If this member is true, then the test action "
                 "loop is executed.", None)
@@ -844,9 +1194,23 @@ class _ActionRequirementTestItem(_TestItem):
         with content.function("static size_t", f"{self.ident}_Scope", params):
             content.add([f"{self.context} *ctx;", "", "ctx = arg;"])
             with content.condition("ctx->Map.in_action_loop"):
+                if self._has_reps:
+                    content.add(
+                        [f"size_t pcd[ {self._pre_co_count} ];", "size_t i;"])
+                    content.add_blank_line()
+                    with content.for_loop("i = 0", f"i < {self._pre_co_count}",
+                                          "++i"):
+                        content.add(
+                            f"pcd[ i ] = {self.ident}_PreRepOffset[ i ]"
+                            "[ ctx->Map.pcs[ i ] ] + "
+                            f"{self.ident}_GetRepresentative( ctx, i );")
+                    content.add_blank_line()
+                    pcs = "pcd"
+                else:
+                    pcs = "ctx->Map.pcs"
                 content.call_function(
                     "return", "T_get_scope",
-                    [f"{self.ident}_PreDesc", "buf", "n", "ctx->Map.pcs"])
+                    [f"{self.ident}_PreDesc", "buf", "n", pcs])
             content.add("return 0;")
 
     def _add_call(self, content: CContent, key: str, name: str) -> None:
@@ -900,6 +1264,10 @@ class _ActionRequirementTestItem(_TestItem):
                                           ["ctx", str(index)])
                     content.append("return;")
                 content.add_blank_line()
+        if self._has_reps:
+            with content.condition("ctx->Map.skip_rep"):
+                content.append("return;")
+            content.add_blank_line()
         self._add_call(content, "test-action", "Action")
         for index, enum in enumerate(self._post_co_idx_to_enum):
             check = f"{enum[0]}_Check"
@@ -920,6 +1288,25 @@ class _ActionRequirementTestItem(_TestItem):
             name = f"{self.ident}_SetPreConditionStates"
             content.gap = False
             content.call_function(None, name, ["ctx"])
+        if self._has_reps:
+            content.add_blank_line()
+            with content.for_loop(
+                    "ctx->Map.rep = 0", "ctx->Map.rep < "
+                    f"{self.ident}_GetRepresentativeCount( ctx )",
+                    "++ctx->Map.rep"):
+                content.add("ctx->Map.skip_rep = false;")
+                self._add_variant_calls(content)
+                if self._pre_co_skip:
+                    content.add_blank_line()
+                    with content.condition("ctx->Map.skip"):
+                        content.append("break;")
+                content.call_function(None,
+                                      f"{self.ident}_MarkRepresentatives",
+                                      ["ctx"])
+        else:
+            self._add_variant_calls(content)
+
+    def _add_variant_calls(self, content: CContent) -> None:
         self._add_call(content, "test-prepare", "Prepare")
         content.gap = False
         content.call_function(None, f"{self.ident}_TestVariant", ["ctx"])
@@ -1005,6 +1392,9 @@ class _ActionRequirementTestItem(_TestItem):
         ]
         if self._pre_co_skip:
             map_members_initialization.append("ctx->Map.skip = false;")
+        if self._has_reps:
+            map_members_initialization.append(
+                f"{self.ident}_ResetRepresentatives( ctx );")
         if header:
             ret = "void"
             name = f"{self.ident}_Run"
@@ -1033,6 +1423,10 @@ class _ActionRequirementTestItem(_TestItem):
         with content.function(ret, name, params, align=align):
             content.add(prologue)
             self._add_for_loops(content, transition_map, 0)
+            if self._has_reps:
+                content.call_function(None,
+                                      f"{self.ident}_CheckRepresentatives",
+                                      ["ctx"])
             content.add(epilogue)
 
     def _add_handler(self, content: CContent, conditions: str,
@@ -1052,11 +1446,23 @@ class _ActionRequirementTestItem(_TestItem):
                     with body.indent():
                         with body.comment_block():
                             body.wrap(self.substitute_text(state["text"]))
-                        code = self.substitute_code(
-                            state["test-code"], f"/{conditions}[{co_idx}]"
-                            f"/states[{state_index}]/test-code")
-                        ctx_unused = ctx_unused and _CTX.search(code) is None
-                        body.append(code)
+                        state_path = (f"/{conditions}[{co_idx}]"
+                                      f"/states[{state_index}]")
+                        if _get_representatives(state):
+                            ctx_unused = False
+                            body.gap = False
+                            self._add_representatives(body, co_idx,
+                                                      state_index, state,
+                                                      state_path)
+                        if state["test-code"] is not None:
+                            code = self.substitute_code(
+                                state["test-code"], f"{state_path}/test-code")
+                            ctx_unused = ctx_unused and _CTX.search(
+                                code) is None
+                            if _get_representatives(state):
+                                body.add(code)
+                            else:
+                                body.append(code)
                         body.append("break;")
                     body.add("}")
                 body.add(f"case {enum[-1]}:")
@@ -1076,6 +1482,25 @@ class _ActionRequirementTestItem(_TestItem):
             self._args[handler] = args
             with content.function("static void", handler, params):
                 content.append(body)
+
+    def _add_representatives(self, content: CContent, co_idx: int,
+                             state_index: int, state: dict[str, Any],
+                             state_path: str) -> None:
+        prefix = self._pre_co_idx_to_enum[co_idx][state_index + 1]
+        content.add(f"switch ( {prefix}_GetRepresentative( ctx ) ) {{")
+        with content.indent():
+            for rep_index, representative in enumerate(
+                    state["representatives"]):
+                content.add(f"case {prefix}_{representative['name']}: {{")
+                with content.indent():
+                    content.append(
+                        self.substitute_code(
+                            representative["test-code"],
+                            f"{state_path}/representatives[{rep_index}]"
+                            "/test-code"))
+                    content.append("break;")
+                content.add("}")
+        content.add("}")
 
     def add_test_case_action_description(self, _content: CContent) -> None:
         pass

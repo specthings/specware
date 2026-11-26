@@ -139,6 +139,16 @@ spec-info:
       pre-conditions:
         description: null
         spec-type: requirement-action-condition-list
+      representative-products:
+        description: |
+          If the value is present, then it shall be the list of representative products.
+          A representative product is a composite condition. Its representatives are the
+          combinations of the representatives of the current states of its
+          pre-conditions. A variant runs as many representative indices as its largest
+          composite condition or state has. A composite condition or state with fewer
+          representatives repeats its last one. A pre-condition shall be in at most one
+          representative product.
+        spec-type: requirement-action-representative-product-list
       skip-reasons:
         description: null
         spec-type: requirement-action-skip-reasons
@@ -231,7 +241,26 @@ spec-info:
       specified. For an action requirement it is verified that all variations of
       pre-condition states have a set of post-condition states specified in the
       transition map. All transitions are covered by the generated test code.
-    mandatory-attributes: all
+    mandatory-attributes:
+    - post-conditions
+    - pre-conditions
+    - skip-reasons
+    - test-action
+    - test-brief
+    - test-cleanup
+    - test-context
+    - test-context-support
+    - test-description
+    - test-header
+    - test-includes
+    - test-local-includes
+    - test-prepare
+    - test-setup
+    - test-stop
+    - test-support
+    - test-target
+    - test-teardown
+    - transition-map
 spec-name: Action Requirement Item Type
 spec-type: requirement-action
 type: spec

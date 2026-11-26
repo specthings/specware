@@ -1,0 +1,153 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+functional-type: action
+links: []
+post-conditions:
+- name: Status
+  states:
+  - name: Ok
+    test-code: |
+      /* Post Ok */
+    text: |
+      Text.
+  - name: Error
+    test-code: |
+      /* Post Error */
+    text: |
+      Text.
+  test-epilogue: null
+  test-prologue: null
+pre-conditions:
+- name: Value
+  states:
+  - name: Zero
+    test-code: |
+      ctx->value = 0;
+    text: |
+      While the value is zero.
+  - name: Positive
+    representatives:
+    - name: One
+      test-code: |
+        ctx->value = 1;
+    - name: Max
+      test-code: |
+        ctx->value = UINT32_MAX;
+    test-code: |
+      ctx->sign = 1;
+    text: |
+      While the value is greater than zero.
+  test-epilogue: null
+  test-prologue: null
+- name: Object
+  states:
+  - name: Valid
+    representatives:
+    - name: First
+      test-code: |
+        ctx->object = 1;
+    - name: Last
+      test-code: |
+        ctx->object = 3;
+    test-code: null
+    text: |
+      While the object is valid.
+  - name: Invalid
+    test-code: |
+      ${.:skip}
+    text: |
+      While the object is invalid.
+  test-epilogue: null
+  test-prologue: null
+- name: Mode
+  states:
+  - name: Fast
+    representatives:
+    - name: Flat
+      test-code: |
+        ctx->depth = 0;
+    - name: Deep
+      test-code: |
+        ctx->depth = 1;
+    - name: Nested
+      test-code: |
+        ctx->depth = 2;
+
+        if ( ctx->value == 1 ) {
+          ${.:skip}
+        }
+    test-code: |
+      ctx->fast = 1;
+    text: |
+      While the mode is fast.
+  - name: Slow
+    test-code: |
+      ctx->fast = 0;
+    text: |
+      While the mode is slow.
+  test-epilogue: null
+  test-prologue: null
+rationale: null
+representative-products:
+- - Value
+  - Mode
+requirement-type: functional
+skip-reasons: {}
+test-action: |
+  /* Action */
+test-brief: null
+test-cleanup: null
+test-context:
+- brief: null
+  description: null
+  member: |
+    uint32_t value
+- brief: null
+  description: null
+  member: |
+    int sign
+- brief: null
+  description: null
+  member: |
+    int object
+- brief: null
+  description: null
+  member: |
+    int depth
+- brief: null
+  description: null
+  member: |
+    int fast
+test-context-support: null
+test-description: null
+test-header: null
+test-includes: []
+test-local-includes: []
+test-prepare: null
+test-setup: null
+test-stop: null
+test-support: null
+test-target: action4.c
+test-teardown: null
+text: |
+  Text.
+transition-map:
+- enabled-by: true
+  post-conditions:
+    Status: Ok
+  pre-conditions:
+    Value:
+    - Positive
+    Object: all
+    Mode: all
+- enabled-by: true
+  post-conditions:
+    Status: Error
+  pre-conditions:
+    Value:
+    - Zero
+    Object: all
+    Mode: all
+type: requirement

@@ -1,0 +1,33 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  dict:
+    attributes:
+      name:
+        description: |
+          It shall be the name of the representative. The test log names the state, a
+          colon and the name of the representative.
+        spec-type: requirement-action-name
+      test-code:
+        description: |
+          It shall be the test code to prepare the representative. The code runs before
+          the test code of the state. The code may use `$${.:skip}` to skip the current
+          run of the representative, if the representative is infeasible with a state of
+          another pre-condition. The code may use a local variable `ctx` which points to
+          the test context, see ${test-context:/spec-name}.
+        spec-type: clang-function-scope
+    description: |
+      This set of attributes defines a representative of an action pre-condition
+      state. A representative is one value of the class of values which the state
+      stands for.
+    mandatory-attributes: all
+spec-name: Action Requirement Representative
+spec-type: requirement-action-representative
+type: spec
