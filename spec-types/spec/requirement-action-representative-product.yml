@@ -1,0 +1,19 @@
+SPDX-License-Identifier: CC-BY-SA-4.0 OR BSD-2-Clause
+copyrights:
+- Copyright (C) 2026 embedded brains GmbH & Co. KG
+enabled-by: true
+links:
+- role: spec-member
+  uid: root
+spec-description: null
+spec-example: null
+spec-info:
+  list:
+    description: |
+      It shall be the list of names of at least two pre-conditions. The combinations
+      of the representatives of their states form one composite condition. The last
+      pre-condition of the list changes fastest.
+    spec-type: requirement-action-name
+spec-name: Action Requirement Representative Product
+spec-type: requirement-action-representative-product
+type: spec

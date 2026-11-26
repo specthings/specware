@@ -2775,7 +2775,7 @@ def _add_item(item_cache, uid, data, item_type):
 
 
 def _condition_state(name):
-    return {"name": name, "test-code": None, "text": None}
+    return {"name": name, "test-code": "/* Code */", "text": None}
 
 
 def _condition(name, state_names):
@@ -3383,7 +3383,7 @@ def test_validation_invalid_actions(caplog, tmpdir):
         generate_validation(validation_config, item_cache, code_context())
     action_data["pre-conditions"][0]["states"] = [{
         "name": "A0",
-        "test-code": None,
+        "test-code": "/* Code */",
         "text": None
     }]
     match = ("transition map descriptor 0 of spec:/a refers to non-existent "
@@ -3392,7 +3392,7 @@ def test_validation_invalid_actions(caplog, tmpdir):
         generate_validation(validation_config, item_cache, code_context())
     action_data["post-conditions"][0]["states"] = [{
         "name": "X0",
-        "test-code": None,
+        "test-code": "/* Code */",
         "text": None
     }]
     action_data["transition-map"][0]["pre-conditions"]["A"] = ["a"]
@@ -3417,12 +3417,12 @@ def test_validation_invalid_actions(caplog, tmpdir):
     action_data["transition-map"][1]["pre-conditions"]["A"] = ["A1"]
     action_data["pre-conditions"][0]["states"].append({
         "name": "A1",
-        "test-code": None,
+        "test-code": "/* Code */",
         "text": None
     })
     action_data["pre-conditions"][0]["states"].append({
         "name": "A2",
-        "test-code": None,
+        "test-code": "/* Code */",
         "text": None
     })
     match = ("transition map of spec:/a contains no default entry "
@@ -3458,7 +3458,7 @@ def test_get_affected_targets(tmpdir):
     # A test program provides the base directory and the source files of the
     # test source files.
     assert get_affected_targets(item_cache, {"/tp"}) == {
-        "action2.c", "action3.c", "tc12.c", "tc34.c", "ts.c"
+        "action2.c", "action3.c", "action4.c", "tc12.c", "tc34.c", "ts.c"
     }
 
     # An item which contributes to no test source file at all.
@@ -3520,3 +3520,899 @@ static void Skip_Skip( Skip_Context *ctx, size_t index )
   }
 }
 """
+
+
+def test_validation_representatives(tmpdir):
+    base_directory = os.path.join(tmpdir, "base")
+    validation_config = {
+        "option-expressions":
+        OPTION_EXPRESSIONS,
+        "base-directory-map": [{
+            "source":
+            os.path.normpath(
+                os.path.join(os.path.dirname(__file__), "spec-validation")),
+            "target":
+            base_directory
+        }]
+    }
+    item_cache = create_item_cache(tmpdir, "spec-validation")
+    augment_with_test_case_links(item_cache)
+    generate_validation(validation_config, item_cache, code_context())
+    with open(os.path.join(base_directory, "action4.c"), "r") as src:
+        content = """/* SPDX-License-Identifier: BSD-2-Clause */
+
+/**
+ * @file
+ *
+ * @ingroup Action4
+ */
+
+/*
+ * Copyright (C) 2026 embedded brains GmbH & Co. KG
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/*
+ * This file was automatically generated.  Do not edit it.
+ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <rtems/test.h>
+
+/**
+ * @defgroup Action4 spec:/action4
+ *
+ * @ingroup Ts
+ *
+ * @{
+ */
+
+typedef enum {
+  Action4_Pre_Value_Zero,
+  Action4_Pre_Value_Positive,
+  Action4_Pre_Value_NA
+} Action4_Pre_Value;
+
+typedef enum {
+  Action4_Pre_Object_Valid,
+  Action4_Pre_Object_Invalid,
+  Action4_Pre_Object_NA
+} Action4_Pre_Object;
+
+typedef enum {
+  Action4_Pre_Mode_Fast,
+  Action4_Pre_Mode_Slow,
+  Action4_Pre_Mode_NA
+} Action4_Pre_Mode;
+
+typedef enum {
+  Action4_Post_Status_Ok,
+  Action4_Post_Status_Error,
+  Action4_Post_Status_NA
+} Action4_Post_Status;
+
+typedef struct {
+  uint8_t Skip : 1;
+  uint8_t Pre_Value_NA : 1;
+  uint8_t Pre_Object_NA : 1;
+  uint8_t Pre_Mode_NA : 1;
+  uint8_t Post_Status : 2;
+} Action4_Entry;
+
+/**
+ * @brief Test context for spec:/action4 test case.
+ */
+typedef struct {
+  uint32_t value;
+
+  int sign;
+
+  int object;
+
+  int depth;
+
+  int fast;
+
+  struct {
+    /**
+     * @brief This member defines the pre-condition states for the next action.
+     */
+    size_t pcs[ 3 ];
+
+    /**
+     * @brief This member defines the representative index for the next action.
+     */
+    size_t rep;
+
+    /**
+     * @brief If this member is true, then the current run of the
+     *   representatives should be skipped.
+     */
+    bool skip_rep;
+
+    /**
+     * @brief This member records the representatives which ran.
+     */
+    bool rep_ran[ 13 ];
+
+    /**
+     * @brief If this member is true, then the test action loop is executed.
+     */
+    bool in_action_loop;
+
+    /**
+     * @brief This member contains the next transition map index.
+     */
+    size_t index;
+
+    /**
+     * @brief This member contains the current transition map entry.
+     */
+    Action4_Entry entry;
+
+    /**
+     * @brief If this member is true, then the current transition variant
+     *   should be skipped.
+     */
+    bool skip;
+  } Map;
+} Action4_Context;
+
+static Action4_Context
+  Action4_Instance;
+
+static const char * const Action4_PreDesc_Value[] = {
+  "Zero",
+  "Positive:One",
+  "Positive:Max",
+  "NA"
+};
+
+static const char * const Action4_PreDesc_Object[] = {
+  "Valid:First",
+  "Valid:Last",
+  "Invalid",
+  "NA"
+};
+
+static const char * const Action4_PreDesc_Mode[] = {
+  "Fast:Flat",
+  "Fast:Deep",
+  "Fast:Nested",
+  "Slow",
+  "NA"
+};
+
+static const char * const * const Action4_PreDesc[] = {
+  Action4_PreDesc_Value,
+  Action4_PreDesc_Object,
+  Action4_PreDesc_Mode,
+  NULL
+};
+
+typedef enum {
+  Action4_Pre_Value_Positive_One,
+  Action4_Pre_Value_Positive_Max
+} Action4_Pre_Value_Positive_Rep;
+
+typedef enum {
+  Action4_Pre_Object_Valid_First,
+  Action4_Pre_Object_Valid_Last
+} Action4_Pre_Object_Valid_Rep;
+
+typedef enum {
+  Action4_Pre_Mode_Fast_Flat,
+  Action4_Pre_Mode_Fast_Deep,
+  Action4_Pre_Mode_Fast_Nested
+} Action4_Pre_Mode_Fast_Rep;
+
+static const uint8_t Action4_PreRepOffset_Value[] = {
+  0, 1, 3, 4
+};
+
+static const uint8_t Action4_PreRepOffset_Object[] = {
+  0, 2, 3, 4
+};
+
+static const uint8_t Action4_PreRepOffset_Mode[] = {
+  0, 3, 4, 5
+};
+
+static const uint8_t * const Action4_PreRepOffset[] = {
+  Action4_PreRepOffset_Value,
+  Action4_PreRepOffset_Object,
+  Action4_PreRepOffset_Mode
+};
+
+static size_t Action4_GetRepresentativeCountOf(
+  const Action4_Context *ctx,
+  size_t                 index
+)
+{
+  const uint8_t *offsets;
+  size_t state;
+
+  offsets = Action4_PreRepOffset[ index ];
+  state = ctx->Map.pcs[ index ];
+
+  return offsets[ state + 1 ] - offsets[ state ];
+}
+
+static size_t Action4_GetProductCount_0( const Action4_Context *ctx )
+{
+  return Action4_GetRepresentativeCountOf( ctx, 0 ) *
+    Action4_GetRepresentativeCountOf( ctx, 2 );
+}
+
+static size_t Action4_GetRepresentative(
+  const Action4_Context *ctx,
+  size_t                 index
+)
+{
+  size_t rep;
+  size_t count;
+
+  rep = ctx->Map.rep;
+
+  switch ( index ) {
+    case 0:
+      count = Action4_GetProductCount_0( ctx );
+
+      if ( rep >= count ) {
+        rep = count - 1;
+      }
+
+      return rep / Action4_GetRepresentativeCountOf( ctx, 2 );
+
+    case 2:
+      count = Action4_GetProductCount_0( ctx );
+
+      if ( rep >= count ) {
+        rep = count - 1;
+      }
+
+      return rep % Action4_GetRepresentativeCountOf( ctx, 2 );
+
+    default:
+      break;
+  }
+
+  count = Action4_GetRepresentativeCountOf( ctx, index );
+
+  if ( rep < count ) {
+    return rep;
+  }
+
+  return count - 1;
+}
+
+static size_t Action4_GetRepresentativeCount( const Action4_Context *ctx )
+{
+  size_t count;
+  size_t i;
+
+  count = 1;
+
+  for ( i = 0; i < 3; ++i ) {
+    size_t count_of_condition;
+
+    count_of_condition = Action4_GetRepresentativeCountOf( ctx, i );
+
+    if ( count_of_condition > count ) {
+      count = count_of_condition;
+    }
+  }
+
+  if ( Action4_GetProductCount_0( ctx ) > count ) {
+    count = Action4_GetProductCount_0( ctx );
+  }
+
+  return count;
+}
+
+static Action4_Pre_Value_Positive_Rep
+Action4_Pre_Value_Positive_GetRepresentative( const Action4_Context *ctx )
+{
+  return ( Action4_Pre_Value_Positive_Rep ) Action4_GetRepresentative( ctx, 0 );
+}
+
+static Action4_Pre_Object_Valid_Rep Action4_Pre_Object_Valid_GetRepresentative(
+  const Action4_Context *ctx
+)
+{
+  return ( Action4_Pre_Object_Valid_Rep ) Action4_GetRepresentative( ctx, 1 );
+}
+
+static Action4_Pre_Mode_Fast_Rep Action4_Pre_Mode_Fast_GetRepresentative(
+  const Action4_Context *ctx
+)
+{
+  return ( Action4_Pre_Mode_Fast_Rep ) Action4_GetRepresentative( ctx, 2 );
+}
+
+static const uint8_t Action4_PreRepBase[] = {
+  0, 4, 8
+};
+
+static const uint8_t Action4_PreRepStates[] = {
+  2, 2, 2
+};
+
+static void Action4_ResetRepresentatives( Action4_Context *ctx )
+{
+  size_t i;
+
+  for ( i = 0; i < 13; ++i ) {
+    ctx->Map.rep_ran[ i ] = false;
+  }
+}
+
+static void Action4_MarkRepresentatives( Action4_Context *ctx )
+{
+  size_t i;
+
+  if ( ctx->Map.skip_rep ) {
+    return;
+  }
+
+  for ( i = 0; i < 3; ++i ) {
+    size_t rep;
+
+    rep = Action4_PreRepBase[ i ] + Action4_PreRepOffset[ i ][ ctx->Map.pcs[ i ] ] + Action4_GetRepresentative( ctx, i );
+    ctx->Map.rep_ran[ rep ] = true;
+  }
+}
+
+static void Action4_CheckRepresentatives( const Action4_Context *ctx )
+{
+  size_t i;
+
+  for ( i = 0; i < 3; ++i ) {
+    const uint8_t *offsets;
+    const bool *ran;
+    size_t state;
+
+    offsets = Action4_PreRepOffset[ i ];
+    ran = &ctx->Map.rep_ran[ Action4_PreRepBase[ i ] ];
+
+    for ( state = 0; state < Action4_PreRepStates[ i ]; ++state ) {
+      size_t k;
+      bool any;
+
+      any = false;
+
+      for ( k = offsets[ state ]; k < offsets[ state + 1 ]; ++k ) {
+        any = any || ran[ k ];
+      }
+
+      if ( any ) {
+        for ( k = offsets[ state ]; k < offsets[ state + 1 ]; ++k ) {
+          T_quiet_true(
+            ran[ k ],
+            "representative %s did not run",
+            Action4_PreDesc[ i ][ k ]
+          );
+        }
+      }
+    }
+  }
+}
+
+static void Action4_Pre_Value_Prepare(
+  Action4_Context  *ctx,
+  Action4_Pre_Value state
+)
+{
+  switch ( state ) {
+    case Action4_Pre_Value_Zero: {
+      /*
+       * While the value is zero.
+       */
+      ctx->value = 0;
+      break;
+    }
+
+    case Action4_Pre_Value_Positive: {
+      /*
+       * While the value is greater than zero.
+       */
+      switch ( Action4_Pre_Value_Positive_GetRepresentative( ctx ) ) {
+        case Action4_Pre_Value_Positive_One: {
+          ctx->value = 1;
+          break;
+        }
+
+        case Action4_Pre_Value_Positive_Max: {
+          ctx->value = UINT32_MAX;
+          break;
+        }
+      }
+
+      ctx->sign = 1;
+      break;
+    }
+
+    case Action4_Pre_Value_NA:
+      break;
+  }
+}
+
+static void Action4_Pre_Object_Prepare(
+  Action4_Context   *ctx,
+  Action4_Pre_Object state
+)
+{
+  switch ( state ) {
+    case Action4_Pre_Object_Valid: {
+      /*
+       * While the object is valid.
+       */
+      switch ( Action4_Pre_Object_Valid_GetRepresentative( ctx ) ) {
+        case Action4_Pre_Object_Valid_First: {
+          ctx->object = 1;
+          break;
+        }
+
+        case Action4_Pre_Object_Valid_Last: {
+          ctx->object = 3;
+          break;
+        }
+      }
+      break;
+    }
+
+    case Action4_Pre_Object_Invalid: {
+      /*
+       * While the object is invalid.
+       */
+      ctx->Map.skip = true;
+      break;
+    }
+
+    case Action4_Pre_Object_NA:
+      break;
+  }
+}
+
+static void Action4_Pre_Mode_Prepare(
+  Action4_Context *ctx,
+  Action4_Pre_Mode state
+)
+{
+  switch ( state ) {
+    case Action4_Pre_Mode_Fast: {
+      /*
+       * While the mode is fast.
+       */
+      switch ( Action4_Pre_Mode_Fast_GetRepresentative( ctx ) ) {
+        case Action4_Pre_Mode_Fast_Flat: {
+          ctx->depth = 0;
+          break;
+        }
+
+        case Action4_Pre_Mode_Fast_Deep: {
+          ctx->depth = 1;
+          break;
+        }
+
+        case Action4_Pre_Mode_Fast_Nested: {
+          ctx->depth = 2;
+
+          if ( ctx->value == 1 ) {
+            ctx->Map.skip_rep = true;
+          }
+          break;
+        }
+      }
+
+      ctx->fast = 1;
+      break;
+    }
+
+    case Action4_Pre_Mode_Slow: {
+      /*
+       * While the mode is slow.
+       */
+      ctx->fast = 0;
+      break;
+    }
+
+    case Action4_Pre_Mode_NA:
+      break;
+  }
+}
+
+static void Action4_Post_Status_Check( Action4_Post_Status state )
+{
+  switch ( state ) {
+    case Action4_Post_Status_Ok: {
+      /*
+       * Text.
+       */
+      /* Post Ok */
+      break;
+    }
+
+    case Action4_Post_Status_Error: {
+      /*
+       * Text.
+       */
+      /* Post Error */
+      break;
+    }
+
+    case Action4_Post_Status_NA:
+      break;
+  }
+}
+
+static void Action4_Action( void )
+{
+  /* Action */
+}
+
+/* clang-format off */
+
+static const Action4_Entry
+Action4_Entries[] = {
+  { 0, 0, 0, 0, Action4_Post_Status_Error },
+  { 0, 0, 0, 0, Action4_Post_Status_Ok }
+};
+
+static const uint8_t
+Action4_Map[] = {
+  0, 0, 0, 0, 1, 1, 1, 1
+};
+
+/* clang-format on */
+
+static size_t Action4_Scope( void *arg, char *buf, size_t n )
+{
+  Action4_Context *ctx;
+
+  ctx = arg;
+
+  if ( ctx->Map.in_action_loop ) {
+    size_t pcd[ 3 ];
+    size_t i;
+
+    for ( i = 0; i < 3; ++i ) {
+      pcd[ i ] = Action4_PreRepOffset[ i ][ ctx->Map.pcs[ i ] ] + Action4_GetRepresentative( ctx, i );
+    }
+
+    return T_get_scope( Action4_PreDesc, buf, n, pcd );
+  }
+
+  return 0;
+}
+
+static T_fixture Action4_Fixture = {
+  .setup = NULL,
+  .stop = NULL,
+  .teardown = NULL,
+  .scope = Action4_Scope,
+  .initial_context = &Action4_Instance
+};
+
+static const uint8_t Action4_Weights[] = {
+  4, 2, 1
+};
+
+static void Action4_Skip( Action4_Context *ctx, size_t index )
+{
+  switch ( index + 1 ) {
+    case 1:
+      ctx->Map.pcs[ 1 ] = Action4_Pre_Object_NA - 1;
+      /* Fall through */
+    case 2:
+      ctx->Map.pcs[ 2 ] = Action4_Pre_Mode_NA - 1;
+      break;
+  }
+}
+
+static inline Action4_Entry Action4_PopEntry( Action4_Context *ctx )
+{
+  size_t index;
+
+  if ( ctx->Map.skip ) {
+    size_t i;
+
+    ctx->Map.skip = false;
+    index = 0;
+
+    for ( i = 0; i < 3; ++i ) {
+      index += Action4_Weights[ i ] * ctx->Map.pcs[ i ];
+    }
+  } else {
+    index = ctx->Map.index;
+  }
+
+  ctx->Map.index = index + 1;
+
+  return Action4_Entries[
+    Action4_Map[ index ]
+  ];
+}
+
+static void Action4_TestVariant( Action4_Context *ctx )
+{
+  Action4_Pre_Value_Prepare( ctx, ctx->Map.pcs[ 0 ] );
+  Action4_Pre_Object_Prepare( ctx, ctx->Map.pcs[ 1 ] );
+
+  if ( ctx->Map.skip ) {
+    Action4_Skip( ctx, 1 );
+    return;
+  }
+
+  Action4_Pre_Mode_Prepare( ctx, ctx->Map.pcs[ 2 ] );
+
+  if ( ctx->Map.skip_rep ) {
+    return;
+  }
+
+  Action4_Action();
+  Action4_Post_Status_Check( ctx->Map.entry.Post_Status );
+}
+
+/**
+ * @fn void T_case_body_Action4( void )
+ */
+T_TEST_CASE_FIXTURE( Action4, &Action4_Fixture )
+{
+  Action4_Context *ctx;
+
+  ctx = T_fixture_context();
+  ctx->Map.in_action_loop = true;
+  ctx->Map.index = 0;
+  ctx->Map.skip = false;
+  Action4_ResetRepresentatives( ctx );
+
+  for (
+    ctx->Map.pcs[ 0 ] = Action4_Pre_Value_Zero;
+    ctx->Map.pcs[ 0 ] < Action4_Pre_Value_NA;
+    ++ctx->Map.pcs[ 0 ]
+  ) {
+    for (
+      ctx->Map.pcs[ 1 ] = Action4_Pre_Object_Valid;
+      ctx->Map.pcs[ 1 ] < Action4_Pre_Object_NA;
+      ++ctx->Map.pcs[ 1 ]
+    ) {
+      for (
+        ctx->Map.pcs[ 2 ] = Action4_Pre_Mode_Fast;
+        ctx->Map.pcs[ 2 ] < Action4_Pre_Mode_NA;
+        ++ctx->Map.pcs[ 2 ]
+      ) {
+        ctx->Map.entry = Action4_PopEntry( ctx );
+
+        for (
+          ctx->Map.rep = 0;
+          ctx->Map.rep < Action4_GetRepresentativeCount( ctx );
+          ++ctx->Map.rep
+        ) {
+          ctx->Map.skip_rep = false;
+          Action4_TestVariant( ctx );
+
+          if ( ctx->Map.skip ) {
+            break;
+          }
+
+          Action4_MarkRepresentatives( ctx );
+        }
+      }
+    }
+  }
+
+  Action4_CheckRepresentatives( ctx );
+}
+
+/** @} */
+"""
+        assert content == src.read()
+
+
+def _representatives_item(post_representatives):
+    item_cache = EmptyItemCache(SpecWareTypeProvider({}))
+    pre_condition = _condition("A", ["A0", "A1"])
+    pre_condition["states"][1]["representatives"] = [{
+        "name": "X",
+        "test-code": None
+    }, {
+        "name": "Y",
+        "test-code": None
+    }]
+    post_condition = _condition("R", ["R0"])
+    post_condition["states"][0]["representatives"] = post_representatives
+    return _add_item(
+        item_cache, "/rep", {
+            "post-conditions": [post_condition],
+            "pre-conditions": [pre_condition],
+            "skip-reasons": {},
+            "test-context": [],
+            "test-header":
+            None,
+            "test-prepare":
+            None,
+            "test-cleanup":
+            None,
+            "transition-map": [{
+                "enabled-by": True,
+                "post-conditions": {
+                    "R": "R0"
+                },
+                "pre-conditions": {
+                    "A": "all"
+                }
+            }],
+        }, "requirement/functional/action")
+
+
+def test_validation_representatives_without_skip():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _representatives_item(None)
+    content = CContent(code_context())
+    _ActionRequirementTestItem(item)._add_loop_body(content,
+                                                    TransitionMap(item))
+    assert str(content) == """ctx->Map.entry = Rep_PopEntry( ctx );
+
+for (
+  ctx->Map.rep = 0;
+  ctx->Map.rep < Rep_GetRepresentativeCount( ctx );
+  ++ctx->Map.rep
+) {
+  ctx->Map.skip_rep = false;
+  Rep_TestVariant( ctx );
+
+  Rep_MarkRepresentatives( ctx );
+}
+"""
+
+
+def test_validation_representatives_of_post_condition_state():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _representatives_item([{"name": "Z", "test-code": None}])
+    match = ("post-condition state 'R/R0' of item '/rep' shall have no "
+             "representatives")
+    with pytest.raises(ValueError, match=match):
+        _ActionRequirementTestItem(item)
+
+
+def test_validation_state_without_test_code_and_representatives():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _representatives_item(None)
+    item["pre-conditions"][0]["states"][0]["test-code"] = None
+    match = ("pre-condition state 'A/A0' of item '/rep' shall have test code "
+             "or representatives")
+    with pytest.raises(ValueError, match=match):
+        _ActionRequirementTestItem(item)
+
+
+def test_validation_representative_count_limit():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _representatives_item(None)
+    item["pre-conditions"][0]["states"][1]["representatives"] = [{
+        "name":
+        f"R{i}",
+        "test-code":
+        None
+    } for i in range(1025)]
+    match = ("pre-condition state 'A/A1' of item '/rep' has 1025 "
+             "representatives, the limit is 1024")
+    with pytest.raises(ValueError, match=match):
+        _ActionRequirementTestItem(item)
+
+
+def test_validation_scope_length_limit():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _representatives_item(None)
+    item["pre-conditions"][0]["states"][1]["representatives"][0][
+        "name"] = 130 * "N"
+    match = ("the scope of item '/rep' has up to 134 characters, the limit "
+             "is 128")
+    with pytest.raises(ValueError, match=match):
+        _ActionRequirementTestItem(item)
+
+
+def _product_item(products):
+    item = _representatives_item(None)
+    many = [{"name": f"R{i}", "test-code": None} for i in range(3)]
+    for name in ("B", "C"):
+        condition = _condition(name, [f"{name}0"])
+        condition["states"][0]["representatives"] = many
+        item["pre-conditions"].append(condition)
+    item["transition-map"][0]["pre-conditions"].update({
+        "B": "all",
+        "C": "all"
+    })
+    item["representative-products"] = products
+    return item
+
+
+def test_validation_representative_product():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _product_item([["A", "B", "C"]])
+    content = CContent(code_context())
+    _ActionRequirementTestItem(item)._add_representative_support(content)
+    text = str(content)
+    assert """    case 0:
+      count = Rep_GetProductCount_0( ctx );
+
+      if ( rep >= count ) {
+        rep = count - 1;
+      }
+
+      return rep / ( Rep_GetRepresentativeCountOf( ctx, 1 ) * Rep_GetRepresentativeCountOf( ctx, 2 ) );
+""" in text
+    assert "return ( rep / Rep_GetRepresentativeCountOf( ctx, 2 ) ) % " \
+        "Rep_GetRepresentativeCountOf( ctx, 1 );" in text
+    assert "return rep % Rep_GetRepresentativeCountOf( ctx, 2 );" in text
+
+
+@pytest.mark.parametrize("products, match", [
+    ([["A"]], "representative product 0 of item '/rep' shall name at least "
+     "two pre-conditions"),
+    ([["A", "X"]], "representative product 0 of item '/rep' names the "
+     "unknown pre-condition 'X'"),
+    ([["A", "B"], ["B", "C"]], "pre-condition 'B' of item '/rep' is in more "
+     "than one representative product"),
+])
+def test_validation_representative_product_errors(products, match):
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    with pytest.raises(ValueError, match=match):
+        _ActionRequirementTestItem(_product_item(products))
+
+
+def test_validation_representative_product_limit():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _product_item([["A", "B"]])
+    many = [{"name": f"R{i}", "test-code": None} for i in range(40)]
+    item["pre-conditions"][0]["states"][1]["representatives"] = many
+    item["pre-conditions"][1]["states"][0]["representatives"] = many
+    match = ("representative product 0 of item '/rep' has up to 1600 "
+             "combinations, the limit is 1024")
+    with pytest.raises(ValueError, match=match):
+        _ActionRequirementTestItem(item)
+
+
+def test_validation_representatives_without_product():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _representatives_item(None)
+    content = CContent(code_context())
+    _ActionRequirementTestItem(item)._add_representative_support(content)
+    assert """  if ( ctx->Map.rep < count ) {
+    return ctx->Map.rep;
+  }
+
+  return count - 1;
+""" in str(content)
