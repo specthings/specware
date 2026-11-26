@@ -350,7 +350,8 @@ def _get_value_doxygen_unspecfied_type(ctx: ItemGetValueContext) -> Any:
     return _get_value_doxygen_url(ctx) or get_value_double_colon(ctx)
 
 
-def _add_doxygen_get_values(mapper: ItemMapper) -> None:
+def add_doxygen_get_values(mapper: ItemMapper) -> None:
+    """ Add the value getters of a Doxygen source to the mapper. """
     add_reference_transformers(mapper)
     for opt in ["feature-enable", "feature", "initializer", "integer"]:
         name = f"interface/appl-config-option/{opt}:/name"
@@ -458,7 +459,7 @@ def generate_application_configuration(
     some_item = next(iter(item_cache.values()))
     text_mapper = create_mapper(some_item, group_uids)
     doxygen_mapper = ItemMapper(some_item)
-    _add_doxygen_get_values(doxygen_mapper)
+    add_doxygen_get_values(doxygen_mapper)
     doxygen_content = _DoxygenContentAdaptor(
         doxygen_mapper, doxygen_context, formatter,
         config.get("doxygen-item-marker", DEFAULT_ITEM_MARKER))
