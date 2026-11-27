@@ -3686,22 +3686,22 @@ static Action4_Context
 
 static const char * const Action4_PreDesc_Value[] = {
   "Zero",
-  "Positive:One",
-  "Positive:Max",
+  "PositiveOne",
+  "PositiveMax",
   "NA"
 };
 
 static const char * const Action4_PreDesc_Object[] = {
-  "Valid:First",
-  "Valid:Last",
+  "ValidFirst",
+  "ValidLast",
   "Invalid",
   "NA"
 };
 
 static const char * const Action4_PreDesc_Mode[] = {
-  "Fast:Flat",
-  "Fast:Deep",
-  "Fast:Nested",
+  "FastFlat",
+  "FastDeep",
+  "FastNested",
   "Slow",
   "NA"
 };
@@ -4334,8 +4334,19 @@ def test_validation_scope_length_limit():
     item = _representatives_item(None)
     item["pre-conditions"][0]["states"][1]["representatives"][0][
         "name"] = 130 * "N"
-    match = ("the scope of item '/rep' has up to 134 characters, the limit "
+    match = ("the scope of item '/rep' has up to 133 characters, the limit "
              "is 128")
+    with pytest.raises(ValueError, match=match):
+        _ActionRequirementTestItem(item)
+
+
+def test_validation_scope_name_collision():
+    # pylint: disable=protected-access
+    from specware.validation import _ActionRequirementTestItem
+    item = _representatives_item(None)
+    item["pre-conditions"][0]["states"][0]["name"] = "A1X"
+    match = ("pre-condition 'A' of item '/rep' names 'A1X' more than once in "
+             "the scope")
     with pytest.raises(ValueError, match=match):
         _ActionRequirementTestItem(item)
 

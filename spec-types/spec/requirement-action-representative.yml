@@ -12,8 +12,11 @@ spec-info:
     attributes:
       name:
         description: |
-          It shall be the name of the representative. The test log names the state, a
-          colon and the name of the representative.
+          It shall be the name of the representative. The test log joins the name of
+          the state and the name of the representative without a separator, for
+          example `PositiveMax` for the representative `Max` of the state
+          `Positive`. The joined name shall differ from each state name and each
+          other joined name of the pre-condition.
         spec-type: requirement-action-name
       test-code:
         description: |

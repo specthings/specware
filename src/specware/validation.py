@@ -792,7 +792,7 @@ def _get_state_descriptions(state: dict[str, Any]) -> list[str]:
     if not representatives:
         return [state["name"]]
     return [
-        f"{state['name']}:{representative['name']}"
+        f"{state['name']}{representative['name']}"
         for representative in representatives
     ]
 
@@ -859,9 +859,17 @@ def _check_limits(item: Item) -> None:
                                  f"{state['name']}' of item '{item.uid}' has "
                                  f"{count} representatives, the limit is "
                                  f"{_MAX_REPRESENTATIVE_COUNT}")
-        length += 1 + max(
-            len(description) for state in condition["states"]
-            for description in _get_state_descriptions(state))
+        descriptions = [
+            description for state in condition["states"]
+            for description in _get_state_descriptions(state)
+        ]
+        for description in descriptions:
+            if descriptions.count(description) > 1:
+                raise ValueError(
+                    f"pre-condition '{condition['name']}' of item "
+                    f"'{item.uid}' names '{description}' more "
+                    "than once in the scope")
+        length += 1 + max(len(description) for description in descriptions)
     if length > _MAX_SCOPE_LENGTH:
         raise ValueError(f"the scope of item '{item.uid}' has up to {length} "
                          f"characters, the limit is {_MAX_SCOPE_LENGTH}")
